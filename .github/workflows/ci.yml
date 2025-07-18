@@ -13,31 +13,6 @@ env:
   CI: true
 
 jobs:
-  autofix:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Set node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Format code
-        run: pnpm run format
-
-      - name: Apply autofix
-        uses: autofix-ci/action@v1
-
   check:
     runs-on: ${{ matrix.os }}
 
