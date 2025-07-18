@@ -1,0 +1,43 @@
+{
+  "name": "@yuxu-palace/kun-mythos",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs"
+    }
+  },
+  "main": "./dist/cjs/index.cjs",
+  "types": "./dist/esm/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rslib build",
+    "check": "biome check --write",
+    "dev": "rslib build --watch",
+    "dev:mf": "rslib mf-dev",
+    "format": "biome format --write",
+    "test:ci": "cross-env CI=true vitest run",
+    "test": "vitest",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.0.6",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@rslib/core": "^0.10.6",
+    "@types/node": "^22.16.4",
+    "cross-env": "^7.0.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

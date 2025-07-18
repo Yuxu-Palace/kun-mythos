@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  pull_request:
+  merge_group:
+
+permissions:
+  contents: read
+
+env:
+  CI: true
+
+jobs:
+  check:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node_version: [lts/*]
+        include:
+          - os: macos-latest
+            node_version: lts/*
+          - os: windows-latest
+            node_version: lts/*
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set node ${{ matrix.node_version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node_version }}
+          cache: pnpm
+  
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint code
+        run: pnpm run format
+        continue-on-error: false 
+
+      - uses: autofix-ci/action@v1
+        with:
+          fail-fast: false
+
+      - name: Run build
+        run: pnpm run build
+        continue-on-error: false
+
+      - name: Run test
+        run: pnpm run test:ci
+        continue-on-error: false
+  
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+  
+      - name: Install dependencies
+        run: pnpm install
+        continue-on-error: false
+
+      - name: Build
+        run: pnpm run build
+        continue-on-error: false
+
+      - run: pnpm dlx pkg-pr-new publish
+
+      - name: Publish to NPM test
+        if: github.ref_name == 'main' || github.ref_name == 'alpha' || github.ref_name == 'beta'
+        uses: JS-DevTools/npm-publish@v3
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: ${{ github.ref_name == 'main' && 'latest' || github.ref_name }}
+          registry: https://registry.npmjs.org/
+          dry-run: true
