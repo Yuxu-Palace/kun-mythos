@@ -4,7 +4,7 @@ on:
   pull_request:
   merge_group:
   push:
-    branches: [main]
+    branches: [main, alpha, beta]
 
 permissions:
   contents: read
@@ -13,6 +13,31 @@ env:
   CI: true
 
 jobs:
+  autofix:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Format code
+        run: pnpm run format
+
+      - name: Apply autofix
+        uses: autofix-ci/action@v1
+
   check:
     runs-on: ${{ matrix.os }}
 
@@ -83,37 +108,10 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      # - name: Publish PR Preview
-        #   run: pnpm dlx pkg-pr-new publish --compact
-        # Note: Requires pkg-pr-new GitHub App installation
-
-  npm-publish:
-    runs-on: ubuntu-latest
-    needs: check
-    if: github.ref_name == 'main' || github.ref_name == 'alpha' || github.ref_name == 'beta'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Set node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: pnpm
-  
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build
-        run: pnpm run build
+      - run: pnpm dlx pkg-pr-new publish
 
       - name: Publish to NPM test
+        if: github.ref_name == 'main' || github.ref_name == 'alpha' || github.ref_name == 'beta'
         uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.NPM_TOKEN }}
