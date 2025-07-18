@@ -1,6 +1,18 @@
 {
   "name": "@yuxu-palace/kun-mythos",
   "version": "0.0.0",
+  "description": "A powerful TypeScript utility library by Yuxu Palace",
+  "keywords": ["typescript", "utility", "library", "toolkit", "yuxu-palace"],
+  "homepage": "https://github.com/yuxu-palace/kun-mythos#readme",
+  "bugs": {
+    "url": "https://github.com/yuxu-palace/kun-mythos/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuxu-palace/kun-mythos.git"
+  },
+  "license": "MIT",
+  "author": "Yuxu Palace",
   "type": "module",
   "exports": {
     ".": {
@@ -35,6 +47,9 @@
     "lint-staged": "^16.1.2",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "publishConfig": {
     "access": "public",
