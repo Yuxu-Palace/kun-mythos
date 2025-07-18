@@ -3,6 +3,8 @@ name: CI
 on:
   pull_request:
   merge_group:
+  push:
+    branches: [main]
 
 permissions:
   contents: read
@@ -47,10 +49,6 @@ jobs:
         run: pnpm run format
         continue-on-error: false 
 
-      - uses: autofix-ci/action@v1
-        with:
-          fail-fast: false
-
       - name: Run build
         run: pnpm run build
         continue-on-error: false
@@ -61,6 +59,8 @@ jobs:
   
   publish:
     runs-on: ubuntu-latest
+    needs: check
+    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checkout repository
@@ -79,16 +79,41 @@ jobs:
   
       - name: Install dependencies
         run: pnpm install
-        continue-on-error: false
 
       - name: Build
         run: pnpm run build
-        continue-on-error: false
 
-      - run: pnpm dlx pkg-pr-new publish
+      # - name: Publish PR Preview
+        #   run: pnpm dlx pkg-pr-new publish --compact
+        # Note: Requires pkg-pr-new GitHub App installation
+
+  npm-publish:
+    runs-on: ubuntu-latest
+    needs: check
+    if: github.ref_name == 'main' || github.ref_name == 'alpha' || github.ref_name == 'beta'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+  
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm run build
 
       - name: Publish to NPM test
-        if: github.ref_name == 'main' || github.ref_name == 'alpha' || github.ref_name == 'beta'
         uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.NPM_TOKEN }}

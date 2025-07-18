@@ -2,7 +2,13 @@
   "name": "@yuxu-palace/kun-mythos",
   "version": "0.0.0",
   "description": "A powerful TypeScript utility library by Yuxu Palace",
-  "keywords": ["typescript", "utility", "library", "toolkit", "yuxu-palace"],
+  "keywords": [
+    "typescript",
+    "utility",
+    "library",
+    "toolkit",
+    "yuxu-palace"
+  ],
   "homepage": "https://github.com/yuxu-palace/kun-mythos#readme",
   "bugs": {
     "url": "https://github.com/yuxu-palace/kun-mythos/issues"
