@@ -19,6 +19,9 @@ export default defineConfig({
     },
     {
       format: 'cjs',
+      dts: {
+        autoExtension: true,
+      },
       output: {
         cleanDistPath: true,
         distPath: { root: path.resolve(__dirname, 'dist/cjs') },
