@@ -19,12 +19,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node_version: [lts/*]
+        node_version: [20.x]
         include:
           - os: macos-latest
-            node_version: lts/*
+            node_version: 20.x
           - os: windows-latest
-            node_version: lts/*
+            node_version: 20.x
       fail-fast: false
 
     steps:
@@ -78,7 +78,7 @@ jobs:
       - name: Set node
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: 20.x
           cache: pnpm
   
       - name: Install dependencies
@@ -89,38 +89,3 @@ jobs:
 
       - name: Publish PR preview
         run: pnpm dlx pkg-pr-new publish --pnpm --comment=update
-
-  publish:
-    runs-on: ubuntu-latest
-    needs: check
-    if: >
-      github.event_name == 'push' &&
-      contains(['refs/heads/main', 'refs/heads/alpha', 'refs/heads/beta'], github.ref)
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Set node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: pnpm
-  
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build
-        run: pnpm run build
-
-      - name: Publish to NPM
-        uses: JS-DevTools/npm-publish@v3
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-          tag: ${{ github.ref_name == 'main' && 'latest' || github.ref_name }}
-          registry: https://registry.npmjs.org/
