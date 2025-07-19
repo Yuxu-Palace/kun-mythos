@@ -22,9 +22,14 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/esm/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      }
     }
   },
   "main": "./dist/cjs/index.cjs",
@@ -40,7 +45,8 @@
     "format": "biome format --write",
     "test:ci": "cross-env CI=true vitest run",
     "test": "vitest",
-    "prepare": "husky"
+    "prepare": "husky",
+    "publish:doctor": "pnpm dlx publint"
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.6",
