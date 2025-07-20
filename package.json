@@ -9,13 +9,13 @@
     "toolkit",
     "yuxu-palace"
   ],
-  "homepage": "https://github.com/yuxu-palace/kun-mythos#readme",
+  "homepage": "https://github.com/Yuxu-Palace/kun-mythos#readme",
   "bugs": {
-    "url": "https://github.com/yuxu-palace/kun-mythos/issues"
+    "url": "https://github.com/Yuxu-Palace/kun-mythos/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yuxu-palace/kun-mythos.git"
+    "url": "git+https://github.com/Yuxu-Palace/kun-mythos.git"
   },
   "license": "MIT",
   "author": "Yuxu Palace",
