@@ -76,7 +76,7 @@ MFT(({ LinkedList }) => {
       ]);
     });
 
-    test('push', () => {
+    test('pop', () => {
       const list = new LinkedList<string, number>();
       list.push('1', 1);
       list.push('2');

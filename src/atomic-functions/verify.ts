@@ -75,6 +75,9 @@ export function isNumber(v: unknown): v is number {
   return typeof v === 'number';
 }
 
+/**
+ * 判断是一个纯数字（排除 NaN）
+ */
 export function isPlainNumber(v: unknown): v is number {
   return isNumber(v) && !isNotANumber(v);
 }
