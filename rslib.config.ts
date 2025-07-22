@@ -1,11 +1,19 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 // import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
-import { defineConfig } from '@rslib/core';
+import { defineConfig, type RslibConfig } from '@rslib/core';
+import tsConfig from './tsconfig.json';
 
 // import pkg from './package.json';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+type OutputOption = RslibConfig['lib'][number]['output'];
+
+const baseOutputOption = {
+  cleanDistPath: true,
+  minify: true,
+} satisfies OutputOption;
 
 export default defineConfig({
   lib: [
@@ -13,14 +21,14 @@ export default defineConfig({
       format: 'esm',
       dts: true,
       output: {
-        cleanDistPath: true,
+        ...baseOutputOption,
         distPath: { root: path.resolve(__dirname, 'dist/esm') },
       },
     },
     {
       format: 'cjs',
       output: {
-        cleanDistPath: true,
+        ...baseOutputOption,
         distPath: { root: path.resolve(__dirname, 'dist/cjs') },
       },
     },
@@ -56,4 +64,7 @@ export default defineConfig({
     //   ],
     // },
   ],
+  resolve: {
+    alias: tsConfig.compilerOptions.paths,
+  },
 });

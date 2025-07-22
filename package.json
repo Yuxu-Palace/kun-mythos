@@ -20,8 +20,10 @@
     "dev": "rslib build --watch",
     "dev:mf": "rslib mf-dev",
     "format": "biome format --write",
-    "test:ci": "cross-env CI=true vitest run",
-    "test": "vitest",
+    "test:code": "vitest run",
+    "test:type": "tsc --noEmit",
+    "test:ci": "cross-env CI=true pnpm run test:code && pnpm run test:type",
+    "test": "vitest --coverage.enabled --ui",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -30,11 +32,14 @@
     "@commitlint/config-conventional": "^19.8.1",
     "@rslib/core": "^0.10.6",
     "@types/node": "^22.16.4",
+    "@vitest/coverage-v8": "3.2.4",
+    "@vitest/ui": "^3.2.4",
     "cross-env": "^7.0.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "3.2.4"
   },
   "publishConfig": {
     "access": "public",
