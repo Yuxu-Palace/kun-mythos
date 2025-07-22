@@ -4,11 +4,15 @@ const dataMap = new WeakMap<WeakKey, any>();
 const privateDataMap = new WeakMap<WeakKey, any>();
 
 /**
- * 存储数据
+ * Stores a value associated with a given object or symbol key, optionally under a private property key.
  *
- * @param key 存储的键
- * @param value 存储的值
- * @param privateKey 私有键
+ * If a private key is provided, the value is stored in a nested object under the main key; otherwise, it is stored directly under the key.
+ * Throws a `TypeError` if the key is not an object or a plain symbol.
+ *
+ * @param key - The object or plain symbol to associate the value with
+ * @param value - The value to store
+ * @param privateKey - Optional property key for private storage
+ * @returns A function that retrieves the stored value for the same key and private key
  */
 function setData<T>(key: WeakKey, value: T, privateKey?: PropertyKey): () => T | undefined {
   if (!isPlainSymbol(key) && !isObject(key)) {
@@ -27,10 +31,14 @@ function setData<T>(key: WeakKey, value: T, privateKey?: PropertyKey): () => T |
 }
 
 /**
- * 获取数据
+ * Retrieves the value associated with the given key, optionally using a private property key.
  *
- * @param key 存储的键
- * @param privateKey 私有键
+ * If a private key is provided, returns the value stored under that private key for the given object or symbol key.
+ * Otherwise, returns the value directly associated with the key.
+ *
+ * @param key - The object or symbol used as the main key
+ * @param privateKey - Optional property key for accessing private data
+ * @returns The stored value, or `undefined` if no value is found
  */
 function getData<T>(key: WeakKey, privateKey?: PropertyKey): T | undefined {
   if (isPropertyKey(privateKey)) {

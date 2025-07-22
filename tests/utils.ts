@@ -21,6 +21,12 @@ interface Context {
   expect: typeof expect;
 }
 
+/**
+ * Creates a test context object by merging Vitest testing functions with the provided context properties.
+ *
+ * @param extendsCtx - Partial context object that must include `format` and `IS_CI`
+ * @returns A context object containing Vitest functions and the supplied context properties
+ */
 function getBaseCtx<T extends Partial<Context> & Pick<Context, 'format' | 'IS_CI'>>(extendsCtx: T) {
   return {
     describe,
@@ -30,17 +36,25 @@ function getBaseCtx<T extends Partial<Context> & Pick<Context, 'format' | 'IS_CI
   };
 }
 
+/**
+ * Dynamically imports and returns the module corresponding to the specified build format.
+ *
+ * If the format is `'src'`, loads the source module from the `src` directory. For `'cjs'` or `'esm'`, loads the built module from the appropriate distribution folder.
+ *
+ * @param format - The module format to load (`'src'`, `'cjs'`, or `'esm'`). Defaults to `'src'`.
+ * @returns A promise resolving to the imported module.
+ */
 export async function loadModule(format: Mode = 'src'): Promise<Module> {
   if (format === MODE.SOURCE) return import('../src/index');
   return import(`../dist/${format}/index.${format === 'cjs' ? 'c' : ''}js`);
 }
 
 /**
- * 本地模式下测试源码
+ * Runs a test function against the module in multiple build formats, adapting to local or CI environments.
  *
- * CI 模式下测试打包产物
+ * Locally, tests are run only against the source format. In CI, tests are run only against built formats (CommonJS and ES modules).
  *
- * @param testFunc 测试函数
+ * @param testFunc - A function that receives the loaded module and a test context for each applicable format.
  */
 export function MFT(testFunc: (module: Module, ctx: Context) => any) {
   describe.concurrent.each(Object.values(MODE))('mutiple format test', async (format) => {

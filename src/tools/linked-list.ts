@@ -12,6 +12,15 @@ interface Node<T = any, M = any> {
 
 type NodeOrNull<T = any, M = any> = Node<T, M> | null;
 
+/**
+ * Creates a new doubly linked list node with the specified data, links, and optional metadata.
+ *
+ * @param data - The value to store in the node
+ * @param next - Reference to the next node or null
+ * @param prev - Reference to the previous node or null
+ * @param metadata - Optional metadata associated with the node
+ * @returns The newly created node object
+ */
 function createNode<T, M>(
   data: T,
   next: Node<T, M>['next'],
@@ -47,6 +56,11 @@ interface LinkedListSelf<T = any, M = any> extends Iterable<Node<T, M>> {
   ) => KEqual<Flag, true> extends true ? { data: T; metadata: Node<T, M>['metadata'] } : T;
 }
 
+/**
+ * Retrieves the internal state object associated with a given `LinkedList` instance.
+ *
+ * @returns The internal linked list state for the specified `LinkedList`.
+ */
 function getSelf<T, M>(key: LinkedList<T, M>) {
   return storage.get(key, PRIVATE_KEY) as LinkedListSelf<T, M>;
 }
