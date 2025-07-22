@@ -12,8 +12,11 @@ export function pick<O extends Record<string, any>, K extends (keyof O | string)
   if (!isArray(keys) || !keys.length || !isObject(obj)) return {} as KPick<O, K>;
 
   const result = {} as KPick<O, K>;
+  // 不用 Object.hasOwn 判断是否存在是因为他会排除 symbol 键
+  const ownKeys = new Set<PropertyKey>(Reflect.ownKeys(obj));
 
   for (const key of keys) {
+    if (!ownKeys.has(key)) continue;
     result[key] = obj[key];
   }
 

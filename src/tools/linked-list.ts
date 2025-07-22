@@ -18,7 +18,7 @@ function createNode<T, M>(
   prev: Node<T, M>['prev'],
   metadata: Node<T, M>['metadata'],
 ): Node<T, M> {
-  return { data, next, prev, metadata: metadata };
+  return { data, next, prev, metadata };
 }
 
 interface LinkedListSelf<T = any, M = any> extends Iterable<Node<T, M>> {

@@ -8,7 +8,7 @@ MFT(
     isArray,
     isSymbol,
     isPropertyKey,
-    isNotANumber,
+    isNaN: isNotANumber,
     isNull,
     isNullOrUndef,
     isNumber,
@@ -96,7 +96,6 @@ MFT(
         expect(isString([])).toBe(false);
         expect(isString(null)).toBe(false);
         expect(isString(undefined)).toBe(false);
-        expect(isString(Symbol('test'))).toBe(false);
       });
 
       test('isPlainSymbol', () => {

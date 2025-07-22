@@ -36,6 +36,16 @@ MFT(({ pick }) => {
     // @ts-expect-error test
     expect(pick()).toEqual({});
   });
+
+  test('扩展测试场景', async () => {
+    // 测试数组对象
+    expect(pick([1, 2, 3], ['0', '2'])).toEqual({ '0': 1, '2': 3 });
+
+    // 测试symbol键
+    const sym = Symbol('test');
+    const obj = { [sym]: 'value', a: 1 };
+    expect(pick(obj, [sym, 'a'])).toEqual({ [sym]: 'value', a: 1 });
+  });
 });
 
 test('类型测试', async () => {

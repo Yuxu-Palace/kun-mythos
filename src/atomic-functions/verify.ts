@@ -29,7 +29,8 @@ export function isNullOrUndef(v: unknown): v is null | undefined {
 /**
  * 判断是一个 NaN
  */
-export function isNotANumber(v: unknown): v is number {
+// biome-ignore lint/suspicious/noShadowRestrictedNames: 语义明确但是和 globalThis 上的 isNaN 重名
+export function isNaN(v: unknown): v is number {
   return Number.isNaN(v);
 }
 
@@ -41,17 +42,17 @@ export function isPlainSymbol(v: unknown): v is symbol {
 }
 
 /**
- * 判断是一个非数组对象
- */
-export function isPlainObject(v: unknown): v is object {
-  return isObject(v) && !isArray(v);
-}
-
-/**
  * 判断是一个对象 (数组也返回 true)
  */
 export function isObject(v: unknown): v is object {
   return typeof v === 'object' && !isNull(v);
+}
+
+/**
+ * 判断是一个非数组对象
+ */
+export function isPlainObject(v: unknown): v is object {
+  return isObject(v) && !isArray(v);
 }
 
 /**
@@ -79,7 +80,7 @@ export function isNumber(v: unknown): v is number {
  * 判断是一个纯数字（排除 NaN）
  */
 export function isPlainNumber(v: unknown): v is number {
-  return isNumber(v) && !isNotANumber(v);
+  return isNumber(v) && !isNaN(v);
 }
 
 /**

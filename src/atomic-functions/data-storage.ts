@@ -12,7 +12,7 @@ const privateDataMap = new WeakMap<WeakKey, any>();
  */
 function setData<T>(key: WeakKey, value: T, privateKey?: PropertyKey): () => T | undefined {
   if (!isPlainSymbol(key) && !isObject(key)) {
-    throw new TypeError('key must be an object');
+    throw new TypeError('key must be an object or plain symbol');
   }
 
   if (isPropertyKey(privateKey)) {
@@ -23,7 +23,7 @@ function setData<T>(key: WeakKey, value: T, privateKey?: PropertyKey): () => T |
     dataMap.set(key, value);
   }
 
-  return getData.bind(null, key, privateKey) as any;
+  return () => getData(key, privateKey);
 }
 
 /**
