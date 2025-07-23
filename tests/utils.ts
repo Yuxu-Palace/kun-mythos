@@ -67,10 +67,8 @@ export function MFT(testFunc: (module: Module, ctx: Context) => any) {
   describe.concurrent.each(Object.values(MODE))('mutiple format test', async (format) => {
     // 本地只测试源码
     const sourceOnly = !IS_CI && format === MODE.SOURCE;
-    // ci 模式下测试打包产物
-    const ciOnly = IS_CI && format !== MODE.SOURCE;
 
-    describe.runIf(sourceOnly || ciOnly)(`${format} test`, async () => {
+    describe.runIf(sourceOnly || IS_CI)(`${format} test`, async () => {
       const module = await loadModule(format);
 
       await testFunc(module, getBaseCtx({ format }));
