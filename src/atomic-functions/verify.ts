@@ -29,7 +29,6 @@ export function isNullOrUndef(v: unknown): v is null | undefined {
 /**
  * 判断是一个 NaN
  */
-// biome-ignore lint/suspicious/noShadowRestrictedNames: 语义明确但是和 globalThis 上的 isNaN 重名
 export function isNaN(v: unknown): v is number {
   return Number.isNaN(v);
 }
@@ -88,4 +87,39 @@ export function isPlainNumber(v: unknown): v is number {
  */
 export function isPropertyKey(v: unknown): v is PropertyKey {
   return isString(v) || isNumber(v) || isSymbol(v);
+}
+
+/**
+ * 判断是一个布尔值
+ */
+export function isBoolean(v: unknown): v is boolean {
+  return typeof v === 'boolean';
+}
+
+/**
+ * 判断是一个 true 值
+ */
+export function isTrue(v: unknown): v is true {
+  return v === true || (isString(v) && v.toLowerCase() === 'true');
+}
+
+/**
+ * 判断是一个 false 值
+ */
+export function isFalse(v: unknown): v is false {
+  return v === false || (isString(v) && v.toLowerCase() === 'false');
+}
+
+/**
+ * 判断是一个真值
+ */
+export function isTruthy<T>(v: T): v is Exclude<T, false | 0 | '' | null | undefined> {
+  return !!v;
+}
+
+/**
+ * 判断是一个非值
+ */
+export function isFalsy(v: unknown): v is false | 0 | '' | null | undefined {
+  return !v;
 }

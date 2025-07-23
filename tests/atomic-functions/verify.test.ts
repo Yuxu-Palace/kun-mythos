@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'vitest';
-import { MFT } from '../utils';
+import { assertType, describe, expect, test } from 'vitest';
+import { loadModule, MFT } from '../utils';
 
 MFT(
   ({
@@ -8,7 +8,7 @@ MFT(
     isArray,
     isSymbol,
     isPropertyKey,
-    isNaN: isNotANumber,
+    isNaN,
     isNull,
     isNullOrUndef,
     isNumber,
@@ -16,12 +16,125 @@ MFT(
     isPlainSymbol,
     isString,
     isUndef,
+    isTrue,
+    isFalse,
+    isBoolean,
+    isFalsy,
+    isTruthy,
   }) => {
     test('导出检查', () => {
       expect(typeof isObject).toBe('function');
       expect(typeof isArray).toBe('function');
       expect(typeof isSymbol).toBe('function');
       expect(typeof isPlainObject).toBe('function');
+      expect(typeof isPropertyKey).toBe('function');
+      expect(typeof isNaN).toBe('function');
+      expect(typeof isNull).toBe('function');
+      expect(typeof isNullOrUndef).toBe('function');
+      expect(typeof isNumber).toBe('function');
+      expect(typeof isPlainNumber).toBe('function');
+      expect(typeof isPlainSymbol).toBe('function');
+      expect(typeof isString).toBe('function');
+      expect(typeof isUndef).toBe('function');
+      expect(typeof isTrue).toBe('function');
+      expect(typeof isFalse).toBe('function');
+      expect(typeof isBoolean).toBe('function');
+      expect(typeof isFalsy).toBe('function');
+    });
+
+    test('isTruthy', () => {
+      expect(isTruthy(true)).toBe(true);
+      expect(isTruthy(false)).toBe(false);
+      expect(isTruthy('true')).toBe(true);
+      expect(isTruthy('True')).toBe(true);
+      expect(isTruthy('tRuE')).toBe(true);
+      expect(isTruthy('false')).toBe(true);
+      expect(isTruthy('False')).toBe(true);
+      expect(isTruthy('fAlSE')).toBe(true);
+      expect(isTruthy('')).toBe(false);
+      expect(isTruthy(0)).toBe(false);
+      expect(isTruthy(1)).toBe(true);
+      expect(isTruthy(null)).toBe(false);
+      expect(isTruthy(undefined)).toBe(false);
+      expect(isTruthy(Symbol('test'))).toBe(true);
+      expect(isTruthy({})).toBe(true);
+      expect(isTruthy([])).toBe(true);
+    });
+
+    test('isTrue', () => {
+      expect(isTrue(true)).toBe(true);
+      expect(isTrue(false)).toBe(false);
+      expect(isTrue('true')).toBe(true);
+      expect(isTrue('True')).toBe(true);
+      expect(isTrue('tRuE')).toBe(true);
+      expect(isTrue('false')).toBe(false);
+      expect(isTrue('False')).toBe(false);
+      expect(isTrue('fAlSE')).toBe(false);
+      expect(isTrue('')).toBe(false);
+      expect(isTrue(0)).toBe(false);
+      expect(isTrue(1)).toBe(false);
+      expect(isTrue(null)).toBe(false);
+      expect(isTrue(undefined)).toBe(false);
+      expect(isTrue(Symbol('test'))).toBe(false);
+      expect(isTrue({})).toBe(false);
+      expect(isTrue([])).toBe(false);
+    });
+
+    test('isFalse', () => {
+      expect(isFalse(true)).toBe(false);
+      expect(isFalse(false)).toBe(true);
+      expect(isFalse('true')).toBe(false);
+      expect(isFalse('True')).toBe(false);
+      expect(isFalse('tRuE')).toBe(false);
+      expect(isFalse('false')).toBe(true);
+      expect(isFalse('False')).toBe(true);
+      expect(isFalse('fAlSE')).toBe(true);
+      expect(isFalse('')).toBe(false);
+      expect(isFalse(0)).toBe(false);
+      expect(isFalse(1)).toBe(false);
+      expect(isFalse(null)).toBe(false);
+      expect(isFalse(undefined)).toBe(false);
+      expect(isFalse(Symbol('test'))).toBe(false);
+      expect(isFalse({})).toBe(false);
+      expect(isFalse([])).toBe(false);
+    });
+
+    test('isBoolean', () => {
+      expect(isBoolean(true)).toBe(true);
+      expect(isBoolean(false)).toBe(true);
+      expect(isBoolean('true')).toBe(false);
+      expect(isBoolean('True')).toBe(false);
+      expect(isBoolean('tRuE')).toBe(false);
+      expect(isBoolean('false')).toBe(false);
+      expect(isBoolean('False')).toBe(false);
+      expect(isBoolean('fAlSE')).toBe(false);
+      expect(isBoolean('')).toBe(false);
+      expect(isBoolean(0)).toBe(false);
+      expect(isBoolean(1)).toBe(false);
+      expect(isBoolean(null)).toBe(false);
+      expect(isBoolean(undefined)).toBe(false);
+      expect(isBoolean(Symbol('test'))).toBe(false);
+      expect(isBoolean({})).toBe(false);
+      expect(isBoolean([])).toBe(false);
+    });
+
+    test('isFalsy', () => {
+      expect(isFalsy(true)).toBe(false);
+      expect(isFalsy(false)).toBe(true);
+      expect(isFalsy('true')).toBe(false);
+      expect(isFalsy('True')).toBe(false);
+      expect(isFalsy('tRuE')).toBe(false);
+      expect(isFalsy('false')).toBe(false);
+      expect(isFalsy('False')).toBe(false);
+      expect(isFalsy('fAlSE')).toBe(false);
+      expect(isFalsy('')).toBe(true);
+      expect(isFalsy(0)).toBe(true);
+      expect(isFalsy(1)).toBe(false);
+      expect(isFalsy(null)).toBe(true);
+      expect(isFalsy(undefined)).toBe(true);
+      expect(isFalsy(Symbol('test'))).toBe(false);
+      expect(isFalsy({})).toBe(false);
+      expect(isFalsy([])).toBe(false);
     });
 
     describe('基本使用', () => {
@@ -77,15 +190,15 @@ MFT(
         expect(isPlainNumber(undefined)).toBe(false);
       });
 
-      test('isNotANumber', () => {
-        expect(isNotANumber(1)).toBe(false);
-        expect(isNotANumber(NaN)).toBe(true);
-        expect(isNotANumber('1')).toBe(false);
-        expect(isNotANumber(Symbol('test'))).toBe(false);
-        expect(isNotANumber({})).toBe(false);
-        expect(isNotANumber([])).toBe(false);
-        expect(isNotANumber(null)).toBe(false);
-        expect(isNotANumber(undefined)).toBe(false);
+      test('isNaN', () => {
+        expect(isNaN(1)).toBe(false);
+        expect(isNaN(NaN)).toBe(true);
+        expect(isNaN('1')).toBe(false);
+        expect(isNaN(Symbol('test'))).toBe(false);
+        expect(isNaN({})).toBe(false);
+        expect(isNaN([])).toBe(false);
+        expect(isNaN(null)).toBe(false);
+        expect(isNaN(undefined)).toBe(false);
       });
 
       test('isString', () => {
@@ -166,3 +279,97 @@ MFT(
     });
   },
 );
+
+import type { KEqual } from '@/index';
+
+describe('类型检查', async () => {
+  const { isFalsy, isTruthy } = await loadModule();
+
+  test('isFalsy', () => {
+    const a = '';
+    if (isFalsy(a)) {
+      assertType<''>(a);
+    } else {
+      assertType<KEqual<typeof a, never>>(true);
+    }
+
+    const b = '1';
+    if (isFalsy(b)) {
+      assertType<KEqual<typeof b, never>>(true);
+    } else {
+      assertType<'1'>(b);
+    }
+
+    const c = 0;
+    if (isFalsy(c)) {
+      assertType<0>(c);
+    } else {
+      assertType<KEqual<typeof c, never>>(true);
+    }
+
+    const d: string = '';
+    if (isFalsy(d)) {
+      assertType<''>(d);
+    } else {
+      assertType<string>(d);
+    }
+
+    const e = Math.random() > 0.5 ? '1' : 0;
+    if (isFalsy(e)) {
+      assertType<0>(e);
+    } else {
+      assertType<'1'>(e);
+    }
+
+    const f = Math.random() > 0.5 ? '' : 0;
+    if (isFalsy(f)) {
+      assertType<KEqual<typeof f, '' | 0>>(true);
+    } else {
+      assertType<KEqual<typeof f, never>>(f);
+    }
+  });
+
+  test('isTruthy', () => {
+    const a = '';
+    if (isTruthy(a)) {
+      assertType<KEqual<typeof a, never>>(true);
+    } else {
+      assertType<''>(a);
+    }
+
+    const b = '1';
+    if (isTruthy(b)) {
+      assertType<'1'>(b);
+    } else {
+      assertType<KEqual<typeof b, never>>(true);
+    }
+
+    const c = 0;
+    if (isTruthy(c)) {
+      assertType<KEqual<typeof c, never>>(true);
+    } else {
+      assertType<0>(c);
+    }
+
+    const d: string = '';
+    if (isTruthy(d)) {
+      assertType<string>(d);
+    } else {
+      assertType<''>(d);
+    }
+
+    const e = Math.random() > 0.5 ? '1' : 0;
+    if (isTruthy(e)) {
+      assertType<'1'>(e);
+    } else {
+      assertType<0>(e);
+    }
+
+    const f = Math.random() > 0.5 ? '' : 0;
+    if (isTruthy(f)) {
+      assertType<KEqual<typeof f, never>>(f);
+    } else {
+      assertType<KEqual<typeof f, '' | 0>>(true);
+    }
+  });
+});
