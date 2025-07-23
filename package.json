@@ -25,12 +25,15 @@
     "format": "biome format --write",
     "test:code": "vitest run",
     "test:type": "tsc --noEmit",
+    "test:bench": "cross-env BENCH=true vitest bench --run",
+    "test:bench:ci": "cross-env CI=true BENCH=true vitest bench --run",
     "test:ci": "cross-env CI=true pnpm run test:code && pnpm run test:type",
     "test": "vitest --coverage.enabled --ui",
     "prepare": "husky"
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.6",
+    "@codspeed/vitest-plugin": "^4.0.1",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@rslib/core": "^0.10.6",
