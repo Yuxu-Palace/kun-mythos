@@ -39,10 +39,10 @@ MFT(({ classnames, cn }) => {
     expect(cn(undefined)).toBe('');
     // 对象为 Symbol
     // @ts-expect-error test
-    expect(cn(Symbol('test'))).toMatchInlineSnapshot(`"Symbol(test)"`);
+    expect(cn(Symbol('test'))).toMatch(/^Symbol\(test\)$/);
     // 对象为 Symbol.for
     // @ts-expect-error test
-    expect(cn(Symbol.for('test'))).toMatchInlineSnapshot(`"Symbol(test)"`);
+    expect(cn(Symbol.for('test'))).toMatch(/^Symbol\(test\)$/);
     // 空对象
     expect(cn({})).toBe('');
   });
