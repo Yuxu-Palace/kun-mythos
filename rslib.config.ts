@@ -13,6 +13,7 @@ type OutputOption = RslibConfig['lib'][number]['output'];
 const baseOutputOption = {
   cleanDistPath: true,
   minify: true,
+  filenameHash: false,
 } satisfies OutputOption;
 
 export default defineConfig({
@@ -22,14 +23,26 @@ export default defineConfig({
       dts: true,
       output: {
         ...baseOutputOption,
+        filename: { js: '[name].mjs' },
         distPath: { root: path.resolve(__dirname, 'dist/esm') },
       },
     },
     {
       format: 'cjs',
+      dts: true,
       output: {
         ...baseOutputOption,
+        filename: { js: '[name].cjs' },
         distPath: { root: path.resolve(__dirname, 'dist/cjs') },
+      },
+    },
+    {
+      format: 'umd',
+      umdName: 'YXKM',
+      output: {
+        ...baseOutputOption,
+        filename: { js: '[name].js' },
+        distPath: { root: path.resolve(__dirname, 'dist/umd') },
       },
     },
     // {
