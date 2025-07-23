@@ -1,3 +1,5 @@
+import type { KUnULCase } from '@/types/base';
+
 /**
  * 判断是一个 symbol
  */
@@ -99,14 +101,14 @@ export function isBoolean(v: unknown): v is boolean {
 /**
  * 判断是一个 true 值
  */
-export function isTrue(v: unknown): v is true {
+export function isTrue(v: unknown): v is true | KUnULCase<'true'> {
   return v === true || (isString(v) && v.toLowerCase() === 'true');
 }
 
 /**
  * 判断是一个 false 值
  */
-export function isFalse(v: unknown): v is false {
+export function isFalse(v: unknown): v is false | KUnULCase<'false'> {
   return v === false || (isString(v) && v.toLowerCase() === 'false');
 }
 

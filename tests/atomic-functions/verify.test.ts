@@ -40,6 +40,7 @@ MFT(
       expect(typeof isFalse).toBe('function');
       expect(typeof isBoolean).toBe('function');
       expect(typeof isFalsy).toBe('function');
+      expect(typeof isTruthy).toBe('function');
     });
 
     test('isTruthy', () => {
@@ -283,7 +284,7 @@ MFT(
 import type { KEqual } from '@/index';
 
 describe('类型检查', async () => {
-  const { isFalsy, isTruthy } = await loadModule();
+  const { isFalsy, isTruthy, isTrue } = await loadModule();
 
   test('isFalsy', () => {
     const a = '';
@@ -370,6 +371,36 @@ describe('类型检查', async () => {
       assertType<KEqual<typeof f, never>>(f);
     } else {
       assertType<KEqual<typeof f, '' | 0>>(true);
+    }
+  });
+
+  test('isTrue', () => {
+    const a = true;
+    if (isTrue(a)) {
+      assertType<true>(a);
+    } else {
+      assertType<KEqual<typeof a, never>>(true);
+    }
+
+    const b = false;
+    if (isTrue(b)) {
+      assertType<KEqual<typeof b, never>>(true);
+    } else {
+      assertType<false>(b);
+    }
+
+    const c = Math.random() > 0.5;
+    if (isTrue(c)) {
+      assertType<true>(c);
+    } else {
+      assertType<false>(c);
+    }
+
+    const d = 'TruE';
+    if (isTrue(d)) {
+      assertType<'TruE'>(d);
+    } else {
+      assertType<KEqual<typeof d, never>>(d);
     }
   });
 });
