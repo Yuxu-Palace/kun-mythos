@@ -114,6 +114,8 @@ export function isFalse(v: unknown): v is false | KUnULCase<'false'> {
 
 /**
  * 判断是一个真值
+ *
+ * @warn 字符串 'false' 等满足 isFalse 判断的字符串也会被视为真值
  */
 export function isTruthy<T>(v: T): v is Exclude<T, false | 0 | '' | null | undefined> {
   return !!v;
@@ -121,6 +123,8 @@ export function isTruthy<T>(v: T): v is Exclude<T, false | 0 | '' | null | undef
 
 /**
  * 判断是一个非值
+ *
+ * @warn 字符串 'false' 等满足 isFalse 判断的字符串不会被视为非值
  */
 export function isFalsy(v: unknown): v is false | 0 | '' | null | undefined {
   return !v;

@@ -44,9 +44,13 @@ MFT(({ classnames, cn }) => {
     // 对象为 undefined
     expect(cn(undefined)).toBe('');
     // 对象为 Symbol
-    expect(cn(Symbol('test'))).toMatch(/^Symbol\(test\)$/);
+    // @ts-expect-error test
+    expect(cn(Symbol('test'))).toBe('');
     // 对象为 Symbol.for
-    expect(cn(Symbol.for('test'))).toMatch(/^Symbol\(test\)$/);
+    // @ts-expect-error test
+    expect(cn(Symbol.for('test'))).toBe('');
+    // @ts-expect-error test
+    expect(cn({ [Symbol('test')]: true, c: Symbol('test') }, Symbol('test'))).toBe('c');
     // 空对象, error 也会被当成对象然后遍历 key 进行处理
     expect(cn({}, new Error())).toBe('');
   });

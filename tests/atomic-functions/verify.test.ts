@@ -326,7 +326,7 @@ describe('类型检查', async () => {
     if (isFalsy(f)) {
       assertType<KEqual<typeof f, '' | 0>>(true);
     } else {
-      assertType<KEqual<typeof f, never>>(f);
+      assertType<KEqual<typeof f, never>>(true);
     }
   });
 
@@ -368,7 +368,7 @@ describe('类型检查', async () => {
 
     const f = Math.random() > 0.5 ? '' : 0;
     if (isTruthy(f)) {
-      assertType<KEqual<typeof f, never>>(f);
+      assertType<KEqual<typeof f, never>>(true);
     } else {
       assertType<KEqual<typeof f, '' | 0>>(true);
     }
@@ -400,7 +400,7 @@ describe('类型检查', async () => {
     if (isTrue(d)) {
       assertType<'TruE'>(d);
     } else {
-      assertType<KEqual<typeof d, never>>(d);
+      assertType<KEqual<typeof d, never>>(true);
     }
   });
 });

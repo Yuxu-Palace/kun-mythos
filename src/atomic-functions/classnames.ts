@@ -1,12 +1,12 @@
-import { isArray, isObject } from './verify';
+import { isArray, isObject, isSymbol } from './verify';
 
 type KeyType = string | number;
 
-type InputType = KeyType | Record<KeyType, any> | null | undefined | symbol | InputType[];
+type InputType = KeyType | Record<KeyType, any> | null | undefined | InputType[];
 
 function objectHandler(obj: Record<KeyType, any>, names: KeyType[], set: Set<InputType>) {
   Object.entries(obj).forEach(([key, value]) => {
-    if (!value || set.has(key)) return;
+    if (!value || set.has(key) || isSymbol(key)) return;
     set.add(key);
     names.push(key);
   });
@@ -21,7 +21,7 @@ function arrayHandler(arr: InputType[], names: KeyType[], set: Set<InputType>) {
    * 扩展运算符会再次遍历数组导致额外开销
    */
   arr.forEach((item) => {
-    if (!item || set.has(item)) return;
+    if (!item || set.has(item) || isSymbol(item)) return;
     set.add(item);
 
     // 数组处理
@@ -34,7 +34,7 @@ function arrayHandler(arr: InputType[], names: KeyType[], set: Set<InputType>) {
       return objectHandler(item, names, set);
     }
 
-    // 普通对象
+    // 普通值
     names.push(String(item));
   });
   return names;
@@ -49,7 +49,7 @@ export function classnames(...input: InputType[]) {
    *
    * 以 classnames 为单位隔离循环依赖, 和资源释放
    *
-   * 对象不存在循环依赖, 因为不会递归对象, 而是直接判断 value 的布尔值
+   * 对象不会导致循环依赖问题, 因为只处理对象的键, 不递归处理值
    */
   return arrayHandler(input, [], new Set([input])).join(' ');
 }
