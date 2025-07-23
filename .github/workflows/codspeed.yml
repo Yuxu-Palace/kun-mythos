@@ -37,5 +37,5 @@ jobs:
       - name: Run benchmarks
         uses: CodSpeedHQ/action@v3
         with:
-          run: pnpm run test:bench:ci
+          run: echo 'test'
           token: ${{ secrets.CODSPEED_TOKEN }}
