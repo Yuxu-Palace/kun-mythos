@@ -1,4 +1,4 @@
-import { assertType, bench, expect, test } from 'vitest';
+import { assertType, bench, describe, expect, test } from 'vitest';
 import { loadModule, MFT } from '../utils';
 
 MFT(({ pick }, { format, IS_BENCH }) => {
@@ -49,14 +49,16 @@ MFT(({ pick }, { format, IS_BENCH }) => {
 
   if (!IS_BENCH) return;
 
-  bench(
-    `${format}性能测试`,
-    async () => {
-      const obj = { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 10 };
-      pick(obj, ['a', 'c', 'e', 'g', 'i']);
-    },
-    { iterations: 1000 },
-  );
+  describe(`${format}性能测试`, () => {
+    bench(
+      '全量读取',
+      async () => {
+        const obj = { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 10 };
+        pick(obj, Object.keys(obj));
+      },
+      { iterations: 1000 },
+    );
+  });
 });
 
 test('类型测试', async () => {
