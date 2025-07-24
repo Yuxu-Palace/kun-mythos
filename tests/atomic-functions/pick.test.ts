@@ -1,5 +1,5 @@
-import { assertType, bench, describe, expect, test } from 'vitest';
-import { loadModule, MFT } from '../utils';
+import { assertType, describe, expect, test } from 'vitest';
+import { bench, loadModule, MFT } from '../utils';
 
 MFT(({ pick }, { format, IS_BENCH }) => {
   test('导出检查', () => {
@@ -47,16 +47,35 @@ MFT(({ pick }, { format, IS_BENCH }) => {
     expect(pick(obj, [sym, 'a'])).toEqual({ [sym]: 'value', a: 1 });
   });
 
-  if (!IS_BENCH) return;
+  describe.runIf(IS_BENCH)(`${format}性能测试`, () => {
+    bench('全量读取', async () => {
+      const obj = { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 10 };
+      pick(obj, Object.keys(obj));
+    });
 
-  describe(`${format}性能测试`, () => {
     bench(
-      '全量读取',
+      '全量读取, 预热',
       async () => {
         const obj = { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 10 };
         pick(obj, Object.keys(obj));
       },
-      { iterations: 1000 },
+      { warmupTime: 200 },
+    );
+
+    bench('混合 key', async () => {
+      const sym = Symbol('4');
+      const obj = { a: 1, 2: 2, [Symbol.for('3')]: 3, [Symbol(4)]: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 10 };
+      pick(obj, ['a', 2, Symbol.for('3'), sym, 'e', 'f', 'g', 'h', 'i', 'j']);
+    });
+
+    bench(
+      '混合 key, 预热',
+      async () => {
+        const sym = Symbol('4');
+        const obj = { a: 1, 2: 2, [Symbol.for('3')]: 3, [Symbol(4)]: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 10 };
+        pick(obj, ['a', 2, Symbol.for('3'), sym, 'e', 'f', 'g', 'h', 'i', 'j']);
+      },
+      { warmupTime: 200 },
     );
   });
 });

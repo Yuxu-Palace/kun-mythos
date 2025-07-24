@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { bench as benchmark, describe, expect, test } from 'vitest';
 
 type Module = typeof import('../src/index');
 
@@ -55,6 +55,31 @@ export async function loadModule(format: Mode = 'src'): Promise<Module> {
   if (format === MODE.SOURCE) return import('../src/index');
   return import(`../dist/${format}/index.${getExt(format)}`);
 }
+
+const benchApply: ProxyHandler<typeof benchmark>['apply'] = (target, thisArg, argArray) => {
+  if (!IS_BENCH) return;
+
+  const [, , option = {}] = argArray;
+
+  // 默认清空热身
+  option.warmupTime ||= 0;
+  option.warmupIterations ||= 0;
+  // 默认 500ms
+  option.time ||= 500;
+  // 最少 5K 次迭代
+  option.iterations ||= 5_000;
+
+  argArray[2] = option;
+
+  return Reflect.apply(target, thisArg, argArray);
+};
+
+export const bench: typeof benchmark = new Proxy(benchmark, {
+  get(target, prop, receiver) {
+    return new Proxy(Reflect.get(target, prop, receiver), { apply: benchApply });
+  },
+  apply: benchApply,
+});
 
 /**
  * 本地模式下测试源码

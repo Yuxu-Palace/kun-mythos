@@ -21,6 +21,7 @@ MFT(
     isBoolean,
     isFalsy,
     isTruthy,
+    isFunction,
   }) => {
     test('导出检查', () => {
       expect(typeof isObject).toBe('function');
@@ -41,6 +42,16 @@ MFT(
       expect(typeof isBoolean).toBe('function');
       expect(typeof isFalsy).toBe('function');
       expect(typeof isTruthy).toBe('function');
+      expect(typeof isFunction).toBe('function');
+    });
+
+    test('isFunction', () => {
+      expect(isFunction(() => {})).toBe(true);
+      expect(isFunction(1)).toBe(false);
+      expect(isFunction('1')).toBe(false);
+      expect(isFunction(Symbol('test'))).toBe(false);
+      expect(isFunction({})).toBe(false);
+      expect(isFunction([])).toBe(false);
     });
 
     test('isTruthy', () => {

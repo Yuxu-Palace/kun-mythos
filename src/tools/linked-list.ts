@@ -121,7 +121,7 @@ export class LinkedList<T = any, M = any> {
   /**
    * 从可迭代对象创建链表
    */
-  static fromEntries<T, M>(init: Iterable<[T, M]> | ArrayLike<[T, M]> = []) {
+  static fromEntries<T, M>(init: Iterable<[T, M] | readonly [T, M]> | ArrayLike<[T, M] | readonly [T, M]> = []) {
     const arr = Array.from(init);
     const list = new LinkedList<T, M>();
     for (const [item, metadata] of arr) {

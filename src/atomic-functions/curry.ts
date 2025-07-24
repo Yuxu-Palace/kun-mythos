@@ -1,0 +1,44 @@
+import type { KAnyFunc, KCast, KDropHead, KLength } from '@/types/base';
+import { isFunction } from './verify';
+
+type KCurry<P extends any[], R> = <T extends any[]>(
+  ...args: KCast<T, Partial<P>>
+) => KDropHead<KLength<T>, P> extends [any, ...any[]] ? KCurry<KCast<KDropHead<KLength<T>, P>, any[]>, R> : R;
+
+type KCurryFunc = <P extends any[], R>(fn: (...args: P) => R) => KCurry<Required<P>, R>;
+
+export type KCurryFuncReturnType<F> = F extends KCurry<any, infer R> ? R : F extends KAnyFunc ? ReturnType<F> : F;
+
+/**
+ * 函数柯里化
+ *
+ * @warn 无法读取函数参数列表的长度, 不能使用参数默认值和剩余参数
+ * @warn 参数默认值会导致形参列表长度读取错误!!! ```curry((a = 1) => {})``` // 不允许!!!
+ * @warn 参数默认值会导致形参列表长度读取错误!!! ```curry((a = 1) => {})``` // 不允许!!!
+ * @warn 参数默认值会导致形参列表长度读取错误!!! ```curry((a = 1) => {})``` // 不允许!!!
+ * @warn 可选参数会被强制必填
+ * @warn 空参函数无需柯里化
+ */
+export const curry: KCurryFunc = (func) => {
+  if (!isFunction(func)) {
+    throw new TypeError('curry 函数的参数必须是函数');
+  }
+  // @ts-expect-error 自定义属性, 确保获取到参数列表长度
+  const length = func?.klength || func?.length || 0;
+  if (!length) {
+    throw new TypeError(
+      '无法读取函数参数列表的长度, 不能使用参数默认值和剩余参数!!! 可选参数会被强制必填! 空参函数无需柯里化!!!',
+    );
+  }
+  const curried = function (this: any, ...args: any) {
+    if (args.length >= length) {
+      return func.call(this, ...args);
+    } else {
+      const tempFunc = (...args2: any) => curried.call(this, ...args.concat(args2));
+      tempFunc.klength = length - args.length;
+      return tempFunc;
+    }
+  };
+  curried.klength = length;
+  return curried as any;
+};

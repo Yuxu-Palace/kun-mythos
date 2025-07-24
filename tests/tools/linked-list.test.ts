@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
-import { MFT } from '../utils';
+import { bench, MFT } from '../utils';
 
-MFT(({ LinkedList }) => {
+MFT(({ LinkedList }, { format, IS_BENCH }) => {
   test('导出检查', () => {
     expect(typeof LinkedList).toBe('function');
     expect(typeof LinkedList.from).toBe('function');
@@ -110,6 +110,74 @@ MFT(({ LinkedList }) => {
       list.unshift('2');
       expect([...list]).toEqual(['2', '1']);
       expect(Array.from(list)).toEqual(['2', '1']);
+    });
+  });
+
+  describe.runIf(IS_BENCH)(`${format}性能测试`, () => {
+    bench('字符串 value 队列测试', () => {
+      const list = new LinkedList<string, number>();
+      for (let i = 0; i < 1000; ++i) {
+        list.push(i.toString());
+      }
+      for (let i = 0; i < 1000; ++i) {
+        list.shift();
+      }
+    });
+
+    bench('字符串 value 栈测试', () => {
+      const list = new LinkedList<string, number>();
+      for (let i = 0; i < 1000; ++i) {
+        list.push(i.toString());
+      }
+      for (let i = 0; i < 1000; ++i) {
+        list.pop();
+      }
+    });
+
+    bench('字符串 value 即入即出', () => {
+      const list = new LinkedList<string, number>();
+      for (let i = 0; i < 1000; ++i) {
+        list.push(i.toString());
+        list.pop();
+      }
+    });
+
+    const list = new LinkedList<string, number>();
+
+    for (let i = 0; i < 1000; ++i) {
+      list.push(i.toString());
+    }
+
+    bench('转化为数组 Array.from', () => {
+      Array.from(list);
+    });
+
+    bench('转化为数组 toArray', () => {
+      list.toArray();
+    });
+
+    bench('转化为数组 扩展运算符', () => {
+      [...list];
+    });
+
+    bench('迭代器测试 toEntries', () => {
+      list.toEntries();
+    });
+
+    bench('迭代器测试 toValues', () => {
+      list.toValues();
+    });
+
+    const baseArr = Array.from({ length: 1000 }, (_, i) => i.toString());
+
+    bench('数组转链表 from', () => {
+      LinkedList.from(baseArr);
+    });
+
+    const entriesArr = list.toEntries();
+
+    bench('数组转链表 fromEntries', () => {
+      LinkedList.fromEntries(entriesArr);
     });
   });
 });

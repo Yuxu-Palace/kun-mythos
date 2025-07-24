@@ -1,7 +1,7 @@
-import { expect, test } from 'vitest';
-import { MFT } from '../utils';
+import { describe, expect, test } from 'vitest';
+import { bench, MFT } from '../utils';
 
-MFT(({ classnames, cn }) => {
+MFT(({ classnames, cn }, { format, IS_BENCH }) => {
   test('导出检查', () => {
     expect(classnames).toBe(cn);
     expect(typeof classnames).toBe('function');
@@ -53,5 +53,52 @@ MFT(({ classnames, cn }) => {
     expect(cn({ [Symbol('test')]: true, c: Symbol('test') }, Symbol('test'))).toBe('c');
     // 空对象, error 也会被当成对象然后遍历 key 进行处理
     expect(cn({}, new Error())).toBe('');
+  });
+
+  describe.runIf(IS_BENCH)(`${format}性能测试`, () => {
+    bench('覆盖所有分支', () => {
+      cn(
+        [{ a: true }, 'b', { d: 1 }, [true]],
+        { c: true },
+        ['d', { e: true }, false, ['f', 1, ['', { g: true }, [1, 'true']]]],
+        '123',
+        [Symbol('test'), Symbol.for('test')],
+        { [Symbol('test')]: true, c: Symbol('test'), [Symbol.for('test')]: !1 },
+        new Error('test error'),
+        [!1 && '213', !0 && '321', Symbol.for('test') && '123'],
+      );
+    });
+
+    bench('边界空跑', () => {
+      cn();
+      cn([]);
+      cn({});
+      cn(null);
+      cn(undefined);
+    });
+
+    bench('纯字符串测试', () => {
+      cn('1', '2', '3', '4', '5', '6', '7', '8', '9', '10');
+    });
+
+    bench(
+      '纯字符串测试, 预热',
+      () => {
+        cn('1', '2', '3', '4', '5', '6', '7', '8', '9', '10');
+      },
+      { warmupTime: 200 },
+    );
+
+    bench('纯数组测试', () => {
+      cn(['1'], ['2', '3'], ['4', '5', '6'], ['7', '8', '9', '10']);
+    });
+
+    bench(
+      '纯数组测试, 预热',
+      () => {
+        cn(['1'], ['2', '3'], ['4', '5', '6'], ['7', '8', '9', '10']);
+      },
+      { warmupTime: 200 },
+    );
   });
 });
