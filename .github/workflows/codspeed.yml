@@ -43,5 +43,5 @@ jobs:
       - name: Run benchmarks
         uses: CodSpeedHQ/action@v3
         with:
-          run: "pnpm run test:bench:ci --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}"
+          run: pnpm run test:bench:ci --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
           token: ${{ secrets.CODSPEED_TOKEN }}
