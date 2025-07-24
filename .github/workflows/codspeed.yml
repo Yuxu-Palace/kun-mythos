@@ -13,6 +13,10 @@ jobs:
   benchmarks:
     name: Run benchmarks
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shardIndex: [1, 2, 3, 4, 5]
+        shardTotal: [5]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,5 +43,5 @@ jobs:
       - name: Run benchmarks
         uses: CodSpeedHQ/action@v3
         with:
-          run: "pnpm run test:bench:ci"
+          run: "pnpm run test:bench:ci --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}"
           token: ${{ secrets.CODSPEED_TOKEN }}

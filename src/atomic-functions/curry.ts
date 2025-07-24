@@ -14,8 +14,7 @@ export type KCurryFuncReturnType<F> = F extends KCurry<any, infer R> ? R : F ext
  *
  * @warn 无法读取函数参数列表的长度, 不能使用参数默认值和剩余参数
  * @warn 参数默认值会导致形参列表长度读取错误!!! ```curry((a = 1) => {})``` // 不允许!!!
- * @warn 参数默认值会导致形参列表长度读取错误!!! ```curry((a = 1) => {})``` // 不允许!!!
- * @warn 参数默认值会导致形参列表长度读取错误!!! ```curry((a = 1) => {})``` // 不允许!!!
+ * @important 重要：使用参数默认值会导致柯里化失败
  * @warn 可选参数会被强制必填
  * @warn 空参函数无需柯里化
  */
@@ -26,9 +25,7 @@ export const curry: KCurryFunc = (func) => {
   // @ts-expect-error 自定义属性, 确保获取到参数列表长度
   const length = func?.klength || func?.length || 0;
   if (!length) {
-    throw new TypeError(
-      '无法读取函数参数列表的长度, 不能使用参数默认值和剩余参数!!! 可选参数会被强制必填! 空参函数无需柯里化!!!',
-    );
+    throw new TypeError('无法读取函数参数列表的长度。请确保: 1) 不使用参数默认值 2) 不使用剩余参数 3) 函数有参数');
   }
   const curried = function (this: any, ...args: any) {
     if (args.length >= length) {

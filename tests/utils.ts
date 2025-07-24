@@ -12,6 +12,12 @@ const MODE = {
   UMD: 'umd',
 } as const;
 
+const CI_MODES = [MODE.SOURCE, MODE.CJS, MODE.ESM, MODE.UMD] as const;
+
+const LOCAL_MODES = [MODE.SOURCE] as const;
+
+const BENCH_MODES = [...LOCAL_MODES] as const;
+
 type Mode = (typeof MODE)[keyof typeof MODE];
 
 interface Context {
@@ -66,8 +72,8 @@ const benchApply: ProxyHandler<typeof benchmark>['apply'] = (target, thisArg, ar
   option.warmupIterations ||= 0;
   // 默认 500ms
   option.time ||= 500;
-  // 最少 5K 次迭代
-  option.iterations ||= 5_000;
+  // 最少 1K 次迭代
+  option.iterations ||= 1000;
 
   argArray[2] = option;
 
@@ -81,6 +87,16 @@ export const bench: typeof benchmark = new Proxy(benchmark, {
   apply: benchApply,
 });
 
+function getModes() {
+  if (IS_BENCH) {
+    return BENCH_MODES;
+  }
+  if (IS_CI) {
+    return CI_MODES;
+  }
+  return LOCAL_MODES;
+}
+
 /**
  * 本地模式下测试源码
  *
@@ -89,11 +105,10 @@ export const bench: typeof benchmark = new Proxy(benchmark, {
  * @param testFunc 测试函数
  */
 export function MFT(testFunc: (module: Module, ctx: Context) => any) {
-  describe.concurrent.each(Object.values(MODE))('mutiple format test', async (format) => {
-    // 本地只测试源码
-    const sourceOnly = !IS_CI && format === MODE.SOURCE;
+  const modes = getModes();
 
-    describe.runIf(sourceOnly || IS_CI)(`${format} test`, async () => {
+  describe.concurrent.each(modes)('mutiple format test', async (format) => {
+    describe(`${format} test`, async () => {
       const module = await loadModule(format);
 
       await testFunc(module, getBaseCtx({ format }));
