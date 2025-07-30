@@ -102,3 +102,9 @@ export function isFalsy(v: unknown): v is false | 0 | '' | null | undefined {
 export function isFunction(v: unknown): v is KAnyFunc {
   return typeof v === 'function';
 }
+
+/** 判断是一个 Promise */
+export function isPromise(v: unknown): v is Promise<any> {
+  // @ts-expect-error
+  return isObject(v) && isFunction(v.then);
+}

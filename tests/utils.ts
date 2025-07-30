@@ -104,10 +104,10 @@ function getModes() {
  *
  * @param testFunc 测试函数
  */
-export function MFT(testFunc: (module: Module, ctx: Context) => any) {
+export function MFT(testFunc: (module: Module, ctx: Context) => any, option?: { skip?: boolean }) {
   const modes = getModes();
 
-  describe.concurrent.each(modes)('mutiple format test', async (format) => {
+  describe.skipIf(option?.skip).concurrent.each(modes)('mutiple format test', async (format) => {
     describe(`${format} test`, async () => {
       const module = await loadModule(format);
 

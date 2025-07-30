@@ -1,6 +1,6 @@
 import { storage } from '@/atomic-functions/data-storage';
 import { pick } from '@/atomic-functions/pick';
-import { PRIVATE_KEY } from '@/constant/private';
+import { GLOBAL_PRIVATE_KEY } from '@/constant/private';
 import type { KEqual } from '@/types/base';
 
 interface Node<T = any, M = any> {
@@ -48,7 +48,7 @@ interface LinkedListSelf<T = any, M = any> extends Iterable<Node<T, M>> {
 }
 
 function getSelf<T, M>(key: LinkedList<T, M>) {
-  return storage.get(key, PRIVATE_KEY) as LinkedListSelf<T, M>;
+  return storage.get(key, GLOBAL_PRIVATE_KEY) as LinkedListSelf<T, M>;
 }
 
 export class LinkedList<T = any, M = any> {
@@ -102,7 +102,7 @@ export class LinkedList<T = any, M = any> {
           }
         },
       } satisfies LinkedListSelf & { _head: NodeOrNull; _tail: NodeOrNull },
-      PRIVATE_KEY,
+      GLOBAL_PRIVATE_KEY,
     );
   }
 

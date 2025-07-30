@@ -56,7 +56,7 @@ export function placeholderFunc<O extends any[], R>(func: KFunc<O, R>) {
 
       if (callArgs.length !== index) {
         // @ts-expect-error 自定义长度属性
-        throw new TypeError(`非法调用, 参数数量不匹配, 期望: ${runFunc.klength || index}, 实际: ${callArgs.length}`);
+        throw new TypeError(`非法调用, 参数数量不匹配, 期望: ${runFunc.klength}, 实际: ${callArgs.length}`);
       }
 
       return func(...(args as any));

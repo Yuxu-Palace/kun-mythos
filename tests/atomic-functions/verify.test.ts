@@ -22,8 +22,10 @@ MFT(
     isFalsy,
     isTruthy,
     isFunction,
+    isPromise,
   }) => {
     test('导出检查', () => {
+      expect(typeof isPromise).toBe('function');
       expect(typeof isObject).toBe('function');
       expect(typeof isArray).toBe('function');
       expect(typeof isSymbol).toBe('function');
@@ -43,6 +45,19 @@ MFT(
       expect(typeof isFalsy).toBe('function');
       expect(typeof isTruthy).toBe('function');
       expect(typeof isFunction).toBe('function');
+    });
+
+    test('isPromise', () => {
+      expect(isPromise(Promise.resolve())).toBe(true);
+      expect(isPromise(1)).toBe(false);
+      expect(isPromise(Promise.reject().catch(() => {}))).toBe(true);
+      expect(isPromise('1')).toBe(false);
+      expect(isPromise(Symbol('test'))).toBe(false);
+      expect(isPromise({})).toBe(false);
+      expect(isPromise([])).toBe(false);
+      expect(isPromise(new Promise(() => {}))).toBe(true);
+      // biome-ignore lint/suspicious/noThenProperty: test
+      expect(isPromise({ then: () => {} })).toBe(true);
     });
 
     test('isFunction', () => {

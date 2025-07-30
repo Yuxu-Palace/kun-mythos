@@ -34,6 +34,7 @@ MFT(({ placeholderFunc, __, PLACEHOLDER_FLAG }, { format, IS_BENCH }) => {
     // 参数长度不匹配
     // @ts-expect-error
     expect(() => placeholderFunc((a: number, b: number) => a + b)(__, 1)()).toThrowError(TypeError);
+    expect(placeholderFunc((...args) => args).length).toBe(0);
   });
 
   describe.runIf(IS_BENCH)(`${format}性能测试`, () => {
