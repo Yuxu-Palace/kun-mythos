@@ -148,7 +148,10 @@ export function debounceCacheFn<F extends KAnyFunc>(func: F, cacheTime = 100): C
   } as unknown as CacheFn<F>;
 
   setCacheFnMeta(cb, getCacheFnMeta(tempCB));
-  cb.clearCache = tempCB.clearCache;
+  cb.clearCache = () => {
+    clearTimeout(timer);
+    return tempCB.clearCache();
+  };
 
   return cb;
 }
