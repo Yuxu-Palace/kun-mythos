@@ -1,6 +1,5 @@
-import { storage } from '@/atomic-functions/data-storage';
 import { pick } from '@/atomic-functions/pick';
-import { GLOBAL_PRIVATE_KEY } from '@/constant/private';
+import { getPrivateMeta, setPrivateMeta } from '@/atomic-functions/private/private-info-ctrl';
 import type { KEqual } from '@/types/base';
 
 interface Node<T = any, M = any> {
@@ -47,63 +46,61 @@ interface LinkedListSelf<T = any, M = any> extends Iterable<Node<T, M>> {
   ) => KEqual<Flag, true> extends true ? { data: T; metadata: Node<T, M>['metadata'] } : T;
 }
 
+const LINKED_LIST_KEY = Symbol('linked-list');
+
 function getSelf<T, M>(key: LinkedList<T, M>) {
-  return storage.get(key, GLOBAL_PRIVATE_KEY) as LinkedListSelf<T, M>;
+  return getPrivateMeta(key, LINKED_LIST_KEY) as LinkedListSelf<T, M>;
 }
 
 export class LinkedList<T = any, M = any> {
   constructor() {
     // 完全杜绝用户操作 node, 只能通过提供的 api 操作
-    storage.set(
-      this,
-      {
-        _head: null,
-        _tail: null,
+    setPrivateMeta(this, LINKED_LIST_KEY, {
+      _head: null,
+      _tail: null,
 
-        set head(node) {
-          if (!node) {
-            // 头节点被设置为 null 则表示清空整个链表
-            this._head = null;
-            this._tail = null;
-            return;
-          }
-          node.prev = null;
-          this._head = node;
-        },
-        get head() {
-          return this._head;
-        },
-        set tail(node) {
-          if (!node) {
-            // 尾节点被设置为 null 则表示清空整个链表
-            this._head = null;
-            this._tail = null;
-            return;
-          }
-          node.next = null;
-          this._tail = node;
-        },
-        get tail() {
-          return this._tail;
-        },
-        *[Symbol.iterator]() {
-          let node = this.head;
+      set head(node) {
+        if (!node) {
+          // 头节点被设置为 null 则表示清空整个链表
+          this._head = null;
+          this._tail = null;
+          return;
+        }
+        node.prev = null;
+        this._head = node;
+      },
+      get head() {
+        return this._head;
+      },
+      set tail(node) {
+        if (!node) {
+          // 尾节点被设置为 null 则表示清空整个链表
+          this._head = null;
+          this._tail = null;
+          return;
+        }
+        node.next = null;
+        this._tail = node;
+      },
+      get tail() {
+        return this._tail;
+      },
+      *[Symbol.iterator]() {
+        let node = this.head;
 
-          while (node) {
-            yield node;
-            node = node.next;
-          }
-        },
-        tvo(node, needMetadata) {
-          if (needMetadata) {
-            return pick(node, ['data', 'metadata']);
-          } else {
-            return node.data;
-          }
-        },
-      } satisfies LinkedListSelf & { _head: NodeOrNull; _tail: NodeOrNull },
-      GLOBAL_PRIVATE_KEY,
-    );
+        while (node) {
+          yield node;
+          node = node.next;
+        }
+      },
+      tvo(node, needMetadata) {
+        if (needMetadata) {
+          return pick(node, ['data', 'metadata']);
+        } else {
+          return node.data;
+        }
+      },
+    } satisfies LinkedListSelf & { _head: NodeOrNull; _tail: NodeOrNull });
   }
 
   /**

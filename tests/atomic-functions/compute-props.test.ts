@@ -1,13 +1,13 @@
 import { assertType, describe, expect, test } from 'vitest';
 import { bench, loadModule, MFT } from '../utils';
 
-MFT(({ computeProps: completeProps }, { format, IS_BENCH }) => {
+MFT(({ computeProps }, { format, IS_BENCH }) => {
   test('导出检查', () => {
-    expect(typeof completeProps).toBe('function');
+    expect(typeof computeProps).toBe('function');
   });
 
   test('基本使用', async () => {
-    expect(completeProps({})).toEqual({ __k_ready: {} });
+    expect(computeProps({})).toEqual({ __k_ready: {} });
 
     const baseObj = {
       a: 1,
@@ -20,7 +20,7 @@ MFT(({ computeProps: completeProps }, { format, IS_BENCH }) => {
       },
     };
 
-    const obj1 = completeProps(baseObj);
+    const obj1 = computeProps(baseObj);
     expect(obj1.__k_ready.c).toBeInstanceOf(Promise);
     expect(obj1.a).toBe(1);
     expect(obj1.b).toBe(2);
