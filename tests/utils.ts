@@ -55,6 +55,7 @@ function getExt(format: Mode = 'src') {
     default:
       format satisfies never;
   }
+  throw new TypeError(`Unsupported format: ${format}`);
 }
 
 export async function loadModule(format: Mode = 'src'): Promise<Module> {
@@ -107,7 +108,7 @@ function getModes() {
 export function MFT(testFunc: (module: Module, ctx: Context) => any, option?: { skip?: boolean }) {
   const modes = getModes();
 
-  describe.skipIf(option?.skip).concurrent.each(modes)('mutiple format test', async (format) => {
+  describe.skipIf(option?.skip).concurrent.each(modes)('multiple format test', async (format) => {
     describe(`${format} test`, async () => {
       const module = await loadModule(format);
 

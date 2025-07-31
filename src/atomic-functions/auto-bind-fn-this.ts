@@ -7,8 +7,12 @@ import { isFunction, isObject } from './verify';
  * @param obj 待处理的对象
  * @param deep 是否递归处理
  */
-export function autoBindFnThis<T extends Record<PropertyKey, any>>(obj: T, deep = false): T {
-  return new Proxy(obj, {
+export function autoBindFnThis<T extends Record<PropertyKey, any>>(obj: T, deep = false, visited = new WeakMap()): T {
+  if (visited.has(obj)) {
+    return visited.get(obj);
+  }
+
+  const proxy = new Proxy(obj, {
     get(target, p, receiver) {
       const value = Reflect.get(target, p, receiver);
 
@@ -17,10 +21,13 @@ export function autoBindFnThis<T extends Record<PropertyKey, any>>(obj: T, deep 
       }
 
       if (deep && isObject(value)) {
-        return autoBindFnThis(value);
+        return autoBindFnThis(value, deep, visited);
       }
 
       return value;
     },
   });
+
+  visited.set(obj, proxy);
+  return proxy;
 }

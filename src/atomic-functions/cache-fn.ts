@@ -126,12 +126,10 @@ export function retryCacheFn<F extends KAnyFunc>(func: F): CacheFn<F> {
 }
 
 /**
- * 缓存一段时间函数的返回结果
+ * 缓存一段时间函数的返回结果, 时间结束后会自动清空缓存
  *
  * @param func 待缓存的函数
  * @param cacheTime 缓存时间
- *
- * 事件结束后会自动清空缓存
  */
 export function debounceCacheFn<F extends KAnyFunc>(func: F, cacheTime = 100): CacheFn<F> {
   if (!isFunction(func)) {
@@ -199,6 +197,19 @@ export function cacheFnFromGetter<F extends KFunc<[], KAnyFunc>>(
  * 如果结果为函数则自动调用
  *
  * @param getter 待缓存的函数
+ *
+ * @example
+ * ```ts
+ * const cachedGetter = cacheGetterResult(() => {
+ *   console.log('Creating expensive function');
+ *   return (x: number) => x * 2;
+ * });
+ *
+ * // 第一次调用会执行 getter 并缓存返回的函数
+ * cachedGetter(5); // 输出: "Creating expensive function", 返回: 10
+ * // 后续调用直接使用缓存的函数
+ * cachedGetter(10); // 返回: 20 (不再输出 "Creating expensive function")
+ * ```
  */
 export function cacheGetterResult<F extends KFunc<[], any>>(getter: F): CacheFn<ReturnType<F>> {
   if (!isFunction(getter)) {

@@ -12,7 +12,7 @@ MFT(({ withResolvers, isPromise, isFunction }) => {
     expect(isFunction(resolvers1.resolve)).toBe(true);
     expect(isFunction(resolvers1.reject)).toBe(true);
     resolvers1.resolve(1);
-    await resolvers1.promise.then((v) => expect(v).toBe(v));
+    expect(await resolvers1.promise).toBe(1);
 
     const old = Promise.withResolvers;
     if (isFunction(Promise.withResolvers)) {
@@ -27,7 +27,7 @@ MFT(({ withResolvers, isPromise, isFunction }) => {
     expect(isPromise(resolvers2.promise)).toBe(true);
     expect(isFunction(resolvers2.resolve)).toBe(true);
     expect(isFunction(resolvers2.reject)).toBe(true);
-    resolvers2.resolve(1);
-    await resolvers2.promise.then((v) => expect(v).toBe(v));
+    resolvers2.resolve(2);
+    expect(await resolvers2.promise).toBe(2);
   });
 });

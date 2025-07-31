@@ -13,7 +13,7 @@ function extendsPlugin() {
 }
 
 export default defineConfig({
-  plugins: [viteTsConfigPaths(), extendsPlugin()],
+  plugins: [viteTsConfigPaths(), ...extendsPlugin()],
   // Configure Vitest (https://vitest.dev/config/)
   test: {
     coverage: {

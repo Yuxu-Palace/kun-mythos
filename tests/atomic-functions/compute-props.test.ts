@@ -1,7 +1,7 @@
-import { assertType, describe, expect, test } from 'vitest';
-import { bench, loadModule, MFT } from '../utils';
+import { assertType, expect, test } from 'vitest';
+import { loadModule, MFT } from '../utils';
 
-MFT(({ computeProps }, { format, IS_BENCH }) => {
+MFT(({ computeProps }) => {
   test('导出检查', () => {
     expect(typeof computeProps).toBe('function');
   });
@@ -34,10 +34,6 @@ MFT(({ computeProps }, { format, IS_BENCH }) => {
     expect(obj1.d).toBe('4');
     await obj1.__k_ready.e;
     expect(obj1.e).toBe(5);
-  });
-
-  describe.runIf(IS_BENCH)(`${format}性能测试`, () => {
-    bench('读取版本号', () => {});
   });
 });
 

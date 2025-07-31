@@ -16,7 +16,7 @@ export const withResolvers = cacheGetterResult((): (<T>() => PromiseWithResolver
   }
 
   return () => {
-    const resolvers = { promise: null, resolve: null, reject: null } as unknown as PromiseWithResolvers<any>;
+    const resolvers = {} as PromiseWithResolvers<any>;
 
     resolvers.promise = new Promise((resolve, reject) => {
       resolvers.resolve = resolve;

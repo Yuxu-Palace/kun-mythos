@@ -7,7 +7,7 @@ export function checkPrivateType(v: unknown, type: PropertyKey) {
   return Boolean(getPrivateMeta(v, type));
 }
 
-/** 获取私有元数据 */
+/** 设置私有元数据 */
 export function setPrivateMeta(v: any, type: PropertyKey, meta: Record<PropertyKey, any>) {
   const metadata = metaMap.get(v) || {};
 
@@ -24,7 +24,7 @@ export function setPrivateMeta(v: any, type: PropertyKey, meta: Record<PropertyK
   }
 }
 
-/** 设置私有元数据 */
+/** 获取私有元数据 */
 export function getPrivateMeta(v: any, type: PropertyKey): unknown {
   if (isNullOrUndef(v)) {
     throw new TypeError('[getPrivateMeta]: v is null or undefined');
