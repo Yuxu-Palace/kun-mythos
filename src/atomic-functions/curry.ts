@@ -1,4 +1,5 @@
 import type { KAnyFunc, KCast, KDropHead, KLength } from '@/types/base';
+import { getFuncLength, setFuncLength } from './private/fn-length';
 import { isFunction } from './verify';
 
 type KCurry<P extends any[], R> = <T extends any[]>(
@@ -22,8 +23,7 @@ export const curry: KCurryFunc = (func) => {
   if (!isFunction(func)) {
     throw new TypeError('curry 函数的参数必须是函数');
   }
-  // @ts-expect-error 自定义属性, 确保获取到参数列表长度
-  const length = func?.klength || func?.length || 0;
+  const length = getFuncLength(func);
   if (!length) {
     throw new TypeError('无法读取函数参数列表的长度。请确保: 1) 不使用参数默认值 2) 不使用剩余参数 3) 函数有参数');
   }
@@ -32,10 +32,10 @@ export const curry: KCurryFunc = (func) => {
       return func.call(this, ...args);
     } else {
       const tempFunc = (...args2: any) => curried.call(this, ...args.concat(args2));
-      tempFunc.klength = length - args.length;
+      setFuncLength(tempFunc, length - args.length);
       return tempFunc;
     }
   };
-  curried.klength = length;
+  setFuncLength(curried, length);
   return curried as any;
 };

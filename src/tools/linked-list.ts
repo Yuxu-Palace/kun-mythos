@@ -109,8 +109,8 @@ export class LinkedList<T = any, M = any> {
   static from<T>(init: Iterable<T> | ArrayLike<T> = []) {
     const arr = Array.from(init);
     const list = new LinkedList<T>();
-    for (const item of arr) {
-      list.push(item);
+    for (let i = 0; i < arr.length; ++i) {
+      list.push(arr[i]);
     }
     return list;
   }
@@ -121,8 +121,8 @@ export class LinkedList<T = any, M = any> {
   static fromEntries<T, M>(init: Iterable<[T, M] | readonly [T, M]> | ArrayLike<[T, M] | readonly [T, M]> = []) {
     const arr = Array.from(init);
     const list = new LinkedList<T, M>();
-    for (const [item, metadata] of arr) {
-      list.push(item, metadata);
+    for (let i = 0; i < arr.length; ++i) {
+      Reflect.apply(list.push, list, arr[i]);
     }
     return list;
   }

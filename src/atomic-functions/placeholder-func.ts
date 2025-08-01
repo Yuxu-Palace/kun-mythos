@@ -1,6 +1,7 @@
 import { __ } from '@/constant/public';
 import type { KAppend, KDropHead, KFunc, KHeadType } from '@/types/base';
 import type { KCurryFuncReturnType } from './curry';
+import { getFuncLength, setFuncLength, syncFuncLength } from './private/fn-length';
 import { isFunction } from './verify';
 
 type PlaceholderSymbol = typeof __;
@@ -55,19 +56,20 @@ export function placeholderFunc<O extends any[], R>(func: KFunc<O, R>) {
       const args = placeArgs.map((arg) => (arg === __ ? callArgs[index++] : arg));
 
       if (callArgs.length !== index) {
-        // @ts-expect-error 自定义长度属性
-        throw new TypeError(`非法调用, 参数数量不匹配, 期望: ${runFunc.klength}, 实际: ${callArgs.length}`);
+        throw new TypeError(`非法调用, 参数数量不匹配, 期望: ${getFuncLength(runFunc)}, 实际: ${callArgs.length}`);
       }
 
       return func(...(args as any));
     }) as KFunc<PlaceholderFuncArgs<A, Required<O>>, KCurryFuncReturnType<R>>;
 
-    // @ts-expect-error 获取具体的形参列表长度
-    runFunc.klength = placeArgs.reduce((acc, cur) => acc + (cur === __ ? 1 : 0), 0);
+    setFuncLength(
+      runFunc,
+      placeArgs.reduce<number>((acc, cur) => acc + (cur === __ ? 1 : 0), 0),
+    );
     return runFunc;
   };
-  // @ts-expect-error 获取具体的形参列表长度
-  callback.klength = func.klength || func.length || 0;
+
+  syncFuncLength(callback, func);
   return callback;
 }
 

@@ -15,7 +15,8 @@ export function pick<O extends Record<string, any>, K extends (keyof O | string)
   // 不用 Object.hasOwn 判断是否存在是因为他会排除 symbol 键
   const ownKeys = new Set<PropertyKey>(Reflect.ownKeys(obj));
 
-  for (const key of keys) {
+  for (let i = 0; i < keys.length; ++i) {
+    const key = keys[i];
     if (!ownKeys.has(key)) continue;
     result[key] = obj[key];
   }

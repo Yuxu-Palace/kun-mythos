@@ -26,7 +26,10 @@ export function computeProps<T extends Record<PropertyKey, KAnyFunc | Promise<an
 ): ComputeProps<T> {
   const result = { __k_ready: {} } as ComputeProps<T>;
 
-  for (const key in obj) {
+  const keys = Object.keys(obj);
+
+  for (let i = 0; i < keys.length; ++i) {
+    const key = keys[i];
     let value: any = obj[key];
 
     if (isFunction(value)) {
@@ -52,6 +55,7 @@ export function computeProps<T extends Record<PropertyKey, KAnyFunc | Promise<an
       continue;
     }
 
+    // @ts-expect-error any
     result[key] = value;
   }
 

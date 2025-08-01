@@ -1,6 +1,7 @@
 export * from './auto-bind-fn-this';
 export * from './cache-fn';
 export * from './classnames';
+export * from './compose';
 export * from './compute-props';
 export * from './curry';
 export * from './data-storage';

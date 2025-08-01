@@ -16,9 +16,11 @@ export function setPrivateMeta(v: any, type: PropertyKey, meta: Record<PropertyK
   }
 
   if (metadata[type]) {
-    Reflect.ownKeys(meta).forEach((key) => {
+    const arr = Reflect.ownKeys(meta);
+    for (let i = 0; i < arr.length; ++i) {
+      const key = arr[i];
       metadata[type][key] = meta[key];
-    });
+    }
   } else {
     metadata[type] = meta;
   }

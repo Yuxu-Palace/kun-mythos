@@ -5,11 +5,13 @@ type KeyType = string | number;
 type InputType = KeyType | Record<KeyType, any> | null | undefined | InputType[];
 
 function objectHandler(obj: Record<KeyType, any>, names: KeyType[], set: Set<InputType>) {
-  Object.entries(obj).forEach(([key, value]) => {
-    if (!value || set.has(key) || isSymbol(key)) return;
+  const entries = Object.entries(obj);
+  for (let i = 0; i < entries.length; ++i) {
+    const [key, value] = entries[i];
+    if (!value || set.has(key) || isSymbol(key)) continue;
     set.add(key);
     names.push(key);
-  });
+  }
 }
 
 function arrayHandler(arr: InputType[], names: KeyType[], set: Set<InputType>) {
@@ -20,23 +22,26 @@ function arrayHandler(arr: InputType[], names: KeyType[], set: Set<InputType>) {
    *
    * 扩展运算符会再次遍历数组导致额外开销
    */
-  arr.forEach((item) => {
-    if (!item || set.has(item) || isSymbol(item)) return;
+  for (let i = 0; i < arr.length; ++i) {
+    const item = arr[i];
+    if (!item || set.has(item) || isSymbol(item)) continue;
     set.add(item);
 
     // 数组处理
     if (isArray(item)) {
-      return arrayHandler(item, names, set);
+      arrayHandler(item, names, set);
+      continue;
     }
 
     // 对象处理
     if (isObject(item)) {
-      return objectHandler(item, names, set);
+      objectHandler(item, names, set);
+      continue;
     }
 
     // 普通值
     names.push(String(item));
-  });
+  }
   return names;
 }
 
