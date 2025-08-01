@@ -1,0 +1,48 @@
+import { describe, expect, test } from 'vitest';
+import { getFuncLength, setFuncLength, syncFuncLength } from '@/atomic-functions/private/fn-length';
+import { MFT } from '~/tests/utils';
+
+MFT((module, { format }) => {
+  test(`${format} 导出检查`, () => {
+    // @ts-expect-error 禁止导出
+    expect(module.getFuncLength).toBeUndefined();
+    // @ts-expect-error 禁止导出
+    expect(module.setFuncLength).toBeUndefined();
+    // @ts-expect-error 禁止导出
+    expect(module.syncFuncLength).toBeUndefined();
+  });
+});
+
+describe('fn-length', () => {
+  test('基本使用', () => {
+    expect(getFuncLength(() => {})).toBe(0);
+    expect(getFuncLength((a: number) => a)).toBe(1);
+    const test = (...args: number[]) => args;
+    test.klength = 2;
+    expect(getFuncLength(test)).toBe(2);
+    setFuncLength(test, 3);
+    expect(getFuncLength(test)).toBe(3);
+    const test2 = () => {};
+    syncFuncLength(test2, test);
+    expect(getFuncLength(test2)).toBe(3);
+  });
+
+  test('边缘情况', () => {
+    // @ts-expect-error test
+    expect(getFuncLength(null)).toBe(0);
+    // @ts-expect-error test
+    expect(getFuncLength(undefined)).toBe(0);
+    // @ts-expect-error test
+    expect(setFuncLength(null, 1)).toBeUndefined();
+    // @ts-expect-error test
+    expect(setFuncLength(undefined, 1)).toBeUndefined();
+    // @ts-expect-error test
+    expect(syncFuncLength(null, () => {})).toBeUndefined();
+    // @ts-expect-error test
+    expect(syncFuncLength(undefined, () => {})).toBeUndefined();
+    // @ts-expect-error test
+    expect(syncFuncLength(() => {}, null)).toBeUndefined();
+    // @ts-expect-error test
+    expect(syncFuncLength(() => {}, undefined)).toBeUndefined();
+  });
+});
