@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["ES2024"],
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "target": "ES2024",
     "module": "ESNext",
     "baseUrl": "./",

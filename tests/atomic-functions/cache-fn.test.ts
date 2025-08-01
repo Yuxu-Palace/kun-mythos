@@ -136,15 +136,11 @@ MFT(
         return '2';
       });
 
-      // @ts-expect-error test
       expect(cf2(1)).toBe('2');
       flag = 1;
-      // @ts-expect-error test
       expect(cf2(2)).toBe('2');
       cf2.clearCache();
-      // @ts-expect-error test
       expect(cf2(1)).toBe(2);
-      // @ts-expect-error test
       expect(cf2(2)).toBe(3);
     });
 

@@ -194,6 +194,8 @@ export function cacheFnFromGetter<F extends KFunc<[], KAnyFunc>>(
   return cb as CacheFn<ReturnType<F>>;
 }
 
+type ResultFn<T> = T extends KFunc<any[], infer R> ? (R extends KAnyFunc ? CacheFn<R> : T) : never;
+
 /**
  * 缓存 getter 函数的返回结果
  *
@@ -214,7 +216,7 @@ export function cacheFnFromGetter<F extends KFunc<[], KAnyFunc>>(
  * cachedGetter(10); // 返回: 20 (不再输出 "Creating expensive function")
  * ```
  */
-export function cacheGetterResult<F extends KFunc<[], any>>(getter: F): CacheFn<ReturnType<F>> {
+export function cacheGetterResult<F extends KFunc<[], any>>(getter: F): CacheFn<ResultFn<F>> {
   if (!isFunction(getter)) {
     throw new TypeError('getter is not a function');
   }
@@ -235,5 +237,5 @@ export function cacheGetterResult<F extends KFunc<[], any>>(getter: F): CacheFn<
   setCacheFnMeta(cb, { result: PRIVATE_KEY });
   cb.clearCache = tempCB.clearCache;
 
-  return cb as unknown as CacheFn<ReturnType<F>>;
+  return cb as unknown as CacheFn<ResultFn<F>>;
 }
