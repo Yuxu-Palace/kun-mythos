@@ -5,7 +5,7 @@ import { isFunction } from './verify';
 
 type FnCheck<PR> = KEqual<PR, Empty> extends true ? (...args: any[]) => any : (arg: PR) => any;
 
-export type PipeArgs<F extends KAnyFunc[], PR = Empty> = F extends [
+type PipeArgs<F extends KAnyFunc[], PR = Empty> = F extends [
   infer F1 extends FnCheck<PR>,
   ...infer LastF extends KAnyFunc[],
 ]

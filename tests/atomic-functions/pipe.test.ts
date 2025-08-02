@@ -27,13 +27,6 @@ MFT(({ pipe }) => {
         (c: string) => `Result: ${c}`,
       )(1, 2),
     ).toBe('Result: 3');
-    expect(
-      pipe(
-        (a: number, b: number) => a + b,
-        (b: number) => b.toString(),
-        (c: string) => `Result: ${c}`,
-      )(1, 2),
-    ).toBe('Result: 3');
   });
 
   test('边界情况', () => {

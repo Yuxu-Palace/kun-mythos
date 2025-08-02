@@ -1,13 +1,13 @@
 export * from './auto-bind-fn-this';
 export * from './cache-fn';
 export * from './classnames';
-export { compose } from './compose';
+export * from './compose';
 export * from './compute-props';
 export * from './curry';
 export * from './data-storage';
 export * from './get-now';
 export * from './pick';
-export { pipe } from './pipe';
+export * from './pipe';
 export * from './placeholder-func';
 export * from './sleep';
 export * from './verify';
