@@ -1,8 +1,26 @@
-import type { KAnyFunc, KFunc } from '@/types/base';
+import type { KAnyFunc, KEqual, KFunc, KLength, KTailTypes } from '@/types/base';
+import type { Empty } from '@/types/private';
 import { syncFuncLength } from './private/fn-length';
 import { isFunction } from './verify';
 
-type ComposeArgs<F extends KAnyFunc[]> = unknown[];
+type FnCheck<PR> = KEqual<PR, Empty> extends true ? (...args: any[]) => any : (arg: PR) => any;
+
+type PlaceholderFuncs<F extends number, Res extends KAnyFunc[] = []> = KLength<Res> extends F
+  ? Res
+  : PlaceholderFuncs<F, [...Res, KAnyFunc]>;
+
+type ComposeArgs<F extends KAnyFunc[], PR = Empty> = F extends [
+  ...infer FirstF extends KAnyFunc[],
+  infer L extends FnCheck<PR>,
+]
+  ? [...ComposeArgs<FirstF, ReturnType<L>>, L]
+  : F extends []
+    ? KEqual<PR, Empty> extends true
+      ? [KAnyFunc]
+      : []
+    : F extends [FnCheck<PR>] | []
+      ? F
+      : [...PlaceholderFuncs<KLength<KTailTypes<F>>>, FnCheck<PR>, ...KAnyFunc[]];
 
 type ComposeFunc<F extends KAnyFunc[]> = F extends [KFunc<infer P, infer R>]
   ? (...args: P) => R
@@ -25,13 +43,11 @@ export function compose<F extends KAnyFunc[]>(...funcs: ComposeArgs<F>): Compose
   const composeFn = function (this: any, ...args: any) {
     let result: any = args;
     for (let i = funcs.length - 1; i >= 0; --i) {
-      // @ts-expect-error TODO
       result = [Reflect.apply(funcs[i], this, result)];
     }
     return result[0];
   } as ComposeFunc<F>;
 
-  // @ts-expect-error TODO
   syncFuncLength(composeFn, funcs[0]);
 
   return composeFn;

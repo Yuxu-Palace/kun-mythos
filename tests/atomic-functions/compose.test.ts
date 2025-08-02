@@ -1,4 +1,3 @@
-// @ts-nocheck TODO
 import { assertType, expect, test } from 'vitest';
 import { loadModule, MFT } from '../utils';
 
@@ -131,11 +130,11 @@ test('类型检查', async () => {
   );
 
   // 测试复杂的类型推导
-  assertType<(x: string, y: number) => [string, boolean]>(
+  assertType<(x: string, y: number) => readonly [string, boolean]>(
     compose(
-      (x: [string, boolean]) => x,
-      (x: [number, string]) => [x[1], x[0] > 10],
-      (x: string, y: number) => [y, x],
+      (x: readonly [string, boolean]) => x,
+      (x: readonly [number, string]) => [x[1], x[0] > 10] as const,
+      (x: string, y: number) => [y, x] as const,
     ),
   );
 });
