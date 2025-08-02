@@ -28,6 +28,15 @@ describe('fn-length', () => {
   });
 
   test('边缘情况', () => {
+    // 测试非数字长度参数
+    const testFunc = () => {};
+    expect(() => setFuncLength(testFunc, NaN)).toThrowError(TypeError);
+    expect(getFuncLength(testFunc)).toBe(0);
+
+    // 测试负数长度参数
+    expect(() => setFuncLength(testFunc, -1)).toThrowError(TypeError);
+    expect(getFuncLength(testFunc)).toBe(0);
+
     // @ts-expect-error test
     expect(getFuncLength(null)).toBe(0);
     // @ts-expect-error test
