@@ -18,7 +18,7 @@ type ComposeArgs<F extends KAnyFunc[], PR = Empty> = F extends [
     ? KEqual<PR, Empty> extends true
       ? [KAnyFunc]
       : []
-    : F extends [FnCheck<PR>] | []
+    : F extends [FnCheck<PR>]
       ? F
       : [...PlaceholderFuncs<KLength<KTailTypes<F>>>, FnCheck<PR>, ...KAnyFunc[]];
 

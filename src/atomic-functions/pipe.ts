@@ -14,7 +14,7 @@ export type PipeArgs<F extends KAnyFunc[], PR = Empty> = F extends [
     ? KEqual<PR, Empty> extends true
       ? [KAnyFunc]
       : []
-    : F extends [FnCheck<PR>] | []
+    : F extends [FnCheck<PR>]
       ? F
       : [FnCheck<PR>, ...KAnyFunc[]];
 
