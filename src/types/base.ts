@@ -44,3 +44,6 @@ export type KHeadType<A extends any[]> = A extends [infer T, ...any[]] ? T : nev
 
 /** 如果 x 是 y 的子类型, 返回 x, 否则返回 y */
 export type KCast<X, Y> = X extends Y ? X : Y;
+
+/** 反转数组类型 */
+export type KReverse<T extends any[]> = T extends [...infer R, infer L] ? [...KReverse<R>, L] : T;

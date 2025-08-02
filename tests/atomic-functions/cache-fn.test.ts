@@ -3,7 +3,17 @@ import { bench, MFT } from '../utils';
 
 MFT(
   (
-    { cacheFn, clearFnCache, retryCacheFn, debounceCacheFn, cacheFnFromGetter, cacheGetterResult, sleep, sleepSync },
+    {
+      cacheFn,
+      unCacheFn,
+      clearFnCache,
+      retryCacheFn,
+      debounceCacheFn,
+      cacheFnFromGetter,
+      cacheGetterResult,
+      sleep,
+      sleepSync,
+    },
     { format, IS_BENCH },
   ) => {
     test('导出检查', () => {
@@ -12,6 +22,8 @@ MFT(
       expect(typeof retryCacheFn).toBe('function');
       expect(typeof debounceCacheFn).toBe('function');
       expect(typeof cacheFnFromGetter).toBe('function');
+      expect(typeof cacheGetterResult).toBe('function');
+      expect(typeof unCacheFn).toBe('function');
     });
 
     const add = (a: number, b: number) => ({ result: a + b });
@@ -36,6 +48,8 @@ MFT(
 
       expect(cf2.clearCache()).toBe(true);
       expect(cf2(1, 2)).not.toBe(cf2r);
+
+      expect(unCacheFn(cf1)).toBe(add);
     });
 
     test('retryCacheFn 基本使用', () => {
@@ -164,6 +178,9 @@ MFT(
       // @ts-expect-error test
       expect(() => cacheGetterResult('')).toThrowError(TypeError);
       expect(clearFnCache(() => {})).toBe(false);
+      const testFn = () => {};
+      // @ts-expect-error test
+      expect(unCacheFn(testFn)).toBe(testFn);
     });
 
     describe.runIf(IS_BENCH)(`${format} 性能测试`, () => {

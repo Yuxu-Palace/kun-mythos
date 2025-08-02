@@ -12,7 +12,7 @@ type PromiseWithResolvers<T> = {
  */
 export const withResolvers = cacheGetterResult((): (<T>() => PromiseWithResolvers<T>) => {
   if (isFunction(Promise.withResolvers)) {
-    return Promise.withResolvers;
+    return () => Promise.withResolvers();
   }
 
   return () => {
