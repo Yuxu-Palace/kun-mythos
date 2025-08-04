@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import { MFT } from '../utils';
 
-MFT(({ withResolvers, isPromise, isFunction }) => {
+MFT(({ withResolvers, isPromise, isFunction, unCacheFn }) => {
   test('导出检查', () => {
     expect(typeof withResolvers).toBe('function');
   });
@@ -18,7 +18,7 @@ MFT(({ withResolvers, isPromise, isFunction }) => {
     if (isFunction(Promise.withResolvers)) {
       Promise.withResolvers = null as any;
     } else {
-      Promise.withResolvers = withResolvers;
+      Promise.withResolvers = unCacheFn(withResolvers);
     }
 
     withResolvers.clearCache();
