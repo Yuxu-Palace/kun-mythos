@@ -3,7 +3,7 @@ import { isArray, isObject } from './verify';
 
 export type KPick<O extends Record<string, any>, K extends (keyof O | string)[]> = KEqual<K, string[]> extends true
   ? Partial<O>
-  : { [K2 in K[number]]: K2 extends keyof O ? O[K2] : undefined };
+  : { [K2 in K[number]]: K2 extends keyof O ? O[K2] : any };
 
 /**
  * 挑选对象中的指定键的值组成一个新对象
