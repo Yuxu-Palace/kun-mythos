@@ -5,7 +5,7 @@ import { isFunction, isPromise } from './verify';
 type TryCallResult<R, E> = KEqual<E, Empty> extends true ? (R extends Promise<any> ? R : R | undefined) : R | E;
 
 /**
- * 尝试调用函数
+ * 包装一个拦截错误的函数
  * @param cb 回调函数
  * @param onError 错误处理函数
  */
@@ -76,7 +76,7 @@ export function tryCallFunc<A extends any[], R, E = Empty>(
 }
 
 /**
- * 包装一个拦截错误的函数
+ * 尝试调用函数
  * @param cb 回调函数
  * @param onError 错误处理函数
  */
