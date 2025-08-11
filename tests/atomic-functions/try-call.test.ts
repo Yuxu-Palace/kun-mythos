@@ -116,6 +116,22 @@ MFT(({ tryCall, tryCallFunc }) => {
         },
       )(),
     ).toBe(2);
+
+    const a = {
+      num: 1,
+      foo: tryCallFunc(
+        function (this: any) {
+          if (this.num++ % 2) {
+            throw new Error('error');
+          }
+          return this.num;
+        },
+        () => 0,
+      ),
+    };
+    expect(a.foo()).toBe(0);
+    expect(a.foo()).toBe(3);
+    expect(a.foo.call({ num: 10 })).toBe(11);
   });
 
   test('边缘情况', () => {
