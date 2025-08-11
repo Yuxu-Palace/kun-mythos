@@ -37,6 +37,26 @@ MFT(({ tryCall, tryCallFunc }) => {
         throw new Error('error');
       });
     }).rejects.toThrowError(Error);
+    expect(
+      tryCall(
+        () => 1,
+        null,
+        (r) => {
+          expect(r).toBe(1);
+        },
+      ),
+    ).toBe(1);
+    expect(
+      tryCall(
+        () => {
+          throw new Error('error');
+        },
+        () => 2,
+        (r) => {
+          expect(r).toBe(2);
+        },
+      ),
+    ).toBe(2);
   });
 
   test('tryCallFunc 基本使用', async () => {
@@ -76,6 +96,26 @@ MFT(({ tryCall, tryCallFunc }) => {
     expect(fn_(1, 1)).toBe(1);
     expect(fn_(1, 0)).toBe(Infinity);
     expect(() => fn_(1, 2)).toThrowError(Error);
+    expect(
+      tryCallFunc(
+        () => 1,
+        null,
+        (r) => {
+          expect(r).toBe(1);
+        },
+      )(),
+    ).toBe(1);
+    expect(
+      tryCallFunc(
+        () => {
+          throw new Error('error');
+        },
+        () => 2,
+        (r) => {
+          expect(r).toBe(2);
+        },
+      )(),
+    ).toBe(2);
   });
 
   test('边缘情况', () => {
