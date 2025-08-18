@@ -225,4 +225,12 @@ export class LinkedList<T = any, M = any> {
     }
     self.head = node;
   }
+
+  /**
+   * 清空链表
+   */
+  clear() {
+    const self = getSelf(this);
+    self.head = null;
+  }
 }

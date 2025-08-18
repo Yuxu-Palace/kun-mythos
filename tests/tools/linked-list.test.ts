@@ -111,6 +111,14 @@ MFT(({ LinkedList }, { format, IS_BENCH }) => {
       expect([...list]).toEqual(['2', '1']);
       expect(Array.from(list)).toEqual(['2', '1']);
     });
+
+    test('clear', () => {
+      const list = new LinkedList<string, number>();
+      list.unshift('1', 1);
+      list.unshift('2');
+      list.clear();
+      expect(list.toArray()).toEqual([]);
+    });
   });
 
   describe.runIf(IS_BENCH)(`${format}性能测试`, () => {
