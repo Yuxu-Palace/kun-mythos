@@ -9,18 +9,26 @@ type PlaceholderFuncs<F extends number, Res extends KAnyFunc[] = []> = KLength<R
   ? Res
   : PlaceholderFuncs<F, [...Res, KAnyFunc]>;
 
-type ComposeArgs<F extends KAnyFunc[], PR = Empty> = F extends [
-  ...infer FirstF extends KAnyFunc[],
-  infer L extends FnCheck<PR>,
-]
-  ? [...ComposeArgs<FirstF, ReturnType<L>>, L]
-  : F extends []
-    ? KEqual<PR, Empty> extends true
+type ComposeArgs<F extends KAnyFunc[], PR = Empty> = F extends [FnCheck<PR>]
+  ? F
+  : F extends [...infer FirstF extends KAnyFunc[], infer L extends FnCheck<PR>]
+    ? [...ComposeArgs<FirstF, ReturnType<L>>, L]
+    : F extends []
       ? [KAnyFunc]
-      : []
-    : F extends [FnCheck<PR>]
-      ? F
       : [...PlaceholderFuncs<KLength<KTailTypes<F>>>, FnCheck<PR>, ...KAnyFunc[]];
+
+// type ComposeArgs<F extends KAnyFunc[], PR = Empty> = F extends [
+//   ...infer FirstF extends KAnyFunc[],
+//   infer L extends FnCheck<PR>,
+// ]
+//   ? [...ComposeArgs<FirstF, ReturnType<L>>, L]
+//   : F extends []
+//     ? KEqual<PR, Empty> extends true
+//       ? [KAnyFunc]
+//       : []
+//     : F extends [FnCheck<PR>]
+//       ? F
+//       : [...PlaceholderFuncs<KLength<KTailTypes<F>>>, FnCheck<PR>, ...KAnyFunc[]];
 
 type ComposeFunc<F extends KAnyFunc[]> = F extends [KFunc<infer P, infer R>]
   ? (...args: P) => R
