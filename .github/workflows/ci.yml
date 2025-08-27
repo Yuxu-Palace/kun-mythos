@@ -87,11 +87,18 @@ jobs:
 
       - run: pnpm dlx pkg-pr-new publish
 
-      - name: Publish to NPM test
-        if: github.ref_name == 'main' || github.ref_name == 'alpha' || github.ref_name == 'beta'
-        uses: JS-DevTools/npm-publish@v3
+      - name: version-patch
+        uses: Yuxu-Palace/yuheng-dispatch@alpha
         with:
-          token: ${{ secrets.NPM_TOKEN }}
-          tag: ${{ github.ref_name == 'main' && 'latest' || github.ref_name }}
-          registry: https://registry.npmjs.org/
-          dry-run: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+          # 版本管理配置
+          version-prefix: 'v'
+          supported-branches: 'main,beta,alpha'
+          enable-changelog: 'true'
+          
+          # npm 发布配置
+          enable-npm-publish: 'true'
+          npm-token: ${{ secrets.NPM_TOKEN }}
+          npm-registry: 'https://registry.npmjs.org/'
+          npm-access: 'public'
