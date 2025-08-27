@@ -1,61 +1,36 @@
 name: Deploy
 
 on:
-  push:
+  pull_request:
     branches: [main, beta, alpha]
-
-concurrency:
-  group: publish-${{ github.ref_name }}
-  cancel-in-progress: true
+    types: [opened, synchronize, reopened, labeled, unlabeled, closed]
 
 jobs:
-  publish:
+  version-management:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
         with:
-          version: 10.10.0
+          fetch-depth: 0
 
-      - name: Set node
-        uses: actions/setup-node@v4
+      - name: 版本管理
+        uses: Yuxu-Palace/yuheng-dispatch@alpha
         with:
-          node-version: 20.x
-          cache: pnpm
-  
-      - name: Cache pnpm modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.local/share/pnpm
-          key: pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-
-
-      - name: Install dependencies
-        run: |
-          echo "=== Start PNPM INSTALL ==="
-          pnpm install --loglevel=warn
-          echo "=== End PNPM INSTALL ==="
-        continue-on-error: false
-
-      - name: Build project
-        run: |
-          echo "=== Start BUILD ==="
-          pnpm run build
-          if [ ! -d "dist" ]; then
-            echo "Build directory not found"
-            exit 1
-          fi
-          echo "=== End BUILD ==="
-        continue-on-error: false
-
-      - name: Publish to NPM
-        uses: JS-DevTools/npm-publish@v3
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-          tag: ${{ github.ref_name == 'main' && 'latest' || github.ref_name }}
-          registry: https://registry.npmjs.org/
-        continue-on-error: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+          # 版本管理配置
+          version-prefix: 'v'
+          supported-branches: 'main,beta,alpha'
+          enable-changelog: 'true'
+          
+          # npm 发布配置
+          enable-npm-publish: 'true'
+          npm-token: ${{ secrets.NPM_TOKEN }}
+          npm-registry: 'https://registry.npmjs.org/'
+          npm-access: 'public'
