@@ -2,6 +2,7 @@
   "name": "@yuxu-palace/kun-mythos",
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@9.0.0",
   "exports": {
     ".": {
       "types": "./dist/esm/index.d.ts",
