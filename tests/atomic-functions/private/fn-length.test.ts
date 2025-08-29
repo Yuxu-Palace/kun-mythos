@@ -17,20 +17,20 @@ describe('fn-length', () => {
   test('基本使用', () => {
     expect(getFuncLength(() => {})).toBe(0);
     expect(getFuncLength((a: number) => a)).toBe(1);
-    const test = (...args: number[]) => args;
-    test.klength = 2;
-    expect(getFuncLength(test)).toBe(2);
-    setFuncLength(test, 3);
-    expect(getFuncLength(test)).toBe(3);
+    const testFn = (...args: number[]) => args;
+    testFn.klength = 2;
+    expect(getFuncLength(testFn)).toBe(2);
+    setFuncLength(testFn, 3);
+    expect(getFuncLength(testFn)).toBe(3);
     const test2 = () => {};
-    syncFuncLength(test2, test);
+    syncFuncLength(test2, testFn);
     expect(getFuncLength(test2)).toBe(3);
   });
 
   test('边缘情况', () => {
     // 测试非数字长度参数
     const testFunc = () => {};
-    expect(() => setFuncLength(testFunc, NaN)).toThrowError(TypeError);
+    expect(() => setFuncLength(testFunc, Number.NaN)).toThrowError(TypeError);
     expect(getFuncLength(testFunc)).toBe(0);
 
     // 测试负数长度参数

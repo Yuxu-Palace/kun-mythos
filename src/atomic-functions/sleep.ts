@@ -7,12 +7,14 @@ type SleepController = {
 };
 
 function mergeController(promise: Promise<any>, controller: SleepController) {
-  return Object.assign({}, promise, controller, {
+  return {
+    ...promise,
+    ...controller,
     // biome-ignore lint/suspicious/noThenProperty: 代理 then 方法方便 controller 的传递
     then: (...args: any[]) => mergeController(promise.then(...args), controller),
     catch: (...args: any[]) => mergeController(promise.catch(...args), controller),
     finally: (...args: any[]) => mergeController(promise.finally(...args), controller),
-  });
+  };
 }
 
 type ProxyPromise<T> = Omit<Promise<T>, 'then' | 'catch' | 'finally'> &
@@ -75,5 +77,6 @@ export function sleep(time: number): ProxyPromise<boolean> {
  */
 export function sleepSync(time: number) {
   const cur = getNow();
+  // biome-ignore lint/style/useBlockStatements: 不需要创建额外的代码块
   while (getNow() - cur < time);
 }

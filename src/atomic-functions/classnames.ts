@@ -8,7 +8,9 @@ function objectHandler(obj: Record<KeyType, any>, names: KeyType[], set: Set<Inp
   const entries = Object.entries(obj);
   for (let i = 0; i < entries.length; ++i) {
     const [key, value] = entries[i];
-    if (!value || set.has(key) || isSymbol(key)) continue;
+    if (!value || set.has(key) || isSymbol(key)) {
+      continue;
+    }
     set.add(key);
     names.push(key);
   }
@@ -24,7 +26,9 @@ function arrayHandler(arr: InputType[], names: KeyType[], set: Set<InputType>) {
    */
   for (let i = 0; i < arr.length; ++i) {
     const item = arr[i];
-    if (!item || set.has(item) || isSymbol(item)) continue;
+    if (!item || set.has(item) || isSymbol(item)) {
+      continue;
+    }
     set.add(item);
 
     // 数组处理
@@ -59,4 +63,4 @@ export function classnames(...input: InputType[]) {
   return arrayHandler(input, [], new Set([input])).join(' ');
 }
 
-export const cn = classnames;
+export { classnames as cn };

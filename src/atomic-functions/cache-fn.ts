@@ -59,20 +59,20 @@ export function cacheFn<F extends KAnyFunc>(func: F): CacheFn<F> {
     throw new TypeError('func is not a function');
   }
 
-  func = unCacheFn(func as any);
+  const _func = unCacheFn(func as any);
 
   const cb: any = function (this: any, ...args: any[]) {
     let result = getCacheFnMeta(cb).result;
 
     if (result === PRIVATE_KEY) {
-      result = Reflect.apply(func, this, args);
+      result = Reflect.apply(_func, this, args);
       setCacheFnMeta(cb, { result });
     }
 
     return result;
   };
 
-  setCacheFnMeta(cb, { result: PRIVATE_KEY, oriFunc: func });
+  setCacheFnMeta(cb, { result: PRIVATE_KEY, oriFunc: _func });
 
   cb.clearCache = clearFnCache.bind(null, cb);
 

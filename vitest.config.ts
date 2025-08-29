@@ -1,3 +1,4 @@
+import process from 'node:process';
 import codspeedPlugin from '@codspeed/vitest-plugin';
 import viteTsConfigPaths from 'vite-tsconfig-paths';
 import { defaultInclude, defineConfig, type UserConfigFnObject } from 'vitest/config';

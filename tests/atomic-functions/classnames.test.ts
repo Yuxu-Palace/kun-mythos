@@ -52,7 +52,7 @@ MFT(({ classnames, cn }, { format, IS_BENCH }) => {
     // @ts-expect-error test
     expect(cn({ [Symbol('test')]: true, c: Symbol('test') }, Symbol('test'))).toBe('c');
     // 空对象, error 也会被当成对象然后遍历 key 进行处理
-    expect(cn({}, new Error())).toBe('');
+    expect(cn({}, new Error('test'))).toBe('');
   });
 
   describe.runIf(IS_BENCH)(`${format}性能测试`, () => {

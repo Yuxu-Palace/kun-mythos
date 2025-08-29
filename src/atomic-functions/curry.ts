@@ -30,11 +30,10 @@ export const curry: KCurryFunc = (func) => {
   const curried = function (this: any, ...args: any) {
     if (args.length >= length) {
       return func.call(this, ...args);
-    } else {
-      const tempFunc = (...args2: any) => curried.call(this, ...args.concat(args2));
-      setFuncLength(tempFunc, length - args.length);
-      return tempFunc;
     }
+    const tempFunc = (...args2: any) => curried.call(this, ...args.concat(args2));
+    setFuncLength(tempFunc, length - args.length);
+    return tempFunc;
   };
   setFuncLength(curried, length);
   return curried as any;

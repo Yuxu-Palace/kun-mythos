@@ -12,7 +12,9 @@ export function pick<O extends Record<PropertyKey, any>, K extends (keyof O | Pr
   obj: O,
   keys: K,
 ): KPick<O, K> {
-  if (!isArray(keys) || !keys.length || !isObject(obj)) return {} as KPick<O, K>;
+  if (!(isArray(keys) && keys.length && isObject(obj))) {
+    return {} as KPick<O, K>;
+  }
 
   const result = {} as KPick<O, K>;
   // 不用 Object.hasOwn 判断是否存在是因为他会排除 symbol 键
@@ -20,7 +22,9 @@ export function pick<O extends Record<PropertyKey, any>, K extends (keyof O | Pr
 
   for (let i = 0; i < keys.length; ++i) {
     const key = keys[i];
-    if (!ownKeys.has(key)) continue;
+    if (!ownKeys.has(key)) {
+      continue;
+    }
     result[key] = obj[key];
   }
 

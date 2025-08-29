@@ -184,17 +184,17 @@ MFT(
     });
 
     describe.runIf(IS_BENCH)(`${format} 性能测试`, () => {
-      const add = (a: number, b: number) => {
+      const longTaskAdd = (a: number, b: number) => {
         // 模拟长任务
         sleepSync(1);
         return a + b;
       };
-      const cf1 = cacheFn(add);
+      const cf1 = cacheFn(longTaskAdd);
 
       bench(
         'noCache',
         () => {
-          add(1, 2);
+          longTaskAdd(1, 2);
         },
         { iterations: 1 },
       );

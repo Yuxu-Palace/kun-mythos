@@ -87,14 +87,14 @@ MFT(({ tryCall, tryCallFunc }) => {
       throw new Error('error');
     });
     expect(() => fn6()).toThrowError(Error);
-    const fn_ = tryCallFunc((a: number, b: number) => {
-      if (a % b) {
+    const fn_ = tryCallFunc((_a: number, b: number) => {
+      if (_a % b) {
         throw new Error('error');
       }
-      return a / b;
+      return _a / b;
     });
     expect(fn_(1, 1)).toBe(1);
-    expect(fn_(1, 0)).toBe(Infinity);
+    expect(fn_(1, 0)).toBe(Number.POSITIVE_INFINITY);
     expect(() => fn_(1, 2)).toThrowError(Error);
     expect(
       tryCallFunc(

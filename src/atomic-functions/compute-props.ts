@@ -37,8 +37,8 @@ export function computeProps<T extends Record<PropertyKey, KAnyFunc | Promise<an
     }
 
     if (isPromise(value)) {
-      result.__k_ready[key] = value.then((v: any) => {
-        value = v;
+      result.__k_ready[key] = value.then((_v: any) => {
+        value = _v;
       });
 
       value = PRIVATE_KEY;

@@ -27,9 +27,9 @@ export function tryCallFunc<A extends any[], R, E = Empty>(
     }
   };
 
-  const catchFn = (e: any) => {
+  const catchFn = (error: any) => {
     if (isFunction(onError)) {
-      result = onError(e) as any;
+      result = onError(error) as any;
     }
   };
 
@@ -48,27 +48,30 @@ export function tryCallFunc<A extends any[], R, E = Empty>(
       }
       return result;
     };
-  } else {
-    if (onError) {
-      return function (this: any, ...args) {
-        try {
-          Reflect.apply(tryFn, this, [args]);
-        } catch (e) {
-          catchFn(e);
-        }
-        return result;
-      };
-    } else if (onFinal) {
-      return function (this: any, ...args) {
-        try {
-          Reflect.apply(tryFn, this, [args]);
-        } finally {
-          finallyFn();
-        }
-        return result;
-      };
-    }
   }
+
+  if (onError) {
+    return function (this: any, ...args) {
+      try {
+        Reflect.apply(tryFn, this, [args]);
+      } catch (e) {
+        catchFn(e);
+      }
+      return result;
+    };
+  }
+
+  if (onFinal) {
+    return function (this: any, ...args) {
+      try {
+        Reflect.apply(tryFn, this, [args]);
+      } finally {
+        finallyFn();
+      }
+      return result;
+    };
+  }
+
   return function (this: any, ...args) {
     Reflect.apply(tryFn, this, [args]);
     return result;

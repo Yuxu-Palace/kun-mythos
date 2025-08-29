@@ -6,11 +6,11 @@ import tsConfig from './tsconfig.json';
 
 // import pkg from './package.json';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 type OutputOption = RslibConfig['lib'][number]['output'];
 
-const baseOutputOption = {
+const BaseOutputOption = {
   cleanDistPath: true,
   minify: true,
   filenameHash: false,
@@ -22,27 +22,27 @@ export default defineConfig({
       format: 'esm',
       dts: true,
       output: {
-        ...baseOutputOption,
+        ...BaseOutputOption,
         filename: { js: '[name].mjs' },
-        distPath: { root: path.resolve(__dirname, 'dist/esm') },
+        distPath: { root: path.resolve(dirname, 'dist/esm') },
       },
     },
     {
       format: 'cjs',
       dts: true,
       output: {
-        ...baseOutputOption,
+        ...BaseOutputOption,
         filename: { js: '[name].cjs' },
-        distPath: { root: path.resolve(__dirname, 'dist/cjs') },
+        distPath: { root: path.resolve(dirname, 'dist/cjs') },
       },
     },
     {
       format: 'umd',
       umdName: 'YXKM',
       output: {
-        ...baseOutputOption,
+        ...BaseOutputOption,
         filename: { js: '[name].js' },
-        distPath: { root: path.resolve(__dirname, 'dist/umd') },
+        distPath: { root: path.resolve(dirname, 'dist/umd') },
       },
     },
     // {

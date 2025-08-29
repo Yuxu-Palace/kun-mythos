@@ -56,34 +56,34 @@ export class LinkedList<T = any, M = any> {
   constructor() {
     // 完全杜绝用户操作 node, 只能通过提供的 api 操作
     setPrivateMeta(this, LINKED_LIST_KEY, {
-      _head: null,
-      _tail: null,
+      __head: null,
+      __tail: null,
 
+      get head() {
+        return this.__head;
+      },
       set head(node) {
         if (!node) {
           // 头节点被设置为 null 则表示清空整个链表
-          this._head = null;
-          this._tail = null;
+          this.__head = null;
+          this.__tail = null;
           return;
         }
         node.prev = null;
-        this._head = node;
+        this.__head = node;
       },
-      get head() {
-        return this._head;
+      get tail() {
+        return this.__tail;
       },
       set tail(node) {
         if (!node) {
           // 尾节点被设置为 null 则表示清空整个链表
-          this._head = null;
-          this._tail = null;
+          this.__head = null;
+          this.__tail = null;
           return;
         }
         node.next = null;
-        this._tail = node;
-      },
-      get tail() {
-        return this._tail;
+        this.__tail = node;
       },
       *[Symbol.iterator]() {
         let node = this.head;
@@ -96,19 +96,18 @@ export class LinkedList<T = any, M = any> {
       tvo(node, needMetadata) {
         if (needMetadata) {
           return pick(node, ['data', 'metadata']);
-        } else {
-          return node.data;
         }
+        return node.data;
       },
-    } satisfies LinkedListSelf & { _head: NodeOrNull; _tail: NodeOrNull });
+    } satisfies LinkedListSelf & { __head: NodeOrNull; __tail: NodeOrNull });
   }
 
   /**
    * 从可迭代对象创建链表
    */
-  static from<T>(init: Iterable<T> | ArrayLike<T> = []) {
+  static from<IT>(init: Iterable<IT> | ArrayLike<IT> = []) {
     const arr = Array.from(init);
-    const list = new LinkedList<T>();
+    const list = new LinkedList<IT>();
     for (let i = 0; i < arr.length; ++i) {
       list.push(arr[i]);
     }
@@ -118,9 +117,11 @@ export class LinkedList<T = any, M = any> {
   /**
    * 从可迭代对象创建链表
    */
-  static fromEntries<T, M>(init: Iterable<[T, M] | readonly [T, M]> | ArrayLike<[T, M] | readonly [T, M]> = []) {
+  static fromEntries<IT, IM>(
+    init: Iterable<[IT, IM] | readonly [IT, IM]> | ArrayLike<[IT, IM] | readonly [IT, IM]> = [],
+  ) {
     const arr = Array.from(init);
-    const list = new LinkedList<T, M>();
+    const list = new LinkedList<IT, IM>();
     for (let i = 0; i < arr.length; ++i) {
       Reflect.apply(list.push, list, arr[i]);
     }
@@ -181,7 +182,7 @@ export class LinkedList<T = any, M = any> {
     const self = getSelf<T, M>(this);
 
     if (!self.tail) {
-      return undefined;
+      return;
     }
     try {
       return self.tvo<F>(self.tail, needMetadata);
@@ -200,7 +201,7 @@ export class LinkedList<T = any, M = any> {
   shift<F extends boolean>(needMetadata?: F) {
     const self = getSelf<T, M>(this);
     if (!self.head) {
-      return undefined;
+      return;
     }
     try {
       return self.tvo<F>(self.head, needMetadata);

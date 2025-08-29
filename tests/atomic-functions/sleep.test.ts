@@ -7,13 +7,13 @@ MFT(({ sleep, sleepSync, getNow }) => {
   });
 
   test('基本使用', async () => {
-    const start1 = getNow();
+    let start1 = getNow();
     const cancel1 = await sleep(10);
     expect(getNow() - start1).toBeGreaterThan(10);
     expect(cancel1).toBe(false);
 
     const cancel2 = await new Promise((res, rej) => {
-      const start1 = getNow();
+      start1 = getNow();
       const sleepController = sleep(100)
         .then(res)
         .catch(rej)
@@ -25,7 +25,7 @@ MFT(({ sleep, sleepSync, getNow }) => {
     expect(cancel2).toBe(true);
 
     const cancel3 = await new Promise((res, rej) => {
-      const start1 = getNow();
+      start1 = getNow();
       const sleepController = sleep(100)
         .then(res)
         .catch(rej)

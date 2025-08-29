@@ -1,83 +1,83 @@
 import type { KAnyFunc, KUnULCase } from '@/types/base';
 
 /** 判断是一个 symbol */
-export function isSymbol(v: unknown): v is symbol {
-  return typeof v === 'symbol';
+export function isSymbol(_v: unknown): _v is symbol {
+  return typeof _v === 'symbol';
 }
 
 /** 判断是一个 undefined */
-export function isUndef(v: unknown): v is undefined {
-  return typeof v === 'undefined';
+export function isUndef(_v: unknown): _v is undefined {
+  return typeof _v === 'undefined';
 }
 
 /** 判断是一个 null */
-export function isNull(v: unknown): v is null {
-  return v === null;
+export function isNull(_v: unknown): _v is null {
+  return _v === null;
 }
 
 /** 判断是一个 null 或者 undefined */
-export function isNullOrUndef(v: unknown): v is null | undefined {
-  return isNull(v) || isUndef(v);
+export function isNullOrUndef(_v: unknown): _v is null | undefined {
+  return isNull(_v) || isUndef(_v);
 }
 
 /** 判断是一个 NaN */
-export function isNaN(v: unknown): v is number {
-  return Number.isNaN(v);
+export function isNaN(_v: unknown): _v is number {
+  return Number.isNaN(_v);
 }
 
 /** 判断是一个 plain symbol */
-export function isPlainSymbol(v: unknown): v is symbol {
-  return isSymbol(v) && isUndef(Symbol.keyFor(v));
+export function isPlainSymbol(_v: unknown): _v is symbol {
+  return isSymbol(_v) && isUndef(Symbol.keyFor(_v));
 }
 
 /** 判断是一个对象 (数组也返回 true) */
-export function isObject(v: unknown): v is object {
-  return typeof v === 'object' && !isNull(v);
+export function isObject(_v: unknown): _v is object {
+  return typeof _v === 'object' && !isNull(_v);
 }
 
 /** 判断是一个非数组对象 */
-export function isPlainObject(v: unknown): v is object {
-  return isObject(v) && !isArray(v);
+export function isPlainObject(_v: unknown): _v is object {
+  return isObject(_v) && !isArray(_v);
 }
 
 /** 判断是一个数组 */
-export function isArray(v: unknown): v is any[] {
-  return Array.isArray(v);
+export function isArray(_v: unknown): _v is any[] {
+  return Array.isArray(_v);
 }
 
 /** 判断是一个字符串 */
-export function isString(v: unknown): v is string {
-  return typeof v === 'string';
+export function isString(_v: unknown): _v is string {
+  return typeof _v === 'string';
 }
 
 /** 判断是一个数字 */
-export function isNumber(v: unknown): v is number {
-  return typeof v === 'number';
+export function isNumber(_v: unknown): _v is number {
+  return typeof _v === 'number';
 }
 
 /** 判断是一个纯数字 (排除 NaN) */
-export function isPlainNumber(v: unknown): v is number {
-  return isNumber(v) && !isNaN(v);
+export function isPlainNumber(_v: unknown): _v is number {
+  return isNumber(_v) && !isNaN(_v);
 }
 
 /** 判断是一个合法的对象 key */
-export function isPropertyKey(v: unknown): v is PropertyKey {
-  return isString(v) || isNumber(v) || isSymbol(v);
+export function isPropertyKey(_v: unknown): _v is PropertyKey {
+  return isString(_v) || isNumber(_v) || isSymbol(_v);
 }
 
 /** 判断是一个布尔值 */
-export function isBoolean(v: unknown): v is boolean {
-  return typeof v === 'boolean';
+export function isBoolean(_v: unknown): _v is boolean {
+  return typeof _v === 'boolean';
 }
 
 /** 判断是一个 true 值 */
-export function isTrue(v: unknown): v is true | KUnULCase<'true'> {
-  return v === true || (isString(v) && v.toLowerCase() === 'true');
+export function isTrue(_v: unknown): _v is true | KUnULCase<'true'> {
+  return _v === true || (isString(_v) && _v.toLowerCase() === 'true');
 }
 
 /** 判断是一个 false 值 */
-export function isFalse(v: unknown): v is false | KUnULCase<'false'> {
-  return v === false || (isString(v) && v.toLowerCase() === 'false');
+export function isFalse(_v: unknown): _v is false | KUnULCase<'false'> {
+  return _v === false || (isString(_v) && _v.toLowerCase() === 'false');
 }
 
 /**
@@ -85,8 +85,8 @@ export function isFalse(v: unknown): v is false | KUnULCase<'false'> {
  *
  * @warn 字符串 'false' 等满足 isFalse 判断的字符串也会被视为真值
  */
-export function isTruthy<T>(v: T): v is Exclude<T, false | 0 | '' | null | undefined> {
-  return !!v;
+export function isTruthy<T>(_v: T): _v is Exclude<T, false | 0 | '' | null | undefined> {
+  return !!_v;
 }
 
 /**
@@ -94,17 +94,17 @@ export function isTruthy<T>(v: T): v is Exclude<T, false | 0 | '' | null | undef
  *
  * @warn 字符串 'false' 等满足 isFalse 判断的字符串不会被视为非值
  */
-export function isFalsy(v: unknown): v is false | 0 | '' | null | undefined {
-  return !v;
+export function isFalsy(_v: unknown): _v is false | 0 | '' | null | undefined {
+  return !_v;
 }
 
 /** 判断是一个函数 */
-export function isFunction(v: unknown): v is KAnyFunc {
-  return typeof v === 'function';
+export function isFunction(_v: unknown): _v is KAnyFunc {
+  return typeof _v === 'function';
 }
 
 /** 判断是一个 Promise */
-export function isPromise(v: unknown): v is Promise<any> {
+export function isPromise(_v: unknown): _v is Promise<any> {
   // @ts-expect-error
-  return isObject(v) && isFunction(v.then);
+  return isObject(_v) && isFunction(_v.then);
 }

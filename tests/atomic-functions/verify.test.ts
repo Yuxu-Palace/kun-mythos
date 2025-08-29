@@ -197,7 +197,7 @@ MFT(
 
       test('isNumber', () => {
         expect(isNumber(1)).toBe(true);
-        expect(isNumber(NaN)).toBe(true);
+        expect(isNumber(Number.NaN)).toBe(true);
         expect(isNumber('1')).toBe(false);
         expect(isNumber(Symbol('test'))).toBe(false);
         expect(isNumber({})).toBe(false);
@@ -208,7 +208,7 @@ MFT(
 
       test('isPlainNumber', () => {
         expect(isPlainNumber(1)).toBe(true);
-        expect(isPlainNumber(NaN)).toBe(false);
+        expect(isPlainNumber(Number.NaN)).toBe(false);
         expect(isPlainNumber('1')).toBe(false);
         expect(isPlainNumber(Symbol('test'))).toBe(false);
         expect(isPlainNumber({})).toBe(false);
@@ -219,7 +219,7 @@ MFT(
 
       test('isNaN', () => {
         expect(isNaN(1)).toBe(false);
-        expect(isNaN(NaN)).toBe(true);
+        expect(isNaN(Number.NaN)).toBe(true);
         expect(isNaN('1')).toBe(false);
         expect(isNaN(Symbol('test'))).toBe(false);
         expect(isNaN({})).toBe(false);

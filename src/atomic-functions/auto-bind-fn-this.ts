@@ -13,8 +13,8 @@ export function autoBindFnThis<T extends Record<PropertyKey, any>>(obj: T, deep 
   }
 
   const proxy = new Proxy(obj, {
-    get(target, p, receiver) {
-      const value = Reflect.get(target, p, receiver);
+    get(target, key, receiver) {
+      const value = Reflect.get(target, key, receiver);
 
       if (isFunction(value)) {
         return (value as KAnyFunc).bind(target);

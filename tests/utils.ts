@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { bench as benchmark, describe, expect, test } from 'vitest';
 
 type Module = typeof import('../src/index');
@@ -59,12 +60,16 @@ function getExt(format: Mode = 'src') {
 }
 
 export async function loadModule(format: Mode = 'src'): Promise<Module> {
-  if (format === MODE.SOURCE) return import('../src/index');
+  if (format === MODE.SOURCE) {
+    return import('../src/index');
+  }
   return import(`../dist/${format}/index.${getExt(format)}`);
 }
 
 const benchApply: ProxyHandler<typeof benchmark>['apply'] = (target, thisArg, argArray) => {
-  if (!IS_BENCH) return;
+  if (!IS_BENCH) {
+    return;
+  }
 
   const [, , option = {}] = argArray;
 
