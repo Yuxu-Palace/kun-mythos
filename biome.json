@@ -295,7 +295,7 @@
                 "selector": {
                   "kind": "catchParameter"
                 },
-                "match": "[e]"
+                "match": "[e]|(.*)"
               },
               {
                 "selector": {
