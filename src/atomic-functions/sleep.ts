@@ -50,6 +50,8 @@ type ProxyPromise<T> = Omit<Promise<T>, 'then' | 'catch' | 'finally'> &
 /**
  * 等待一段时间
  *
+ * @platform web, node, webworker
+ *
  * @param time 等待时间
  */
 export function sleep(time: number): ProxyPromise<boolean> {
@@ -70,6 +72,8 @@ export function sleep(time: number): ProxyPromise<boolean> {
 
 /**
  * 等待一段时间
+ *
+ * @platform web, node, webworker
  *
  * @warn ⚠️ 警告：此函数是同步的，会持续占用 CPU 资源 仅在必须同步阻塞的场景下使用，大多数情况下应优先使用异步的 sleep 函数
  *

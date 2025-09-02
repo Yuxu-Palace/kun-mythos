@@ -9,6 +9,8 @@ type PromiseWithResolvers<T> = {
 
 /**
  * 获取 Promise 和对应的处理方法
+ *
+ * @platform web, node, webworker
  */
 export const withResolvers = cacheGetterResult((): (<T>() => PromiseWithResolvers<T>) => {
   if (isFunction(Promise.withResolvers)) {

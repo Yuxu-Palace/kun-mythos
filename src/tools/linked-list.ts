@@ -52,6 +52,11 @@ function getSelf<T, M>(key: LinkedList<T, M>) {
   return getPrivateMeta(key, LINKED_LIST_KEY) as LinkedListSelf<T, M>;
 }
 
+/**
+ * 链表
+ *
+ * @platform web, node, webworker
+ */
 export class LinkedList<T = any, M = any> {
   constructor() {
     // 完全杜绝用户操作 node, 只能通过提供的 api 操作

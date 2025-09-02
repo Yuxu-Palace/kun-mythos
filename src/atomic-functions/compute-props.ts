@@ -19,6 +19,8 @@ type ComputeProps<T extends Record<PropertyKey, any>> = KPrintify<
  *
  * 对于 promise, 会等待 promise resolve, 将 resolve 后的值作为对应 key 的值
  *
+ * @platform web, node, webworker
+ *
  * @param obj 待计算属性的对象
  */
 export function computeProps<T extends Record<PropertyKey, KAnyFunc | Promise<any> | (any & {})>>(

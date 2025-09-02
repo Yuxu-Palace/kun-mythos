@@ -4,6 +4,8 @@ import { isFunction, isObject } from './verify';
 /**
  * 自动绑定对象方法的 this
  *
+ * @platform web, node, webworker
+ *
  * @param obj 待处理的对象
  * @param deep 是否递归处理
  */

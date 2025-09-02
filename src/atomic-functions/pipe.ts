@@ -27,6 +27,8 @@ type PipeFunc<F extends KAnyFunc[]> = F extends [KFunc<infer P, infer R>]
 /**
  * 管道函数，从左到右执行
  *
+ * @platform web, node, webworker
+ *
  * @param funcs 待执行的函数, 从左到右执行
  */
 export function pipe<F extends KAnyFunc[]>(...funcs: PipeArgs<F>): PipeFunc<F> {

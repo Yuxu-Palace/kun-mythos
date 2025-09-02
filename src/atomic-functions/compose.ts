@@ -39,6 +39,8 @@ type ComposeFunc<F extends KAnyFunc[]> = F extends [KFunc<infer P, infer R>]
 /**
  * 组合函数, 从右到左执行
  *
+ * @platform web, node, webworker
+ *
  * @param funcs 待组合的函数，从右到左执行
  */
 export function compose<F extends KAnyFunc[]>(...funcs: ComposeArgs<F>): ComposeFunc<F> {

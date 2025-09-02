@@ -13,6 +13,8 @@ export type KCurryFuncReturnType<F> = F extends KCurry<any, infer R> ? R : F ext
 /**
  * 函数柯里化
  *
+ * @platform web, node, webworker
+ *
  * @warn 无法读取函数参数列表的长度, 不能使用参数默认值和剩余参数
  * @warn 参数默认值会导致形参列表长度读取错误!!! ```curry((a = 1) => {})``` // 不允许!!!
  * @important 重要：使用参数默认值会导致柯里化失败

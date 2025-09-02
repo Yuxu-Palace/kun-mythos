@@ -31,6 +31,8 @@ function setCacheFnMeta<T extends KAnyFunc>(func: CacheFn<T>, meta: Partial<Retu
 /**
  * 判断是否是缓存函数
  *
+ * @platform web, node, webworker
+ *
  * @param func 待判断的函数
  */
 export function isCacheFn(func: KAnyFunc): func is CacheFn<KAnyFunc> {
@@ -39,6 +41,8 @@ export function isCacheFn(func: KAnyFunc): func is CacheFn<KAnyFunc> {
 
 /**
  * 获取原始函数
+ *
+ * @platform web, node, webworker
  *
  * @param func 待处理的函数
  */
@@ -51,6 +55,8 @@ export function unCacheFn<F extends KAnyFunc>(func: CacheFn<F>): F {
 
 /**
  * 缓存函数返回结果
+ *
+ * @platform web, node, webworker
  *
  * @param func 待缓存的函数
  */
@@ -82,6 +88,8 @@ export function cacheFn<F extends KAnyFunc>(func: F): CacheFn<F> {
 /**
  * 清除函数的缓存
  *
+ * @platform web, node, webworker
+ *
  * @param func 待清除缓存的函数
  */
 export function clearFnCache(func: KAnyFunc) {
@@ -97,6 +105,8 @@ export function clearFnCache(func: KAnyFunc) {
 
 /**
  * 带有重试机制的缓存方法
+ *
+ * @platform web, node, webworker
  *
  * @param func 待缓存的函数
  *
@@ -128,6 +138,8 @@ export function retryCacheFn<F extends KAnyFunc>(func: F): CacheFn<F> {
 /**
  * 缓存一段时间函数的返回结果, 时间结束后会自动清空缓存
  *
+ * @platform web, node, webworker
+ *
  * @param func 待缓存的函数
  * @param cacheTime 缓存时间
  */
@@ -158,6 +170,8 @@ export function debounceCacheFn<F extends KAnyFunc>(func: F, cacheTime = 100): C
 
 /**
  * 将 getter 返回的函数当成 cacheFn 的入参
+ *
+ * @platform web, node, webworker
  *
  * @param getter 生成需要缓存的函数
  * @param clearTopCache 是否清除对于函数的缓存
@@ -200,6 +214,8 @@ type ResultFn<T> = T extends KFunc<any[], infer R> ? (R extends KAnyFunc ? Cache
  * 缓存 getter 函数的返回结果
  *
  * 如果结果为函数则自动调用
+ *
+ * @platform web, node, webworker
  *
  * @param getter 待缓存的函数
  *

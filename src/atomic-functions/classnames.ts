@@ -51,6 +51,8 @@ function arrayHandler(arr: InputType[], names: KeyType[], set: Set<InputType>) {
 
 /**
  * 根据输入数据生成 className 字符串
+ *
+ * @platform web, node, webworker
  */
 export function classnames(...input: InputType[]) {
   /**

@@ -28,6 +28,8 @@ type PlaceholderArgs<T extends any[], R extends any[] = []> = T extends [infer A
  *
  * 可选参数会被强制要求填写
  *
+ * @platform web, node, webworker
+ *
  * @warning 占位符只能用于函数参数位置, 函数返回值位置无法使用占位符
  * @warning 无法与 curry 函数一起使用 (无法正确推导类型)! 具体看下方示例
  *
