@@ -20,7 +20,6 @@
   "license": "MIT",
   "author": "Yuxu Palace",
   "type": "module",
-  "packageManager": "pnpm@9.0.0",
   "exports": {
     ".": {
       "import": {
