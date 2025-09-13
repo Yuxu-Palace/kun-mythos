@@ -38,7 +38,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "rslib build",
+    "build": "biome check --write && rslib build",
     "check": "biome check --write",
     "dev": "rslib build --watch",
     "dev:mf": "rslib mf-dev",
