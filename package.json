@@ -1,5 +1,5 @@
 {
-  "name": "@yuxu-palace/kun-mythos",
+  "name": "@Yuxu-Palace/kun-mythos",
   "version": "0.0.0",
   "description": "A powerful TypeScript utility library by Yuxu Palace",
   "keywords": [
@@ -7,7 +7,7 @@
     "utility",
     "library",
     "toolkit",
-    "yuxu-palace"
+    "Yuxu-Palace"
   ],
   "homepage": "https://github.com/Yuxu-Palace/kun-mythos#readme",
   "bugs": {
@@ -18,7 +18,7 @@
     "url": "git+https://github.com/Yuxu-Palace/kun-mythos.git"
   },
   "license": "MIT",
-  "author": "Yuxu Palace",
+  "author": "Yuxu-Palace",
   "type": "module",
   "exports": {
     ".": {
