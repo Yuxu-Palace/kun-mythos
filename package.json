@@ -1,13 +1,13 @@
 {
-  "name": "@Yuxu-Palace/kun-mythos",
+  "name": "@yuxu-palace/kun-mythos",
   "version": "0.0.0",
-  "description": "A powerful TypeScript utility library by Yuxu Palace",
+  "description": "A powerful TypeScript utility library by Yuxu-Palace",
   "keywords": [
     "typescript",
     "utility",
     "library",
     "toolkit",
-    "Yuxu-Palace"
+    "yuxu-palace"
   ],
   "homepage": "https://github.com/Yuxu-Palace/kun-mythos#readme",
   "bugs": {
@@ -18,7 +18,7 @@
     "url": "git+https://github.com/Yuxu-Palace/kun-mythos.git"
   },
   "license": "MIT",
-  "author": "Yuxu-Palace",
+  "author": "yuxu-palace",
   "type": "module",
   "exports": {
     ".": {
@@ -38,7 +38,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "biome check --write && rslib build",
+    "build": "rslib build",
     "check": "biome check --write",
     "dev": "rslib build --watch",
     "dev:mf": "rslib mf-dev",
