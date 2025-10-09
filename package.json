@@ -1,6 +1,24 @@
 {
   "name": "@yuxu-palace/kun-mythos",
   "version": "0.0.0",
+  "description": "A powerful TypeScript utility library by Yuxu-Palace",
+  "keywords": [
+    "typescript",
+    "utility",
+    "library",
+    "toolkit",
+    "yuxu-palace"
+  ],
+  "homepage": "https://github.com/Yuxu-Palace/kun-mythos#readme",
+  "bugs": {
+    "url": "https://github.com/Yuxu-Palace/kun-mythos/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yuxu-Palace/kun-mythos.git"
+  },
+  "license": "MIT",
+  "author": "yuxu-palace",
   "type": "module",
   "types": "./dist/cjs/index.d.ts",
   "main": "./dist/cjs/index.cjs",
@@ -9,9 +27,14 @@
   "jsdelivr": "./dist/umd/index.js",
   "exports": {
     ".": {
-      "types": "./dist/esm/index.d.ts",
-      "import": "./dist/esm/index.mjs",
-      "require": "./dist/cjs/index.cjs"
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      }
     }
   },
   "files": [
@@ -23,13 +46,12 @@
     "dev": "rslib build --watch",
     "dev:mf": "rslib mf-dev",
     "format": "biome format --write",
-    "test:code": "vitest run",
-    "test:type": "tsc --noEmit",
     "test:bench": "cross-env BENCH=true vitest bench",
     "test:bench:ci": "cross-env CI=true BENCH=true vitest bench --run",
-    "test:ci": "cross-env CI=true pnpm run test:code && pnpm run test:type",
     "test": "vitest --coverage.enabled --ui",
-    "prepare": "husky"
+    "test:ci": "cross-env CI=true vitest run",
+    "prepare": "husky",
+    "publish:doctor": "pnpm dlx publint"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.2",
@@ -46,6 +68,15 @@
     "typescript": "^5.8.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "3.2.4"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=18.0.0"
+    },
+    "packageManager": {
+      "name": "pnpm"
+    }
   },
   "publishConfig": {
     "access": "public",

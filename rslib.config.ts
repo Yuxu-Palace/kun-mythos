@@ -29,7 +29,9 @@ export default defineConfig({
     },
     {
       format: 'cjs',
-      dts: true,
+      dts: {
+        autoExtension: true,
+      },
       output: {
         ...BaseOutputOption,
         filename: { js: '[name].cjs' },
