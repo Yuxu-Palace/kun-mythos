@@ -1,12 +1,35 @@
 {
   "name": "@yuxu-palace/kun-mythos",
   "version": "0.0.0",
+  "description": "A powerful TypeScript utility library by Yuxu-Palace",
+  "keywords": [
+    "typescript",
+    "utility",
+    "library",
+    "toolkit",
+    "yuxu-palace"
+  ],
+  "homepage": "https://github.com/Yuxu-Palace/kun-mythos#readme",
+  "bugs": {
+    "url": "https://github.com/Yuxu-Palace/kun-mythos/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yuxu-Palace/kun-mythos.git"
+  },
+  "license": "MIT",
+  "author": "yuxu-palace",
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/esm/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      }
     }
   },
   "main": "./dist/cjs/index.cjs",
@@ -22,7 +45,8 @@
     "format": "biome format --write",
     "test:ci": "cross-env CI=true vitest run",
     "test": "vitest",
-    "prepare": "husky"
+    "prepare": "husky",
+    "publish:doctor": "pnpm dlx publint"
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.6",
@@ -35,6 +59,15 @@
     "lint-staged": "^16.1.2",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=18.0.0"
+    },
+    "packageManager": {
+      "name": "pnpm"
+    }
   },
   "publishConfig": {
     "access": "public",
