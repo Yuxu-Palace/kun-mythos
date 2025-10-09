@@ -1,1 +1,1 @@
-npx --no -- lint-staged
+exec pnpm dlx lint-staged

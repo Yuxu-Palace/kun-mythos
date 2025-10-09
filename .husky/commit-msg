@@ -1,1 +1,1 @@
-npx --no-install commitlint -e $HUSKY_GIT_PARAMS
+pnpm exec commitlint --edit "${1}"
