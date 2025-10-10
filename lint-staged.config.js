@@ -4,4 +4,5 @@
  */
 export default {
   '*.ts': ['pnpm run check'],
+  '*.{json,yml,yaml,md}': ['pnpm run format'],
 };
