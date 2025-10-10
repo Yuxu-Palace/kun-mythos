@@ -1,10 +1,16 @@
 import { PRIVATE_KEY } from '@/constant/private';
 import type { KAnyFunc, KFunc, KPrintify } from '@/types/base';
-import { isFunction, isPromise } from './verify';
+import { isFunction, isPromise, isString } from './verify';
 
 type ComputeProps<T extends Record<PropertyKey, any>> = KPrintify<
   {
     [K in keyof T]: T[K] extends KAnyFunc ? Awaited<ReturnType<T[K]>> : Awaited<T[K]>;
+  } & {
+    [K in keyof T as K extends string
+      ? T[K] extends KFunc<any[], Promise<any>> | Promise<any>
+        ? `wait${Capitalize<K>}`
+        : never
+      : never]: T[K] extends KFunc<any[], infer R> ? R : T[K];
   } & {
     __k_ready: {
       [K in keyof T as T[K] extends KFunc<any[], Promise<any>> | Promise<any> ? K : never]: Promise<void>;
@@ -28,7 +34,7 @@ export function computeProps<T extends Record<PropertyKey, KAnyFunc | Promise<an
 ): ComputeProps<T> {
   const result = { __k_ready: {} } as ComputeProps<T>;
 
-  const keys = Object.keys(obj);
+  const keys = Reflect.ownKeys(obj);
 
   for (let i = 0; i < keys.length; ++i) {
     const key = keys[i];
@@ -41,7 +47,14 @@ export function computeProps<T extends Record<PropertyKey, KAnyFunc | Promise<an
     if (isPromise(value)) {
       result.__k_ready[key] = value.then((_v: any) => {
         value = _v;
+        return _v;
       });
+
+      if (isString(key)) {
+        Object.defineProperty(result, `wait${key[0].toUpperCase()}${key.slice(1)}`, {
+          get: () => result.__k_ready[key],
+        });
+      }
 
       value = PRIVATE_KEY;
 

@@ -19,7 +19,7 @@ export function autoBindFnThis<T extends Record<PropertyKey, any>>(obj: T, deep 
       const value = Reflect.get(target, key, receiver);
 
       if (isFunction(value)) {
-        return (value as KAnyFunc).bind(target);
+        return (value as KAnyFunc).bind(receiver);
       }
 
       if (deep && isObject(value)) {
