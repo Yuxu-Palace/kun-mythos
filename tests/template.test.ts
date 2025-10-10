@@ -9,6 +9,7 @@ MFT(
 
     describe.runIf(IS_BENCH)(`${format}性能测试`, () => {
       bench('读取版本号', () => {
+        // biome-ignore lint/nursery/noUnusedExpressions: test
         VERSION;
       });
     });

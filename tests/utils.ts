@@ -54,7 +54,7 @@ function getExt(format: Mode = 'src') {
     case MODE.UMD:
       return 'js';
     default:
-      format satisfies never;
+      void (format satisfies never);
   }
   throw new TypeError(`Unsupported format: ${format}`);
 }

@@ -37,6 +37,7 @@ export function tryCallFunc<A extends any[], R, E = Empty>(
   };
 
   const finallyFn = () => {
+    // biome-ignore lint/nursery/noUnusedExpressions: test
     isFunction(onFinal) && onFinal(result);
   };
 

@@ -165,6 +165,7 @@ MFT(({ LinkedList }, { format, IS_BENCH }) => {
     });
 
     bench('转化为数组 扩展运算符', () => {
+      // biome-ignore lint/nursery/noUnusedExpressions: test
       [...list];
     });
 

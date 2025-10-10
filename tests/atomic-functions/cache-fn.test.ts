@@ -26,7 +26,9 @@ MFT(
       expect(typeof unCacheFn).toBe('function');
     });
 
-    const add = (a: number, b: number) => ({ result: a + b });
+    const add = (a: number, b: number) => {
+      return { result: a + b };
+    };
 
     test('基本使用', () => {
       const cf1 = cacheFn(add);
