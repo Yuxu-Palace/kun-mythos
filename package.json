@@ -1,90 +1,90 @@
 {
-	"name": "@yuxu-palace/kun-mythos",
-	"version": "0.0.0",
-	"description": "A powerful TypeScript utility library by Yuxu-Palace",
-	"keywords": [
-		"typescript",
-		"utility",
-		"library",
-		"toolkit",
-		"yuxu-palace"
-	],
-	"homepage": "https://github.com/Yuxu-Palace/kun-mythos#readme",
-	"bugs": {
-		"url": "https://github.com/Yuxu-Palace/kun-mythos/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/Yuxu-Palace/kun-mythos.git"
-	},
-	"license": "MIT",
-	"author": "yuxu-palace",
-	"type": "module",
-	"types": "./dist/cjs/index.d.ts",
-	"main": "./dist/cjs/index.cjs",
-	"module": "./dist/esm/index.mjs",
-	"unpkg": "./dist/umd/index.js",
-	"jsdelivr": "./dist/umd/index.js",
-	"exports": {
-		".": {
-			"import": {
-				"types": "./dist/esm/index.d.ts",
-				"default": "./dist/esm/index.js"
-			},
-			"require": {
-				"types": "./dist/cjs/index.d.cts",
-				"default": "./dist/cjs/index.cjs"
-			}
-		}
-	},
-	"files": [
-		"dist"
-	],
-	"scripts": {
-		"build": "rslib build",
-		"check": "biome check --write",
-		"dev": "rslib build --watch",
-		"dev:mf": "rslib mf-dev",
-		"format": "biome format --write",
-		"test:bench": "cross-env BENCH=true vitest bench",
-		"test:bench:ci": "cross-env CI=true BENCH=true vitest bench --run",
-		"test": "vitest --coverage.enabled --ui",
-		"test:ci": "cross-env CI=true vitest run",
-		"prepare": "husky",
-		"publish:doctor": "pnpm dlx publint"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "2.2.2",
-		"@codspeed/vitest-plugin": "^4.0.1",
-		"@commitlint/cli": "^19.8.1",
-		"@commitlint/config-conventional": "^19.8.1",
-		"@rslib/core": "^0.10.6",
-		"@types/node": "^22.16.4",
-		"@vitest/coverage-v8": "3.2.4",
-		"@vitest/ui": "3.2.4",
-		"cross-env": "^7.0.3",
-		"husky": "^9.1.7",
-		"lint-staged": "^16.1.2",
-		"typescript": "^5.8.3",
-		"vite-tsconfig-paths": "^5.1.4",
-		"vitest": "3.2.4"
-	},
-	"devEngines": {
-		"runtime": {
-			"name": "node",
-			"version": ">=18.0.0"
-		},
-		"packageManager": {
-			"name": "pnpm"
-		}
-	},
-	"pnpm": {
-		"overrides": {
-			"axios": "^1.12.0"
-		}
-	},
-	"publishConfig": {
-		"access": "public",
-		"registry": "https://registry.npmjs.org/"
-	}
+  "name": "@yuxu-palace/kun-mythos",
+  "version": "0.0.0",
+  "description": "A powerful TypeScript utility library by Yuxu-Palace",
+  "keywords": [
+    "typescript",
+    "utility",
+    "library",
+    "toolkit",
+    "yuxu-palace"
+  ],
+  "homepage": "https://github.com/Yuxu-Palace/kun-mythos#readme",
+  "bugs": {
+    "url": "https://github.com/Yuxu-Palace/kun-mythos/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yuxu-Palace/kun-mythos.git"
+  },
+  "license": "MIT",
+  "author": "yuxu-palace",
+  "type": "module",
+  "types": "./dist/cjs/index.d.ts",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.mjs",
+  "unpkg": "./dist/umd/index.js",
+  "jsdelivr": "./dist/umd/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rslib build",
+    "check": "biome check --write",
+    "dev": "rslib build --watch",
+    "dev:mf": "rslib mf-dev",
+    "format": "biome format --write",
+    "test:bench": "cross-env BENCH=true vitest bench",
+    "test:bench:ci": "cross-env CI=true BENCH=true vitest bench --run",
+    "test": "vitest --coverage.enabled --ui",
+    "test:ci": "cross-env CI=true vitest run",
+    "prepare": "husky",
+    "publish:doctor": "pnpm dlx publint"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.5",
+    "@codspeed/vitest-plugin": "^5.0.1",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@rslib/core": "^0.10.6",
+    "@types/node": "^22.16.4",
+    "@vitest/coverage-v8": "3.2.4",
+    "@vitest/ui": "3.2.4",
+    "cross-env": "^7.0.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "typescript": "^5.8.3",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "3.2.4"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=18.0.0"
+    },
+    "packageManager": {
+      "name": "pnpm"
+    }
+  },
+  "pnpm": {
+    "overrides": {
+      "axios": "^1.12.0"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
 }

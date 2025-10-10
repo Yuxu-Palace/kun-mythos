@@ -1,20 +1,9 @@
-import process from 'node:process';
 import codspeedPlugin from '@codspeed/vitest-plugin';
 import viteTsConfigPaths from 'vite-tsconfig-paths';
-import { defaultInclude, defineConfig, type UserConfigFnObject } from 'vitest/config';
-
-type PluginOption = ReturnType<UserConfigFnObject>['plugins'];
-
-function extendsPlugin() {
-  const plugins: PluginOption = [];
-  if (process.env.CI && process.env.BENCH) {
-    plugins.push(codspeedPlugin());
-  }
-  return plugins;
-}
+import { defaultInclude, defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [viteTsConfigPaths(), ...extendsPlugin()],
+  plugins: [viteTsConfigPaths(), codspeedPlugin()],
   // Configure Vitest (https://vitest.dev/config/)
   test: {
     coverage: {

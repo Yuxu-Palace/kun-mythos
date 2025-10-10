@@ -122,7 +122,12 @@
         "noSetterReturn": { "level": "error" },
         "noStringCaseMismatch": { "level": "error", "fix": "safe" },
         "noSwitchDeclarations": { "level": "error", "fix": "safe" },
-        "noUndeclaredDependencies": { "level": "error" },
+        "noUndeclaredDependencies": {
+          "level": "off",
+          "options": {
+            "devDependencies": ["vitest.config.ts", "**/tests/*.{spec,test,bench}.{js,ts,jsx,tsx}", "./*.{ts,js}"]
+          }
+        },
         "noUndeclaredVariables": {
           "level": "error",
           "options": {
@@ -175,7 +180,22 @@
         "noShadow": "error",
         "noUselessUndefined": { "level": "error", "fix": "safe" },
         "useExhaustiveSwitchCases": { "level": "error" },
-        "useExplicitType": "off"
+        "useExplicitType": "off",
+        "noReactForwardRef": { "level": "info", "fix": "safe" },
+        "noDeprecatedImports": { "level": "info" },
+        "useConsistentArrowReturn": {
+          "level": "error",
+          "fix": "safe",
+          "options": {
+            "style": "asNeeded",
+            "requireForObjectLiteral": true
+          }
+        },
+        "noVueDuplicateKeys": { "level": "error" },
+        "noUnusedExpressions": { "level": "error" },
+        "noJsxLiterals": "off",
+        "noDuplicateDependencies": { "level": "error" },
+        "noUselessCatchBinding": { "level": "error" }
       },
       "performance": {
         "noAccumulatingSpread": { "level": "error" },
