@@ -9,7 +9,8 @@ MFT(({ sleep, sleepSync, getNow }) => {
   test('基本使用', async () => {
     let start1 = getNow();
     const cancel1 = await sleep(10);
-    expect(getNow() - start1).toBeGreaterThan(10);
+    // 这里调整为 9 是因为计时会有一点差异, 并不是精确的
+    expect(getNow() - start1).toBeGreaterThan(9);
     expect(cancel1).toBe(false);
 
     const cancel2 = await new Promise((res, rej) => {

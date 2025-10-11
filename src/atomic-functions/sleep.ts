@@ -53,6 +53,8 @@ type ProxyPromise<T> = Omit<Promise<T>, 'then' | 'catch' | 'finally'> &
  * @platform web, node, webworker
  *
  * @param time 等待时间
+ *
+ * @warn 此函数的计时并不准确, 存在细微差异
  */
 export function sleep(time: number): ProxyPromise<boolean> {
   const { promise, resolve } = withResolvers<boolean>();
