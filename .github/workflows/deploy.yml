@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
 
       - name: Version Patch
-        uses: Yuxu-Palace/yuheng-dispatch@main
+        uses: Yuxu-Palace/yuheng-dispatch@alpha
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           
