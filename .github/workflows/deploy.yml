@@ -23,7 +23,10 @@ jobs:
         uses: Yuxu-Palace/yuheng-dispatch@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          
+
+          git-user-name: 'cmtlyt'
+          git-user-email: 'cmtlyt@163.com'
+
           # 版本管理配置
           version-prefix: 'v'
           supported-branches: 'main,beta,alpha'
