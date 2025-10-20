@@ -1,0 +1,242 @@
+import { pick } from '@/atomic-functions/pick';
+import { getPrivateMeta, setPrivateMeta } from '@/atomic-functions/private/private-info-ctrl';
+import type { KEqual } from '@/types/base';
+
+interface Node<T = any, M = any> {
+  data: T;
+  next: NodeOrNull<T, M>;
+  prev: NodeOrNull<T, M>;
+  metadata: M | undefined;
+}
+
+type NodeOrNull<T = any, M = any> = Node<T, M> | null;
+
+function createNode<T, M>(
+  data: T,
+  next: Node<T, M>['next'],
+  prev: Node<T, M>['prev'],
+  metadata: Node<T, M>['metadata'],
+): Node<T, M> {
+  return { data, next, prev, metadata };
+}
+
+interface LinkedListSelf<T = any, M = any> extends Iterable<Node<T, M>> {
+  /**
+   * 头节点
+   *
+   * 设置头节点时会自动删除 prev
+   *
+   * 设置为 null 时会清空整个链表
+   */
+  head: NodeOrNull<T, M>;
+  /**
+   * 尾节点
+   *
+   * 设置尾节点时会自动删除 next
+   *
+   * 设置为 null 时会清空整个链表
+   */
+  tail: NodeOrNull<T, M>;
+  /**
+   * 转换为 VO
+   */
+  tvo: <Flag extends boolean>(
+    node: Node,
+    needMetadata?: Flag,
+  ) => KEqual<Flag, true> extends true ? { data: T; metadata: Node<T, M>['metadata'] } : T;
+}
+
+const LINKED_LIST_KEY = Symbol('linked-list');
+
+function getSelf<T, M>(key: LinkedList<T, M>) {
+  return getPrivateMeta(key, LINKED_LIST_KEY) as LinkedListSelf<T, M>;
+}
+
+/**
+ * 链表
+ *
+ * @platform web, node, webworker
+ */
+export class LinkedList<T = any, M = any> {
+  constructor() {
+    // 完全杜绝用户操作 node, 只能通过提供的 api 操作
+    setPrivateMeta(this, LINKED_LIST_KEY, {
+      __head: null,
+      __tail: null,
+
+      get head() {
+        return this.__head;
+      },
+      set head(node) {
+        if (!node) {
+          // 头节点被设置为 null 则表示清空整个链表
+          this.__head = null;
+          this.__tail = null;
+          return;
+        }
+        node.prev = null;
+        this.__head = node;
+      },
+      get tail() {
+        return this.__tail;
+      },
+      set tail(node) {
+        if (!node) {
+          // 尾节点被设置为 null 则表示清空整个链表
+          this.__head = null;
+          this.__tail = null;
+          return;
+        }
+        node.next = null;
+        this.__tail = node;
+      },
+      *[Symbol.iterator]() {
+        let node = this.head;
+
+        while (node) {
+          yield node;
+          node = node.next;
+        }
+      },
+      tvo(node, needMetadata) {
+        if (needMetadata) {
+          return pick(node, ['data', 'metadata']);
+        }
+        return node.data;
+      },
+    } satisfies LinkedListSelf & { __head: NodeOrNull; __tail: NodeOrNull });
+  }
+
+  /**
+   * 从可迭代对象创建链表
+   */
+  static from<IT>(init: Iterable<IT> | ArrayLike<IT> = []) {
+    const arr = Array.from(init);
+    const list = new LinkedList<IT>();
+    for (let i = 0; i < arr.length; ++i) {
+      list.push(arr[i]);
+    }
+    return list;
+  }
+
+  /**
+   * 从可迭代对象创建链表
+   */
+  static fromEntries<IT, IM>(
+    init: Iterable<[IT, IM] | readonly [IT, IM]> | ArrayLike<[IT, IM] | readonly [IT, IM]> = [],
+  ) {
+    const arr = Array.from(init);
+    const list = new LinkedList<IT, IM>();
+    for (let i = 0; i < arr.length; ++i) {
+      Reflect.apply(list.push, list, arr[i]);
+    }
+    return list;
+  }
+
+  /**
+   * 转换为可迭代对象
+   */
+  *toEntries() {
+    const self = getSelf<T, M>(this);
+    for (const item of self) {
+      const { data, metadata } = self.tvo(item, true);
+      yield [data, metadata] as const;
+    }
+  }
+
+  /**
+   * 转换为可迭代对象
+   */
+  *toValues<F extends boolean>(needMetadata?: F) {
+    const self = getSelf<T, M>(this);
+    for (const item of self) {
+      yield self.tvo<F>(item, needMetadata);
+    }
+  }
+
+  [Symbol.iterator]() {
+    return this.toValues();
+  }
+
+  /**
+   * 转换为数组
+   */
+  toArray<F extends boolean>(needMetadata?: F) {
+    return Array.from(this.toValues<F>(needMetadata));
+  }
+
+  /**
+   * 添加节点到末尾
+   */
+  push(data: T, metadata?: Node<T, M>['metadata']) {
+    const self = getSelf(this);
+
+    const node = createNode(data, null, self.tail, metadata);
+    if (self.tail) {
+      self.tail.next = node;
+    } else {
+      self.head = node;
+    }
+    self.tail = node;
+  }
+
+  /**
+   * 从末尾移除节点
+   */
+  pop<F extends boolean>(needMetadata?: F) {
+    const self = getSelf<T, M>(this);
+
+    if (!self.tail) {
+      return;
+    }
+    try {
+      return self.tvo<F>(self.tail, needMetadata);
+    } finally {
+      // 明确解除对 prev 的引用
+      const prev = self.tail.prev;
+      self.tail.prev = null;
+
+      self.tail = prev;
+    }
+  }
+
+  /**
+   * 从开头移除节点
+   */
+  shift<F extends boolean>(needMetadata?: F) {
+    const self = getSelf<T, M>(this);
+    if (!self.head) {
+      return;
+    }
+    try {
+      return self.tvo<F>(self.head, needMetadata);
+    } finally {
+      // 明确解除对 next 的引用
+      const next = self.head.next;
+      self.head.next = null;
+      self.head = next;
+    }
+  }
+
+  /**
+   * 添加节点到开头
+   */
+  unshift(data: T, metadata?: Node<T, M>['metadata']) {
+    const self = getSelf(this);
+    const node = createNode(data, self.head, null, metadata);
+    if (self.head) {
+      self.head.prev = node;
+    } else {
+      self.tail = node;
+    }
+    self.head = node;
+  }
+
+  /**
+   * 清空链表
+   */
+  clear() {
+    const self = getSelf(this);
+    self.head = null;
+  }
+}

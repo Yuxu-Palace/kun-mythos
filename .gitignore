@@ -13,3 +13,6 @@ storybook-static
 !.vscode/settings.json
 !.vscode/extensions.json
 .idea
+
+# tests
+coverage
