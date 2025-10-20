@@ -3,6 +3,8 @@ name: CI
 on:
   pull_request:
   merge_group:
+  push:
+    branches: [main, alpha, beta]
 
 permissions:
   contents: read
@@ -17,12 +19,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node_version: [lts/*]
+        node_version: [20.x, lts/*]
         include:
           - os: macos-latest
-            node_version: lts/*
+            node_version: 20.x
           - os: windows-latest
-            node_version: lts/*
+            node_version: 20.x
       fail-fast: false
 
     steps:
@@ -33,6 +35,8 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
 
       - name: Set node ${{ matrix.node_version }}
         uses: actions/setup-node@v4
@@ -47,10 +51,6 @@ jobs:
         run: pnpm run format
         continue-on-error: false 
 
-      - uses: autofix-ci/action@v1
-        with:
-          fail-fast: false
-
       - name: Run build
         run: pnpm run build
         continue-on-error: false
@@ -59,8 +59,10 @@ jobs:
         run: pnpm run test:ci
         continue-on-error: false
   
-  publish:
+  pr-preview:
     runs-on: ubuntu-latest
+    needs: check
+    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checkout repository
@@ -70,28 +72,20 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
 
       - name: Set node
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: 20.x
           cache: pnpm
   
       - name: Install dependencies
         run: pnpm install
-        continue-on-error: false
 
       - name: Build
         run: pnpm run build
-        continue-on-error: false
 
-      - run: pnpm dlx pkg-pr-new publish
-
-      - name: Publish to NPM test
-        if: github.ref_name == 'main' || github.ref_name == 'alpha' || github.ref_name == 'beta'
-        uses: JS-DevTools/npm-publish@v3
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-          tag: ${{ github.ref_name == 'main' && 'latest' || github.ref_name }}
-          registry: https://registry.npmjs.org/
-          dry-run: true
+      - name: Publish PR preview
+        run: pnpm dlx pkg-pr-new publish --pnpm --comment=update

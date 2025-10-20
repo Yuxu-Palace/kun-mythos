@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "lib": ["ES2021"],
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "target": "ES2024",
     "module": "ESNext",
     "noEmit": true,
     "strict": true,
@@ -10,7 +11,11 @@
     "moduleResolution": "bundler",
     "useDefineForClassFields": true,
     "erasableSyntaxOnly": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "~/*": ["./*"]
+    }
   },
   "include": ["src"]
 }

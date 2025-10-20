@@ -1,11 +1,20 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 // import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
-import { defineConfig } from '@rslib/core';
+import { defineConfig, type RslibConfig } from '@rslib/core';
+import tsConfig from './tsconfig.json';
 
 // import pkg from './package.json';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+
+type OutputOption = RslibConfig['lib'][number]['output'];
+
+const BaseOutputOption = {
+  cleanDistPath: true,
+  minify: true,
+  filenameHash: false,
+} satisfies OutputOption;
 
 export default defineConfig({
   lib: [
@@ -13,15 +22,29 @@ export default defineConfig({
       format: 'esm',
       dts: true,
       output: {
-        cleanDistPath: true,
-        distPath: { root: path.resolve(__dirname, 'dist/esm') },
+        ...BaseOutputOption,
+        filename: { js: '[name].mjs' },
+        distPath: { root: path.resolve(dirname, 'dist/esm') },
       },
     },
     {
       format: 'cjs',
+      dts: {
+        autoExtension: true,
+      },
       output: {
-        cleanDistPath: true,
-        distPath: { root: path.resolve(__dirname, 'dist/cjs') },
+        ...BaseOutputOption,
+        filename: { js: '[name].cjs' },
+        distPath: { root: path.resolve(dirname, 'dist/cjs') },
+      },
+    },
+    {
+      format: 'umd',
+      umdName: 'YXKM',
+      output: {
+        ...BaseOutputOption,
+        filename: { js: '[name].js' },
+        distPath: { root: path.resolve(dirname, 'dist/umd') },
       },
     },
     // {
@@ -56,4 +79,7 @@ export default defineConfig({
     //   ],
     // },
   ],
+  resolve: {
+    alias: tsConfig.compilerOptions.paths,
+  },
 });
