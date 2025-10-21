@@ -5,6 +5,7 @@ export * from './compose';
 export * from './compute-props';
 export * from './curry';
 export * from './data-storage';
+export * from './deep-clone';
 export * from './get-now';
 export * from './iife';
 export * from './pick';

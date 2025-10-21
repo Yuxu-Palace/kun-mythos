@@ -1,25 +1,26 @@
-import { isArray, isObject, isString } from '../atomic-functions/verify';
+import { isArray, isObject, isString, isUndef } from '../atomic-functions/verify';
 
-function getSourceInfo(keyPath: string, obj: Record<PropertyKey, any>) {
+export function parseSourceWithKeyPath(keyPath: string, obj: Record<PropertyKey, any>) {
   const keys = keyPath.split('.');
-  const target = keys.pop();
 
+  const target = keys.pop();
   if (!target) {
     throw new TypeError(`keyPath is not a valid key path: ${keyPath}`);
   }
 
   let current = obj;
   for (let i = 0; i < keys.length; i++) {
-    if (typeof current === 'undefined') {
+    const key = keys[i];
+    current = current[key];
+    if (isUndef(current)) {
       break;
     }
-    current = current[keys[i]];
   }
 
-  return [current, target] as const;
+  return [current, target, (current || {})[target]];
 }
 
-function setTarget(keyPath: string, obj: Record<PropertyKey, any>, value: any) {
+export function setTarget(keyPath: string, obj: Record<PropertyKey, any>, value: any) {
   const keys = keyPath.split('.');
   const target = keys.pop();
 
@@ -91,7 +92,7 @@ function applyKeySourceInfo<T extends Record<PropertyKey, any>>(
 ) {
   for (let i = 0; i < keyPathMap.length; i++) {
     const [sourceKey, targetKey] = keyPathMap[i];
-    const [source, target] = getSourceInfo(sourceKey, sourceObj);
+    const [source, target] = parseSourceWithKeyPath(sourceKey, sourceObj);
     const value = (source || {})[target];
     setTarget(resolvePath(sourceKey, targetKey), result, value);
   }
