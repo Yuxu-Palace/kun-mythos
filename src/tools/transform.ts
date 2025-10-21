@@ -2,6 +2,8 @@ import { parseSourceWithKeyPath, setTarget } from './pick-rename';
 
 type TransformFn<T, R = any> = (value: any, source: any, origin: T) => R;
 
+type VerifyFn<T> = (...args: Parameters<TransformFn<T>>) => boolean;
+
 /**
  * 数据降级
  *
@@ -15,7 +17,7 @@ type TransformFn<T, R = any> = (value: any, source: any, origin: T) => R;
  * fullbackArray([1]) // [1]
  * ```
  */
-export function fullback<T extends TransformFn<any>>(verifyFn: TransformFn<any>, transformFn: T) {
+export function fallback<T extends TransformFn<any>>(verifyFn: VerifyFn<any>, transformFn: T) {
   return ((...args) => {
     if (verifyFn(...args)) {
       return args[0];

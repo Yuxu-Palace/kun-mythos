@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import { MFT } from '../utils';
 
-MFT(({ applyTransform, applyTransforms, fullback, deepClone, isArray, isPlainObject, isNumber }) => {
+MFT(({ applyTransform, applyTransforms, fallback, deepClone, isArray, isPlainObject, isNumber }) => {
   test('导出测试', () => {
     expect(typeof applyTransform).toBe('function');
     expect(typeof applyTransforms).toBe('function');
@@ -17,12 +17,12 @@ MFT(({ applyTransform, applyTransforms, fullback, deepClone, isArray, isPlainObj
     },
   };
 
-  const transformArray = fullback(isArray, () => []);
-  const transformObject = fullback(isPlainObject, () => {
+  const transformArray = fallback(isArray, () => []);
+  const transformObject = fallback(isPlainObject, () => {
     return {};
   });
 
-  const transformNumber = (defaultValue: number) => fullback(isNumber, () => defaultValue);
+  const transformNumber = (defaultValue: number) => fallback(isNumber, () => defaultValue);
 
   test('基本使用', () => {
     expect(applyTransform('needArray', transformArray, deepClone(testObj))).toEqual({

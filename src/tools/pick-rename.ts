@@ -1,4 +1,4 @@
-import { isArray, isObject, isString, isUndef } from '../atomic-functions/verify';
+import { isArray, isObject, isPlainObject, isString, isUndef } from '../atomic-functions/verify';
 
 export function parseSourceWithKeyPath(keyPath: string, obj: Record<PropertyKey, any>) {
   const keys = keyPath.split('.');
@@ -22,11 +22,8 @@ export function parseSourceWithKeyPath(keyPath: string, obj: Record<PropertyKey,
 
 export function setTarget(keyPath: string, obj: Record<PropertyKey, any>, value: any) {
   const keys = keyPath.split('.');
-  const target = keys.pop();
-
-  if (!target) {
-    throw new TypeError(`keyPath is not a valid key path: ${keyPath}`);
-  }
+  // biome-ignore lint/style/noNonNullAssertion: 这个方法是内部的大概率不会出现空字符串
+  const target = keys.pop()!;
 
   let current = obj;
   for (let i = 0; i < keys.length; i++) {
@@ -63,26 +60,45 @@ interface PickRenameOptions {
 
 type KeySourceInfo = [string, string];
 
-function parseKeySourceInfo(keyMap: KeyMap) {
-  const keyPathMap: KeySourceInfo[] = [];
+function parseArrayKeySourceInfo(keyMap: KeyMap & any[]) {
+  const keyPathMap: KeySourceInfo[] = Array.from({ length: keyMap.length });
+  for (let i = 0; i < keyMap.length; i++) {
+    const keySource = keyMap[i];
+    if (!isString(keySource)) {
+      throw new TypeError(`keyMap[${i}] is not a string`);
+    }
+    const parts = keySource.split(':');
+    if (parts.length !== 2 || !parts[0] || !parts[1]) {
+      throw new TypeError(`keyMap[${i}] is not a valid key mapping: ${keySource}`);
+    }
+    keyPathMap[i] = parts as KeySourceInfo;
+  }
+  return keyPathMap;
+}
 
-  if (isArray(keyMap)) {
-    for (let i = 0; i < keyMap.length; i++) {
-      const keySource = keyMap[i];
-      if (!isString(keySource)) {
-        throw new TypeError(`keyMap[${i}] is not a string`);
-      }
-      keyPathMap.push(keySource.split(':') as KeySourceInfo);
+function parseObjectKeySourceInfo(keyMap: KeyMap & Record<any, any>) {
+  const keys = Reflect.ownKeys(keyMap);
+  const keyPathMap: KeySourceInfo[] = Array.from({ length: keys.length });
+
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i] as string;
+    if (!isString(keyMap[key])) {
+      throw new TypeError(`keyMap[${key}] is not a string`);
     }
-  } else if (isObject(keyMap)) {
-    const keys = Object.keys(keyMap);
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      keyPathMap.push([key, keyMap[key] as string]);
-    }
+    keyPathMap[i] = [key, keyMap[key]];
   }
 
   return keyPathMap;
+}
+
+function parseKeySourceInfo(keyMap: KeyMap) {
+  if (isArray(keyMap)) {
+    return parseArrayKeySourceInfo(keyMap);
+  }
+  if (isPlainObject(keyMap)) {
+    return parseObjectKeySourceInfo(keyMap);
+  }
+  return [];
 }
 
 function applyKeySourceInfo<T extends Record<PropertyKey, any>>(

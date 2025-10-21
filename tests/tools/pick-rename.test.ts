@@ -97,5 +97,9 @@ MFT(({ pickRename }) => {
     expect(() => pickRename(['test:a.b'], { a: 1 }, { mode: 'merge' })).toThrowError();
     expect(() => pickRename([':', {}], { a: 1 })).toThrowError();
     expect(() => pickRename(['', {}], { a: 1 })).toThrowError();
+    expect(() => pickRename([{}], { a: 1 })).toThrowError();
+    expect(() => pickRename({ '': {} }, { a: 1 })).toThrowError();
+    // @ts-expect-error test
+    expect(pickRename(null, { a: 1 })).toEqual({});
   });
 });
