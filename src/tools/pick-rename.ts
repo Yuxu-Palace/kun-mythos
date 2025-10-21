@@ -82,9 +82,6 @@ function parseObjectKeySourceInfo(keyMap: KeyMap & Record<any, any>) {
 
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i] as string;
-    if (!isString(keyMap[key])) {
-      throw new TypeError(`keyMap[${key}] is not a string`);
-    }
     keyPathMap[i] = [key, keyMap[key]];
   }
 
