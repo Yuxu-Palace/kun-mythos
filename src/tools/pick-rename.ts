@@ -22,7 +22,7 @@ export function parseSourceWithKeyPath(keyPath: string, obj: Record<PropertyKey,
 
 export function setTarget(keyPath: string, obj: Record<PropertyKey, any>, value: any) {
   const keys = keyPath.split('.');
-  // biome-ignore lint/style/noNonNullAssertion: 这个方法是内部的大概率不会出现空字符串
+  // biome-ignore lint/style/noNonNullAssertion: 此处的报错已被其他逻辑前置处理, 未对用户导出, 忽略该问题
   const target = keys.pop()!;
 
   let current = obj;
@@ -119,6 +119,11 @@ function applyKeySourceInfo<T extends Record<PropertyKey, any>>(
   return result;
 }
 
+/**
+ * 挑选对象中的指定键的值组成一个新对象
+ *
+ * @warn merge 模式下，会直接修改 obj, 你可以选择 clone 一份再使用
+ */
 export function pickRename<T extends Record<PropertyKey, any> = Record<PropertyKey, any>>(
   keyMap: KeyMap,
   obj: Record<PropertyKey, any>,
