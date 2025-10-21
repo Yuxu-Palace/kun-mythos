@@ -99,6 +99,8 @@ MFT(({ pickRename }) => {
     expect(() => pickRename(['', {}], { a: 1 })).toThrowError();
     expect(() => pickRename([{}], { a: 1 })).toThrowError();
     expect(() => pickRename({ '': {} }, { a: 1 })).toThrowError();
+    expect(() => pickRename({ '123': {} }, { a: 1 })).toThrowError();
+    expect(() => pickRename({ [Symbol('123')]: {} }, { a: 1 })).toThrowError();
     // @ts-expect-error test
     expect(pickRename(null, { a: 1 })).toEqual({});
   });

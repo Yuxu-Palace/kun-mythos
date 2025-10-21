@@ -12,9 +12,9 @@ type VerifyFn<T> = (...args: Parameters<TransformFn<T>>) => boolean;
  * @platform web, node, webworker
  * @example
  * ```js
- * const fullbackArray = fullback(isArray, () => []);
- * fullbackArray(1) // []
- * fullbackArray([1]) // [1]
+ * const fallbackArray = fallback(isArray, () => []);
+ * fallbackArray(1) // []
+ * fallbackArray([1]) // [1]
  * ```
  */
 export function fallback<T extends TransformFn<any>>(verifyFn: VerifyFn<any>, transformFn: T) {
@@ -34,7 +34,7 @@ export function fallback<T extends TransformFn<any>>(verifyFn: VerifyFn<any>, tr
  * @example
  * ```js
  * const testObj = { needArray: 123 };
- * const transformArray = fullback(isArray, () => []);
+ * const transformArray = fallback(isArray, () => []);
  * applyTransform('needArray', transformArray, testObj); // { needArray: [] }
  * ```
  */
