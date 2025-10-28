@@ -1,0 +1,140 @@
+import { PRIVATE_KEY } from '../constant/private';
+import type {
+  KAppend,
+  KDropHead,
+  KFillArray,
+  KFilterArray,
+  KFunc,
+  KInclude,
+  KLength,
+  KPatchArray,
+} from '../types/base';
+import type { KCurryFuncReturnType } from './curry';
+import { setFuncLength, syncFuncLength } from './private/fn-length';
+import { isFunction, isTrue } from './verify';
+
+interface Flag<T extends number = number> {
+  [PRIVATE_KEY]: true;
+  id: T;
+}
+
+const FLAG_MAP = new Map<symbol, Flag<number>>();
+
+function flag<T extends number>(id: T) {
+  const _flag = Symbol(`@yuxu-palace/kun-mythos:placeholderFuncWithSort:flag-${id}`);
+  FLAG_MAP.set(_flag, { [PRIVATE_KEY]: true, id });
+  return _flag as unknown as Flag<T>;
+}
+
+function checkFlag(_flag: any): _flag is Flag {
+  return isTrue((FLAG_MAP.get(_flag) || {})[PRIVATE_KEY]);
+}
+
+function parseFlag(_flag: symbol) {
+  // biome-ignore lint/style/noNonNullAssertion: 已前置处理
+  return FLAG_MAP.get(_flag)!.id;
+}
+
+type PlaceholderArgs<T extends any[], R extends any[] = []> = T extends [infer A, ...any]
+  ? PlaceholderArgs<KDropHead<1, T>, KAppend<A | Flag, R>>
+  : R;
+
+type PlaceholderArgsVerify<
+  T extends any[],
+  F extends Flag[] = KFilterArray<Flag, T>,
+  C extends any[] = [],
+  E extends any[] = KFillArray<KLength<F>, never>,
+> = E extends []
+  ? T
+  : KInclude<Flag<KLength<C>>, F> extends true
+    ? PlaceholderArgsVerify<T, F, KAppend<never, C>, KDropHead<1, E>>
+    : KFillArray<KLength<T>, Flag<KLength<C>>>;
+
+type FilterPlainArgs<T extends any[], O extends any[], R extends any[] = []> = T extends [infer A, ...any]
+  ? A extends Flag
+    ? FilterPlainArgs<KDropHead<1, T>, KDropHead<1, O>, KAppend<O[0], R>>
+    : FilterPlainArgs<KDropHead<1, T>, KDropHead<1, O>, R>
+  : R;
+
+type PlaceholderFuncArgs<
+  Args extends any[],
+  Ori extends any[],
+  Last extends any[] = KFillArray<KLength<Args>, never>,
+> = Args extends [Flag<infer Idx>, ...any]
+  ? PlaceholderFuncArgs<KDropHead<1, Args>, KDropHead<1, Ori>, KPatchArray<Last, Idx, Ori[0]>>
+  : Last;
+
+/**
+ * 函数支持占位符和参数排序
+ *
+ * 包装并返回一个新函数, 新函数允许使用占位符替代传参, 占位符的位置后续传递即可, 占位符支持排序, 新函数会根据顺序重新排序参数
+ *
+ * 可选参数会被强制要求填写
+ *
+ * @platform web, node, webworker
+ *
+ * @warning 占位符只能用于函数参数位置, 函数返回值位置无法使用占位符
+ * @warning 无法与 curry 函数一起使用 (无法正确推导类型)! 具体看下方示例
+ *
+ * @example
+ * import { placeholderFuncWithSort } from '@yuxu-palace/kun-mythos';
+ * const add = (a: number, b: string, c: number, d: boolean) => a + b + c + d;
+ * // const func = curry(placeholderFuncWithSort(add)); // 这么使用无法正确推导类型
+ * // const func = placeholderFuncWithSort(curry(add)); // 这个不影响使用
+ * const { flag } = placeholderFuncWithSort;
+ * const func = placeholderFuncWithSort(add);
+ * const f1 = func(1, flag(1), 3, flag(0));
+ * f1(false, '2'); // '123false'
+ * // 占位函数生成后可使用 curry 函数包裹
+ * const f2 = curry(f1);
+ * f2(false, '2'); // '123false'
+ * f2(false)('2'); // '123false'
+ * f2()(false)('2'); // '123false'
+ */
+export function placeholderFuncWithSort<O extends any[], R>(func: KFunc<O, R>) {
+  if (!isFunction(func)) {
+    throw new TypeError('func 必须是函数');
+  }
+
+  const callback = <A extends PlaceholderArgs<Required<O>>>(...placeArgs: PlaceholderArgsVerify<A>) => {
+    const argsInfo: [number, number][] = [];
+    const _placeArgs = Array.from(placeArgs);
+    for (let i = 0; i < _placeArgs.length; i++) {
+      const placeArg = _placeArgs[i];
+      if (checkFlag(placeArg)) {
+        // 这个 placeArg 是 Flag 类型的 Symbol
+        argsInfo.push([i, parseFlag(placeArg as any)]);
+        FLAG_MAP.delete(placeArg as any);
+      }
+    }
+
+    const runFunc = (...callArgs: any[]) => {
+      if (callArgs.length !== argsInfo.length) {
+        throw new TypeError(`非法调用, 参数数量不匹配, 期望: ${argsInfo.length}, 实际: ${callArgs.length}`);
+      }
+
+      const args = Array.from(_placeArgs) as any[];
+
+      for (let i = 0; i < argsInfo.length; i++) {
+        const [argIndex, flagId] = argsInfo[i];
+        args[argIndex] = callArgs[flagId];
+      }
+
+      return func(...(args as any));
+    };
+
+    setFuncLength(runFunc, argsInfo.length);
+
+    // @ts-expect-error 必要的类型断言, 正常情况不会出现递归过深问题, 只会因为类型推导有性能问题
+    return runFunc as KFunc<
+      PlaceholderFuncArgs<KFilterArray<Flag, A>, FilterPlainArgs<A, Required<O>>>,
+      KCurryFuncReturnType<R>
+    >;
+  };
+
+  syncFuncLength(callback, func);
+  return callback;
+}
+
+/** 带有排序的站位符 */
+placeholderFuncWithSort.flag = flag;

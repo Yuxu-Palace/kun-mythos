@@ -11,6 +11,7 @@ export * from './iife';
 export * from './pick';
 export * from './pipe';
 export * from './placeholder-func';
+export * from './placeholder-func-with-sort';
 export * from './singleton';
 export * from './sleep';
 export * from './try-call';
