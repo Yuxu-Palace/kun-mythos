@@ -35,9 +35,7 @@ function parseFlag(_flag: symbol) {
   return FLAG_MAP.get(_flag)!.id;
 }
 
-type PlaceholderArgs<T extends any[], R extends any[] = []> = T extends [infer A, ...any]
-  ? PlaceholderArgs<KDropHead<1, T>, KAppend<A | Flag, R>>
-  : R;
+type PlaceholderArgs<T extends any[]> = KLength<T> extends 0 ? [] : { [K in keyof T]: T[K] | Flag };
 
 type PlaceholderArgsVerify<
   T extends any[],
@@ -50,18 +48,18 @@ type PlaceholderArgsVerify<
     ? PlaceholderArgsVerify<T, F, KAppend<never, C>, KDropHead<1, E>>
     : KFillArray<KLength<T>, Flag<KLength<C>>>;
 
-type FilterPlainArgs<T extends any[], O extends any[], R extends any[] = []> = T extends [infer A, ...any]
+type FilterPlainArgs<T extends any[], O extends any[], R extends any[] = []> = T extends [infer A, ...infer Last]
   ? A extends Flag
-    ? FilterPlainArgs<KDropHead<1, T>, KDropHead<1, O>, KAppend<O[0], R>>
-    : FilterPlainArgs<KDropHead<1, T>, KDropHead<1, O>, R>
+    ? FilterPlainArgs<Last, KDropHead<1, O>, KAppend<O[0], R>>
+    : FilterPlainArgs<Last, KDropHead<1, O>, R>
   : R;
 
 type PlaceholderFuncArgs<
   Args extends any[],
   Ori extends any[],
   Last extends any[] = KFillArray<KLength<Args>, never>,
-> = Args extends [Flag<infer Idx>, ...any]
-  ? PlaceholderFuncArgs<KDropHead<1, Args>, KDropHead<1, Ori>, KPatchArray<Last, Idx, Ori[0]>>
+> = Args extends [Flag<infer Idx>, ...infer Other]
+  ? PlaceholderFuncArgs<Other, KDropHead<1, Ori>, KPatchArray<Last, Idx, Ori[0]>>
   : Last;
 
 /**
@@ -73,6 +71,7 @@ type PlaceholderFuncArgs<
  *
  * @platform web, node, webworker
  *
+ * @warning 占位符必须通过 flag 函数生成并且从 0 开始不能重复
  * @warning 占位符只能用于函数参数位置, 函数返回值位置无法使用占位符
  * @warning 无法与 curry 函数一起使用 (无法正确推导类型)! 具体看下方示例
  *
@@ -125,7 +124,6 @@ export function placeholderFuncWithSort<O extends any[], R>(func: KFunc<O, R>) {
 
     setFuncLength(runFunc, argsInfo.length);
 
-    // @ts-expect-error 必要的类型断言, 正常情况不会出现递归过深问题, 只会因为类型推导有性能问题
     return runFunc as KFunc<
       PlaceholderFuncArgs<KFilterArray<Flag, A>, FilterPlainArgs<A, Required<O>>>,
       KCurryFuncReturnType<R>

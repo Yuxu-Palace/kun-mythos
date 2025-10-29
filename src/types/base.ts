@@ -61,11 +61,18 @@ export type KFillArray<L extends number, V, R extends any[] = []> = L extends KL
   : KFillArray<L, V, KAppend<V, R>>;
 
 /** 修订数组 */
-export type KPatchArray<Arr extends any[], I extends number, V, R extends any[] = []> = Arr extends [infer A, ...any]
+export type KPatchArray<Arr extends any[], I extends number, V, R extends any[] = []> = Arr extends [
+  infer A,
+  ...infer Last,
+]
   ? KLength<R> extends I
-    ? [...R, V, ...KDropHead<1, Arr>]
-    : KPatchArray<KDropHead<1, Arr>, I, V, KAppend<A, R>>
+    ? [...R, V, ...Last]
+    : KPatchArray<Last, I, V, KAppend<A, R>>
   : R;
+// 该方法可以实现功能, 但是类型会被转为对象 {}, 而不是保留数组类型 []
+// export type KPatchArray<Arr extends any[], I extends number, V> = {
+//   [K in keyof Arr]: K extends `${I}` ? V : Arr[K];
+// };
 
 /** 判断数组是否包含指定值 */
 export type KInclude<V, A extends any[]> = A extends [infer I, ...any]
