@@ -28,6 +28,9 @@ MFT(({ placeholderFuncWithSort }, { IS_BENCH, format }) => {
     // @ts-expect-error
     expect(() => placeholderFuncWithSort((_a: string, _b: number) => 1)(flag(0), 1)()).toThrowError(TypeError);
     expect(placeholderFuncWithSort((..._args: any[]) => 1).length).toBe(0);
+    const flag0 = flag(0);
+    placeholderFuncWithSort((a: number, b: string) => a + b)(flag0, '1');
+    expect(() => placeholderFuncWithSort((a: number, b: string) => a + b)(flag0, '1')).toThrowError(TypeError);
   });
 
   describe.runIf(IS_BENCH)(`${format}性能测试`, () => {

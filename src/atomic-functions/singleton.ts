@@ -19,7 +19,12 @@ export function singleton<T extends new (...args: any[]) => any>(ClassName: T): 
     construct: cacheFn<Required<ProxyHandler<T>>['construct']>(Reflect.construct),
   });
 
-  proxy.prototype.constructor = proxy;
+  Reflect.defineProperty(proxy.prototype, 'constructor', {
+    writable: false,
+    value: proxy,
+    enumerable: false,
+    configurable: false,
+  });
 
   return proxy;
 }

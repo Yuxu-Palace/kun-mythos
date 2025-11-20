@@ -11,7 +11,7 @@ import type {
 } from '../types/base';
 import type { KCurryFuncReturnType } from './curry';
 import { setFuncLength, syncFuncLength } from './private/fn-length';
-import { isFunction, isTrue } from './verify';
+import { isFunction, isSymbol, isTrue } from './verify';
 
 interface Flag<T extends number = number> {
   [PRIVATE_KEY]: true;
@@ -20,14 +20,23 @@ interface Flag<T extends number = number> {
 
 const FLAG_MAP = new Map<symbol, Flag<number>>();
 
+const FLAG_PREFIX = '@yuxu-palace/kun-mythos:placeholderFuncWithSort:flag-';
+
 function flag<T extends number>(id: T) {
-  const _flag = Symbol(`@yuxu-palace/kun-mythos:placeholderFuncWithSort:flag-${id}`);
+  const _flag = Symbol(`${FLAG_PREFIX}${id}`);
   FLAG_MAP.set(_flag, { [PRIVATE_KEY]: true, id });
   return _flag as unknown as Flag<T>;
 }
 
 function checkFlag(_flag: any): _flag is Flag {
-  return isTrue((FLAG_MAP.get(_flag) || {})[PRIVATE_KEY]);
+  const isFlag = isTrue((FLAG_MAP.get(_flag) || {})[PRIVATE_KEY]);
+  if (!isFlag && isSymbol(_flag)) {
+    const strFlag = _flag.toString().slice(7, -1);
+    if (strFlag.startsWith(FLAG_PREFIX)) {
+      throw new TypeError(`flag(${strFlag.slice(FLAG_PREFIX.length)}) 已被使用`);
+    }
+  }
+  return isFlag;
 }
 
 function parseFlag(_flag: symbol) {
@@ -71,7 +80,7 @@ type PlaceholderFuncArgs<
  *
  * @platform web, node, webworker
  *
- * @warning 占位符必须通过 flag 函数生成并且从 0 开始不能重复
+ * @warning 占位符必须通过 flag 函数生成并且从 0 开始不能重复, 且 flag 不应该被复用
  * @warning 占位符只能用于函数参数位置, 函数返回值位置无法使用占位符
  * @warning 无法与 curry 函数一起使用 (无法正确推导类型)! 具体看下方示例
  *

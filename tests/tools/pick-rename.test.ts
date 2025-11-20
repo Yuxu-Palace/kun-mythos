@@ -88,6 +88,7 @@ MFT(({ pickRename }) => {
     expect(pickRename(['a:.b'], { a: 1 }, { mode: 'pick' })).toEqual({ b: 1 });
     expect(pickRename(['a.b.c:.d'], {})).toEqual({ a: { b: { d: undefined } } });
     expect(pickRename(['a.b.c:d'], {})).toEqual({ d: undefined });
+    expect(pickRename(['a.b.c:.'], {})).toEqual({ a: { b: { c: undefined } } });
   });
 
   test('边界情况', () => {

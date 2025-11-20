@@ -47,8 +47,9 @@ function resolvePath(sourcePath: string, targetPath: string) {
     return targetPath;
   }
   const list = sourcePath.split('.');
-  list.pop();
-  list.push(targetPath.slice(1));
+  // biome-ignore lint/style/noNonNullAssertion: 已经前置判断所以可以忽略为空的可能
+  const propName = list.pop()!;
+  list.push(targetPath.slice(1) || propName);
   return list.join('.');
 }
 
