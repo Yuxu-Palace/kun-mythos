@@ -92,6 +92,7 @@ MFT(({ pickRename }) => {
 
   test('边界情况', () => {
     expect(() => pickRename([':test'], {})).toThrowError();
+    expect(() => pickRename(['.:test'], {})).toThrowError();
     expect(() => pickRename(['test:'], {})).toThrowError();
     expect(pickRename(['a.b.c:test'], {})).toEqual({ test: undefined });
     expect(() => pickRename(['test:a.b'], { a: 1 }, { mode: 'merge' })).toThrowError();

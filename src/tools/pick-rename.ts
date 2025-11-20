@@ -71,6 +71,9 @@ function parseArrayKeySourceInfo(keyMap: KeyMap & any[]) {
     if (parts.length !== 2 || !parts[0] || !parts[1]) {
       throw new TypeError(`keyMap[${i}] is not a valid key mapping: ${keySource}`);
     }
+    if (parts[0][0] === '.') {
+      throw new TypeError(`keyMap[${i}] is not a valid key mapping: ${keySource} ${parts[0]} starts with \`.\``);
+    }
     keyPathMap[i] = parts as KeySourceInfo;
   }
   return keyPathMap;
