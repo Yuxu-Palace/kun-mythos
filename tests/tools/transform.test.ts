@@ -11,10 +11,7 @@ MFT(({ applyTransform, applyTransforms, fallback, deepClone, isArray, isPlainObj
     needArray: 123,
     needObj: 123,
     array: [],
-    obj: {
-      needArray: 123,
-      array: [1, 'needNumber', 3],
-    },
+    obj: { needArray: 123, array: [1, 'needNumber', 3] },
   };
 
   const transformArray = fallback(isArray, () => []);
@@ -114,6 +111,46 @@ MFT(({ applyTransform, applyTransforms, fallback, deepClone, isArray, isPlainObj
       needObj: {},
       array: [],
       obj: { needArray: [], array: [1, 2, 3, 123] },
+    });
+  });
+
+  test('数组 keyPath 使用', () => {
+    expect(applyTransform(['needArray'], transformArray, deepClone(testObj))).toEqual({
+      needArray: [],
+      needObj: 123,
+      array: [],
+      obj: { needArray: 123, array: [1, 'needNumber', 3] },
+    });
+
+    expect(
+      applyTransforms(
+        [
+          ['obj.array.3'.split('.'), (_, __, origin) => origin.needArray],
+          ['needArray', transformArray],
+          ['obj.needArray'.split('.'), transformArray],
+          ['array', transformArray],
+          ['obj.array.1', transformNumber(2)],
+          ['needObj', transformObject],
+        ],
+        deepClone(testObj),
+      ),
+    ).toEqual({
+      needArray: [],
+      needObj: {},
+      array: [],
+      obj: { needArray: [], array: [1, 2, 3, 123] },
+    });
+
+    const testKey = Symbol('testKey');
+    expect(applyTransform([testKey, 'a', 1], transformNumber(2), deepClone(testObj))).toEqual({
+      [testKey]: { a: [undefined, 2] },
+      needArray: 123,
+      needObj: 123,
+      array: [],
+      obj: { needArray: 123, array: [1, 'needNumber', 3] },
+    });
+    expect(applyTransform(['a', testKey, 4], transformNumber(2), { a: { [testKey]: [1, 2, 3] } })).toEqual({
+      a: { [testKey]: [1, 2, 3, undefined, 2] },
     });
   });
 

@@ -91,6 +91,75 @@ MFT(({ pickRename }) => {
     expect(pickRename(['a.b.c:.'], {})).toEqual({ a: { b: { c: undefined } } });
   });
 
+  test('数组 keyPath 使用', () => {
+    expect(pickRename([[['a', 0], 'b']], { a: [1] })).toEqual({ b: 1 });
+    expect(
+      pickRename(
+        [
+          [
+            ['a', 0],
+            ['b', '0'],
+          ],
+        ],
+        { a: [1] },
+      ),
+    ).toEqual({ b: { 0: 1 } });
+    expect(
+      pickRename(
+        [
+          [
+            ['a', 0],
+            ['.', '1'],
+          ],
+        ],
+        { a: [1] },
+      ),
+    ).toEqual({ a: { 1: 1 } });
+    expect(pickRename([['a.0', ['.']]], { a: [1] })).toEqual({ a: { 0: 1 } });
+    expect(pickRename([['a.0', '.']], { a: [1] })).toEqual({ a: { 0: 1 } });
+
+    const testKey = Symbol('test');
+    expect(pickRename([[['a', testKey], '.']], { a: { [testKey]: 1 } })).toEqual({ a: { [testKey]: 1 } });
+    expect(pickRename([[['a', testKey], '.b']], { a: { [testKey]: 1 } })).toEqual({ a: { b: 1 } });
+
+    expect(
+      pickRename(
+        [
+          [
+            ['a', testKey],
+            ['.', 'b', 0],
+          ],
+        ],
+        { a: { [testKey]: 1 } },
+      ),
+    ).toEqual({ a: { b: [1] } });
+
+    expect(pickRename([[[testKey, 0], '.b']], { [testKey]: [123] })).toEqual({ [testKey]: { b: 123 } });
+    expect(
+      pickRename(
+        [
+          [
+            [testKey, 0],
+            ['.', 1, 'b'],
+          ],
+        ],
+        { [testKey]: [123] },
+      ),
+    ).toEqual({ [testKey]: [undefined, { b: 123 }] });
+    expect(
+      pickRename(
+        [
+          [
+            [testKey, 0],
+            ['.', 1, 'b'],
+          ],
+        ],
+        { [testKey]: [123] },
+        { mode: 'merge' },
+      ),
+    ).toEqual({ [testKey]: [123, { b: 123 }] });
+  });
+
   test('边界情况', () => {
     expect(() => pickRename([':test'], {})).toThrowError();
     expect(() => pickRename(['.:test'], {})).toThrowError();

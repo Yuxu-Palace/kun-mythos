@@ -1,10 +1,11 @@
-import { isArray, isObject, isPlainObject, isString, isUndef } from '../atomic-functions/verify';
+import { isArray, isNumber, isObject, isPlainObject, isString, isUndef } from '../atomic-functions/verify';
 
-export function parseSourceWithKeyPath(keyPath: string, obj: Record<PropertyKey, any>) {
-  const keys = keyPath.split('.');
+export function parseSourceWithKeyPath(keyPath: string | PropertyKey[], obj: Record<PropertyKey, any>) {
+  const oriKeys = parsePath(keyPath);
+  const keys = [...oriKeys];
 
   const target = keys.pop();
-  if (!target) {
+  if (isUndef(target) || (isString(target) && !target)) {
     throw new TypeError(`keyPath is not a valid key path: ${keyPath}`);
   }
 
@@ -17,11 +18,11 @@ export function parseSourceWithKeyPath(keyPath: string, obj: Record<PropertyKey,
     }
   }
 
-  return [current, target, (current || {})[target]];
+  return [current, target, (current || {})[target], oriKeys] as const;
 }
 
-export function setTarget(keyPath: string, obj: Record<PropertyKey, any>, value: any) {
-  const keys = keyPath.split('.');
+export function setTarget(keyPath: string | PropertyKey[], obj: Record<PropertyKey, any>, value: any) {
+  const keys = parsePath(keyPath);
   // biome-ignore lint/style/noNonNullAssertion: 此处的报错已被其他逻辑前置处理, 未对用户导出, 忽略该问题
   const target = keys.pop()!;
 
@@ -34,7 +35,8 @@ export function setTarget(keyPath: string, obj: Record<PropertyKey, any>, value:
         throw new TypeError(`keyPath is not a valid key path: ${keyPath}`);
       }
     } else {
-      current[key] = {};
+      const nextKey = keys[i + 1] || target;
+      current[key] = isNumber(nextKey) ? [] : {};
       current = current[key];
     }
   }
@@ -42,34 +44,47 @@ export function setTarget(keyPath: string, obj: Record<PropertyKey, any>, value:
   current[target] = value;
 }
 
-function resolvePath(sourcePath: string, targetPath: string) {
-  if (targetPath[0] !== '.') {
-    return targetPath;
-  }
-  const list = sourcePath.split('.');
-  // biome-ignore lint/style/noNonNullAssertion: 已经前置判断所以可以忽略为空的可能
-  const propName = list.pop()!;
-  list.push(targetPath.slice(1) || propName);
-  return list.join('.');
+function parsePath(sourcePath: string | PropertyKey[]) {
+  return isArray(sourcePath) ? sourcePath : sourcePath.split('.');
 }
 
-type KeyMap = string[] | Record<string, any>;
+function resolvePath(sourcePath: string | PropertyKey[], targetPath: string | PropertyKey[]) {
+  if (targetPath[0] !== '.') {
+    return parsePath(targetPath);
+  }
+  const list = parsePath(sourcePath);
+  // biome-ignore lint/style/noNonNullAssertion: 已经前置判断所以可以忽略为空的可能
+  const propName = list.pop()!;
+  if (isArray(targetPath)) {
+    const temp = targetPath.slice(1);
+    list.push(...(temp.length !== 0 ? temp : [propName]));
+  } else {
+    list.push(targetPath.slice(1) || propName);
+  }
+  return list;
+}
+
+type KeyMap = string[] | Record<string, any> | KeySourceInfo[];
 
 interface PickRenameOptions {
   mode?: 'pick' | 'merge';
 }
 
-type KeySourceInfo = [string, string];
+type KeySourceInfo = [PropertyKey[] | string, PropertyKey[] | string];
 
 function parseArrayKeySourceInfo(keyMap: KeyMap & any[]) {
   const keyPathMap: KeySourceInfo[] = Array.from({ length: keyMap.length });
   for (let i = 0; i < keyMap.length; i++) {
     const keySource = keyMap[i];
-    if (!isString(keySource)) {
+    let parts: any[];
+    if (isArray(keySource) && keySource.length === 2) {
+      parts = keySource as KeySourceInfo;
+    } else if (isString(keySource)) {
+      parts = keySource.split(':');
+    } else {
       throw new TypeError(`keyMap[${i}] is not a string`);
     }
-    const parts = keySource.split(':');
-    if (parts.length !== 2 || !parts[0] || !parts[1]) {
+    if (parts.length !== 2 || !parts[0].length || !parts[1].length) {
       throw new TypeError(`keyMap[${i}] is not a valid key mapping: ${keySource}`);
     }
     if (parts[0][0] === '.') {
@@ -116,9 +131,8 @@ function applyKeySourceInfo<T extends Record<PropertyKey, any>>(
 ) {
   for (let i = 0; i < keyPathMap.length; i++) {
     const [sourceKey, targetKey] = keyPathMap[i];
-    const [source, target] = parseSourceWithKeyPath(sourceKey, sourceObj);
-    const value = (source || {})[target];
-    setTarget(resolvePath(sourceKey, targetKey), result, value);
+    const [, , value, sourceKeyPath] = parseSourceWithKeyPath(sourceKey, sourceObj);
+    setTarget(resolvePath(sourceKeyPath, targetKey), result, value);
   }
   return result;
 }
@@ -135,7 +149,6 @@ export function pickRename<T extends Record<PropertyKey, any> = Record<PropertyK
 ): T {
   const { mode = 'pick' } = options || {};
   const result = (mode === 'merge' ? obj : {}) as T;
-
   const keyPathMap = parseKeySourceInfo(keyMap);
 
   return applyKeySourceInfo(keyPathMap, obj, result);

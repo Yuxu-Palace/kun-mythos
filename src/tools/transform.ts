@@ -41,7 +41,7 @@ export function fallback<T extends TransformFn<any>>(verifyFn: VerifyFn<any>, tr
 export function applyTransform<
   R extends Record<PropertyKey, any>,
   I extends Record<PropertyKey, any> = Record<PropertyKey, any>,
->(keyPath: string, transformFn: TransformFn<I>, obj: I): I & R {
+>(keyPath: string | PropertyKey[], transformFn: TransformFn<I>, obj: I): I & R {
   const [source, , value] = parseSourceWithKeyPath(keyPath, obj);
 
   const newValue = transformFn(value, source, obj);
@@ -51,7 +51,7 @@ export function applyTransform<
   return obj as I & R;
 }
 
-type TransformInfo = [string, TransformFn<any>];
+type TransformInfo = [string | PropertyKey[], TransformFn<any>];
 
 /**
  * 应用一批转换函数
