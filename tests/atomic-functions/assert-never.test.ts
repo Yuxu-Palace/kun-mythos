@@ -1,4 +1,5 @@
 import { assertType, expect, test } from 'vitest';
+import type { KEqual } from '@/index';
 import { loadModule, MFT } from '../utils';
 
 MFT(({ assertNever }) => {
@@ -68,7 +69,8 @@ test('类型测试', async () => {
       case 'square':
         return shape.size ** 2;
       default:
-        assertType<never>(shape);
+        // biome-ignore lint/correctness/noUndeclaredVariables: type-level exhaustiveness check
+        assertType<KEqual<typeof shape, never>>(true);
         return assertNever(shape, `Unhandled shape: ${(shape as any).kind}`);
     }
   };
@@ -89,7 +91,8 @@ test('类型测试', async () => {
     if (color === 'blue') {
       return 'Blue color';
     }
-    assertType<never>(color);
+    // biome-ignore lint/correctness/noUndeclaredVariables: type-level exhaustiveness check
+    assertType<KEqual<typeof color, never>>(true);
     return assertNever(color);
   };
 

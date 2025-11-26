@@ -324,7 +324,7 @@ MFT(
 import type { KEqual } from '@/index';
 
 describe('类型检查', async () => {
-  const { isFalsy, isTruthy, isTrue } = await loadModule();
+  const { isFalsy, isTruthy, isTrue, isEmptyArray } = await loadModule();
 
   test('isFalsy', () => {
     const a = '';
@@ -441,6 +441,48 @@ describe('类型检查', async () => {
       assertType<'TruE'>(d);
     } else {
       assertType<KEqual<typeof d, never>>(true);
+    }
+  });
+
+  test('isEmptyArray 类型测试', () => {
+    // 空数组
+    const arr1: unknown[] = [];
+    if (isEmptyArray(arr1)) {
+      assertType<[]>(arr1);
+    } else {
+      assertType<unknown[]>(arr1);
+    }
+
+    // 非空数组
+    const arr2: number[] = [1, 2, 3];
+    if (isEmptyArray(arr2)) {
+      assertType<[]>(arr2);
+    } else {
+      assertType<number[]>(arr2);
+    }
+
+    // 联合类型：数组 | 非数组
+    const arr3: string[] | number = Math.random() > 0.5 ? ['a'] : 123;
+    if (isEmptyArray(arr3)) {
+      assertType<[]>(arr3);
+    } else {
+      assertType<string[] | number>(arr3);
+    }
+
+    // 联合类型：空数组 | 非空数组
+    const arr4: [] | [number] = Math.random() > 0.5 ? [] : [1];
+    if (isEmptyArray(arr4)) {
+      assertType<[]>(arr4);
+    } else {
+      assertType<[number]>(arr4);
+    }
+
+    // 联合类型：数组 | null | undefined
+    const arr5: number[] | null | undefined = Math.random() > 0.5 ? [1] : null;
+    if (isEmptyArray(arr5)) {
+      assertType<[]>(arr5);
+    } else {
+      assertType<number[] | null | undefined>(arr5);
     }
   });
 });
