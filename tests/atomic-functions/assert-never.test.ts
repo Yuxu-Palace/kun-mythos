@@ -2,8 +2,12 @@ import { assertType, expect, test } from 'vitest';
 import { loadModule, MFT } from '../utils';
 
 MFT(({ assertNever }) => {
+  test('导出检查', () => {
+    expect(typeof assertNever).toBe('function');
+  });
+
   test('基本使用', () => {
-    expect(() => assertNever({} as never)).toThrow('value is not never');
+    expect(() => assertNever({} as never)).toThrow(TypeError);
   });
 
   test('自定义错误信息', () => {

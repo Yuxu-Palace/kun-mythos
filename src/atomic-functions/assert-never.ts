@@ -5,5 +5,5 @@
  * @param message - 报错信息，描述当前不受支持的场景。
  */
 export function assertNever(_value: never, message = 'value is not never'): never {
-  throw new Error(message);
+  throw new TypeError(message);
 }

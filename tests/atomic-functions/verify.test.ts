@@ -6,6 +6,7 @@ MFT(
     isObject,
     isPlainObject,
     isArray,
+    isEmptyArray,
     isSymbol,
     isPropertyKey,
     isNaN,
@@ -28,6 +29,7 @@ MFT(
       expect(typeof isPromise).toBe('function');
       expect(typeof isObject).toBe('function');
       expect(typeof isArray).toBe('function');
+      expect(typeof isEmptyArray).toBe('function');
       expect(typeof isSymbol).toBe('function');
       expect(typeof isPlainObject).toBe('function');
       expect(typeof isPropertyKey).toBe('function');
@@ -280,6 +282,18 @@ MFT(
         expect(isArray('1')).toBe(false);
         expect(isArray(null)).toBe(false);
         expect(isArray(undefined)).toBe(false);
+      });
+
+      test('isEmptyArray', () => {
+        expect(isEmptyArray([])).toBe(true);
+        expect(isEmptyArray([1])).toBe(false);
+        expect(isEmptyArray(['a', 'b', 'c'])).toBe(false);
+        expect(isEmptyArray(null)).toBe(false);
+        expect(isEmptyArray(undefined)).toBe(false);
+        expect(isEmptyArray('not array')).toBe(false);
+        expect(isEmptyArray(123)).toBe(false);
+        expect(isEmptyArray({ length: 1 })).toBe(false);
+        expect(isEmptyArray({})).toBe(false);
       });
 
       test('isSymbol', () => {

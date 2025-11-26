@@ -1,4 +1,3 @@
-export * from './array';
 export * from './assert-never';
 export * from './auto-bind-fn-this';
 export * from './cache-fn';
