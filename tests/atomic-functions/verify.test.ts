@@ -16,6 +16,7 @@ MFT(
     isPlainNumber,
     isPlainSymbol,
     isString,
+    isEmptyString,
     isUndef,
     isTrue,
     isFalse,
@@ -40,6 +41,7 @@ MFT(
       expect(typeof isPlainNumber).toBe('function');
       expect(typeof isPlainSymbol).toBe('function');
       expect(typeof isString).toBe('function');
+      expect(typeof isEmptyString).toBe('function');
       expect(typeof isUndef).toBe('function');
       expect(typeof isTrue).toBe('function');
       expect(typeof isFalse).toBe('function');
@@ -240,6 +242,17 @@ MFT(
         expect(isString(undefined)).toBe(false);
       });
 
+      test('isEmptyString', () => {
+        expect(isEmptyString('')).toBe(true);
+        expect(isEmptyString('not empty')).toBe(false);
+        expect(isEmptyString(1)).toBe(false);
+        expect(isEmptyString(Symbol('test'))).toBe(false);
+        expect(isEmptyString({})).toBe(false);
+        expect(isEmptyString([])).toBe(false);
+        expect(isEmptyString(null)).toBe(false);
+        expect(isEmptyString(undefined)).toBe(false);
+      });
+
       test('isPlainSymbol', () => {
         expect(isPlainSymbol(Symbol('test'))).toBe(true);
         expect(isPlainSymbol(Symbol.for('test'))).toBe(false);
@@ -324,7 +337,7 @@ MFT(
 import type { KEqual } from '@/index';
 
 describe('类型检查', async () => {
-  const { isFalsy, isTruthy, isTrue, isEmptyArray } = await loadModule();
+  const { isFalsy, isTruthy, isTrue, isEmptyArray, isEmptyString } = await loadModule();
 
   test('isFalsy', () => {
     const a = '';
@@ -483,6 +496,43 @@ describe('类型检查', async () => {
       assertType<[]>(arr5);
     } else {
       assertType<number[] | null | undefined>(arr5);
+    }
+  });
+
+  test('isEmptyString 类型测试', () => {
+    const str1: unknown = '';
+    if (isEmptyString(str1)) {
+      assertType<''>(str1);
+    } else {
+      assertType<unknown>(str1);
+    }
+
+    const str2: string = 'hello';
+    if (isEmptyString(str2)) {
+      assertType<''>(str2);
+    } else {
+      assertType<string>(str2);
+    }
+
+    const str3: string | number = Math.random() > 0.5 ? '' : 42;
+    if (isEmptyString(str3)) {
+      assertType<''>(str3);
+    } else {
+      assertType<string | number>(str3);
+    }
+
+    const str4: '' | 'world' = Math.random() > 0.5 ? '' : 'world';
+    if (isEmptyString(str4)) {
+      assertType<''>(str4);
+    } else {
+      assertType<'world'>(str4);
+    }
+
+    const str5: string | null | undefined = Math.random() > 0.5 ? '' : null;
+    if (isEmptyString(str5)) {
+      assertType<''>(str5);
+    } else {
+      assertType<string | null | undefined>(str5);
     }
   });
 });

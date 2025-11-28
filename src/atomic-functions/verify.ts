@@ -55,6 +55,11 @@ export function isString(_v: unknown): _v is string {
   return typeof _v === 'string';
 }
 
+/** 判断是一个空字符串 */
+export function isEmptyString(_v: unknown): _v is '' {
+  return isString(_v) && _v.length === 0;
+}
+
 /** 判断是一个数字 */
 export function isNumber(_v: unknown): _v is number {
   return typeof _v === 'number';
