@@ -26,10 +26,12 @@ export async function baseRequest<R, C extends RequestAPIConfig<any, R> = Reques
   config: C,
   getResponse: (requestInfo: Request) => Promise<Response>,
 ): Promise<R> {
-  const { url, parser, data, tdto, tvo, onResponse, ...rest } = config;
+  const { baseUrl, url, parser, data, tdto, tvo, onResponse, ...rest } = config;
+
+  const targetUrl = new URL(url, baseUrl);
 
   const body = getBody(data, tdto);
-  const requestInfo = new Request(url, { ...rest, body });
+  const requestInfo = new Request(targetUrl, { ...rest, body });
 
   const responseInfo = await getResponse(requestInfo);
 
