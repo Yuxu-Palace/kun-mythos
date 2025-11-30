@@ -13,22 +13,23 @@ export function createApiWithMap<M extends APIMap, D extends DefaultAPIConfig>(
       if (!isString(api.url)) {
         return createApiWithMap(api as Record<string, APIConfig>, defaultConfig);
       }
-      return createApi({ ...defaultConfig, ...(api as APIConfig) }, !!isCustom);
+      return createApi(api as APIConfig, defaultConfig, isString(isCustom));
     },
   }) as any;
 }
 
-export function createApi<A extends APIConfig, C extends boolean = false>(
-  api: A,
-  custom: C,
-): APITransformMethod<A, DefaultAPIConfig, C> {
+export function createApi<
+  A extends APIConfig,
+  D extends DefaultAPIConfig = DefaultAPIConfig,
+  C extends boolean = false,
+>(api: A, defaultConfig?: D, custom?: C): APITransformMethod<A, D, C> {
   if (!isString(api.url)) {
     throw new TypeError('入参应为 APIConfig 对象');
   }
   if (custom) {
-    return ((data, config) => request({ ...api, ...config, data })) as APITransformMethod<A, DefaultAPIConfig, true>;
+    return ((data, config) => request({ ...defaultConfig, ...api, ...config, data })) as APITransformMethod<A, D, true>;
   }
-  return ((data) => request({ ...api, data })) as APITransformMethod<A, DefaultAPIConfig, C>;
+  return ((data) => request({ ...defaultConfig, ...api, data })) as APITransformMethod<A, D, C>;
 }
 
 export function defineApi<A extends APIConfig>(_api: A): A {
@@ -38,32 +39,3 @@ export function defineApi<A extends APIConfig>(_api: A): A {
 export function defineApiMap<A extends APIMap>(_apiMap: A): A {
   return _apiMap;
 }
-
-const testApiMap = defineApiMap({
-  user: {
-    getInfo: {
-      url: '',
-      onResponse: () => '123',
-    },
-  },
-  getUserInfo: {
-    url: '',
-    // mock: true,
-    // onResponse: () => '123',
-  },
-});
-
-const testApi = createApiWithMap(testApiMap, {
-  onResponse: () => 123,
-});
-
-testApi.getUserInfo({});
-
-testApi.user.getInfoCustom(
-  {},
-  {
-    tvo: () => true,
-  },
-);
-
-testApi.user.getInfoCustom({});

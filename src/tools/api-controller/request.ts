@@ -1,5 +1,6 @@
 import { getType } from '@/atomic-functions/get-type';
 import { tryCall } from '@/atomic-functions/try-call';
+import { isFunction } from '@/atomic-functions/verify';
 import type { APIConfig, RequestAPIConfig } from './types';
 
 function getBody(data: any, tdto?: APIConfig['tdto']) {
@@ -45,7 +46,11 @@ export async function baseRequest<R, C extends RequestAPIConfig<any, R> = Reques
     if (parser === 'stream') {
       return responseInfo.body;
     }
-    return responseInfo[parser]();
+    const responseHandler = responseInfo[parser];
+    if (isFunction(responseHandler)) {
+      return responseHandler();
+    }
+    throw new TypeError('Invalid parser');
   });
 
   return tvo ? tvo(resResult) : (resResult as R);
@@ -57,7 +62,7 @@ export async function mockRequest<R, C extends RequestAPIConfig<any, R> = Reques
   const { onRequest, ...rest } = config;
 
   return baseRequest<R>(config, async (requestInfo) => {
-    const reqResult = await onRequest?.(requestInfo, config);
+    const reqResult = await (onRequest && onRequest(requestInfo, config));
 
     const responseBody = getBody(reqResult);
     return new Response(responseBody, { ...rest });
@@ -71,8 +76,12 @@ export async function networkRequest<R, C extends RequestAPIConfig<any, R> = Req
 }
 
 export function request<R, C extends RequestAPIConfig<any, R> = RequestAPIConfig<any, R>>(config: C): Promise<R> {
-  const { mock } = config;
-  if (mock) {
+  const { requestMode, requestModeMap } = config;
+  const customRequest = (requestModeMap || {})[requestMode || ''];
+  if (customRequest) {
+    return customRequest(config);
+  }
+  if (requestMode === 'mock') {
     return mockRequest(config);
   }
   return networkRequest(config);
