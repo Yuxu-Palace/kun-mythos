@@ -1,5 +1,6 @@
 import type { KCast, KEqual } from '@/types/base';
 
+/** 请求方法 */
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 
 export interface BaseAPIConfig<
@@ -10,18 +11,31 @@ export interface BaseAPIConfig<
   DefaultConfig extends DefaultAPIConfig = DefaultAPIConfig,
   ReqModeMapKeys extends string = string & {},
 > extends RequestInit {
+  /**
+   * 请求地址
+   *
+   * @example '/api/user'
+   * @example 'https://example.com/api/user'
+   */
   url: string;
+  /** 请求模式 */
   requestMode?: 'mock' | 'network' | ReqModeMapKeys;
+  /** 请求方法 */
   method?: RequestMethod;
-  parser?: 'json' | 'text' | 'blob' | 'arrayBuffer' | 'formData' | 'bytes' | 'stream';
+  /** 响应体解析方式 */
+  parser?: 'json' | 'text' | 'blob' | 'arrayBuffer' | 'formData' | 'bytes' | 'stream' | (string & {});
+  /** transform data transfer object */
   tdto?: (data: Input) => any;
+  /** transform view object */
   tvo?: (
     data: FindNonAny<[Awaited<MockResOutput>, Awaited<ReturnType<NonNullable<DefaultConfig['onResponse']>>>]>,
   ) => Output;
+  /** 请求前 hook */
   onRequest?: (
     data: Request,
     config: RequestAPIConfig<Input, Output, MockReqOutput, MockResOutput, ReqModeMapKeys>,
   ) => MockReqOutput;
+  /** 响应前 hook */
   onResponse?: (
     data: Response,
     config: RequestAPIConfig<Input, Output, MockReqOutput, MockResOutput, ReqModeMapKeys>,
@@ -35,7 +49,9 @@ export interface DefaultAPIConfig<
   MockResOutput = any,
   ReqModeMapKeys extends string = string & {},
 > extends Omit<BaseAPIConfig<Input, Output, MockReqOutput, MockResOutput, DefaultAPIConfig, ReqModeMapKeys>, 'url'> {
+  /** 基本地址 */
   baseUrl?: string;
+  /** 请求模式 map */
   requestModeMap?: Record<
     ReqModeMapKeys,
     (config: RequestAPIConfig<Input, Output, MockReqOutput, MockResOutput, ReqModeMapKeys>) => any
@@ -50,6 +66,7 @@ export interface RequestAPIConfig<
   ReqModeMapKeys extends string = string & {},
 > extends DefaultAPIConfig<Input, Output, MockReqOutput, MockResOutput, ReqModeMapKeys>,
     BaseAPIConfig<Input, Output, MockReqOutput, MockResOutput, DefaultAPIConfig, ReqModeMapKeys> {
+  /** 请求数据 */
   data?: Input;
 }
 
@@ -64,6 +81,9 @@ export interface RequestAPIConfig<
 //   requestMode: 'mock';
 // }
 
+/**
+ * API config
+ */
 export type APIConfig<
   Input = any,
   Output = any,
@@ -74,6 +94,7 @@ export type APIConfig<
 > = BaseAPIConfig<Input, Output, MockReqOutput, MockResOutput, DefaultConfig, ReqModeMapKeys>;
 // | MockAPIConfig<Input, Output, MockReqOutput, MockResOutput, DefaultConfig, ReqModeMapKeys>;
 
+/** API map */
 export type APIMap = Record<string, APIConfig | Record<string, APIConfig>>;
 
 export type IsUnknownAny<T> = KEqual<T, any> extends true ? true : KEqual<T, unknown> extends true ? true : false;

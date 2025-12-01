@@ -1,7 +1,13 @@
-import { isString } from '@/atomic-functions/verify';
+import { isString, isTrue } from '@/atomic-functions/verify';
 import { request } from './request';
 import type { APIConfig, APIMap, APIMapTransformMethods, APITransformMethod, DefaultAPIConfig } from './types';
 
+/**
+ * 通过 API config map 创建请求对象
+ *
+ * @param apiMap API config map
+ * @param defaultConfig 默认配置
+ */
 export function createApiWithMap<M extends APIMap, D extends DefaultAPIConfig>(
   apiMap: M,
   defaultConfig?: D,
@@ -18,6 +24,13 @@ export function createApiWithMap<M extends APIMap, D extends DefaultAPIConfig>(
   }) as any;
 }
 
+/**
+ * 通过 API config 创建一个请求方法
+ *
+ * @param api API config
+ * @param defaultConfig 默认配置
+ * @param custom 是否为自定义请求
+ */
 export function createApi<
   A extends APIConfig,
   D extends DefaultAPIConfig = DefaultAPIConfig,
@@ -26,16 +39,22 @@ export function createApi<
   if (!isString(api.url)) {
     throw new TypeError('入参应为 APIConfig 对象');
   }
-  if (custom) {
+  if (isTrue(custom)) {
     return ((data, config) => request({ ...defaultConfig, ...api, ...config, data })) as APITransformMethod<A, D, true>;
   }
   return ((data) => request({ ...defaultConfig, ...api, data })) as APITransformMethod<A, D, C>;
 }
 
+/**
+ * 定义 API, ts 支持, 获取更好的类型声明
+ */
 export function defineApi<A extends APIConfig>(_api: A): A {
   return _api;
 }
 
+/**
+ * 定义 API map, ts 支持, 获取更好的类型声明
+ */
 export function defineApiMap<A extends APIMap>(_apiMap: A): A {
   return _apiMap;
 }

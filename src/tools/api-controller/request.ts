@@ -23,7 +23,7 @@ function getBody(data: any, tdto?: APIConfig['tdto']) {
   );
 }
 
-export async function baseRequest<R, C extends RequestAPIConfig<any, R> = RequestAPIConfig<any, R>>(
+async function baseRequest<R, C extends RequestAPIConfig<any, R> = RequestAPIConfig<any, R>>(
   config: C,
   getResponse: (requestInfo: Request) => Promise<Response>,
 ): Promise<R> {
@@ -46,7 +46,7 @@ export async function baseRequest<R, C extends RequestAPIConfig<any, R> = Reques
     if (parser === 'stream') {
       return responseInfo.body;
     }
-    const responseHandler = responseInfo[parser];
+    const responseHandler = (responseInfo as unknown as Record<string, () => Promise<any>>)[parser];
     if (isFunction(responseHandler)) {
       return responseHandler();
     }
@@ -56,9 +56,7 @@ export async function baseRequest<R, C extends RequestAPIConfig<any, R> = Reques
   return tvo ? tvo(resResult) : (resResult as R);
 }
 
-export async function mockRequest<R, C extends RequestAPIConfig<any, R> = RequestAPIConfig<any, R>>(
-  config: C,
-): Promise<R> {
+async function mockRequest<R, C extends RequestAPIConfig<any, R> = RequestAPIConfig<any, R>>(config: C): Promise<R> {
   const { onRequest, ...rest } = config;
 
   return baseRequest<R>(config, async (requestInfo) => {
@@ -69,12 +67,15 @@ export async function mockRequest<R, C extends RequestAPIConfig<any, R> = Reques
   });
 }
 
-export async function networkRequest<R, C extends RequestAPIConfig<any, R> = RequestAPIConfig<any, R>>(
-  config: C,
-): Promise<R> {
+async function networkRequest<R, C extends RequestAPIConfig<any, R> = RequestAPIConfig<any, R>>(config: C): Promise<R> {
   return baseRequest<R>(config, fetch);
 }
 
+/**
+ * 请求方法
+ *
+ * @param config 请求配置
+ */
 export function request<R, C extends RequestAPIConfig<any, R> = RequestAPIConfig<any, R>>(config: C): Promise<R> {
   const { requestMode, requestModeMap } = config;
   const customRequest = (requestModeMap || {})[requestMode || ''];
