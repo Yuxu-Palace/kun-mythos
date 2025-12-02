@@ -1,5 +1,5 @@
 import type { KAnyFunc, KCast, KEqual, KFunc } from '@/types/base';
-import type { Empty } from '../../types/private';
+import type { Empty } from '@/types/private';
 
 /** 请求方法 */
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | (string & {});
@@ -161,7 +161,7 @@ export type FindNonAny<T extends any[], Other = Empty> = T extends [infer F, ...
       : F
   : any;
 
-type ApiConfigParams<I, C, Custom> = Custom extends true ? [I?, C?] : [I?];
+type APIHandlerParams<I, C, Custom> = Custom extends true ? [I?, C?] : [I?];
 
 type DefineRequestModes<D extends DefaultAPIConfig> = keyof NonNullable<D['requestModeMap']> & string;
 
@@ -209,7 +209,7 @@ type CustomRequestModeReturn<
       ? Pack<ReturnType<CustomReq>>
       : any;
 
-type APIFuncResult<
+type APIHandlerResult<
   AConfig extends APIConfig,
   CallConfig extends CallAPIConfig = APIConfig,
   UserR = Empty,
@@ -313,13 +313,13 @@ export type APITransformMethod<
     DefineRequestModes<InputD>
   >,
 >(
-  ...args: ApiConfigParams<
+  ...args: APIHandlerParams<
     KEqual<I, APIInputType<A, InputD>> extends true ? APIInputType<C, { tdto: KFunc<[I]> }> : I,
     C,
     Custom
   >
 ) => Promise<
-  APIFuncResult<
+  APIHandlerResult<
     A,
     KCast<C, Partial<APIConfig>>,
     R,
