@@ -1,4 +1,4 @@
-import { isString, isTrue } from '@/atomic-functions/verify';
+import { isNullOrUndef, isString, isTrue } from '@/atomic-functions/verify';
 import { request } from './request';
 import type { APIConfig, APIMap, APIMapTransformMethods, APITransformMethod, DefaultAPIConfig } from './types';
 
@@ -8,14 +8,17 @@ import type { APIConfig, APIMap, APIMapTransformMethods, APITransformMethod, Def
  * @param apiMap API config map
  * @param defaultConfig 默认配置
  */
-export function createApiWithMap<M extends APIMap, D extends DefaultAPIConfig>(
+export function createApiWithMap<M extends APIMap, D extends DefaultAPIConfig = DefaultAPIConfig>(
   apiMap: M,
   defaultConfig?: D,
 ): APIMapTransformMethods<M, D> {
   return new Proxy(apiMap, {
     get(target, prop: string, receiver) {
       const [name, isCustom] = prop.split('Custom');
-      const api = Reflect.get(target, name, receiver) || {};
+      const api = Reflect.get(target, name, receiver);
+      if (isNullOrUndef(api)) {
+        return void 0;
+      }
       if (!isString(api.url)) {
         return createApiWithMap(api as Record<string, APIConfig>, defaultConfig);
       }

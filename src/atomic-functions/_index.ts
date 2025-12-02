@@ -7,6 +7,7 @@ export * from './curry';
 export * from './data-storage';
 export * from './deep-clone';
 export * from './get-now';
+export * from './get-type';
 export * from './iife';
 export * from './pick';
 export * from './pipe';

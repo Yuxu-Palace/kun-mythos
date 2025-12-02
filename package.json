@@ -65,6 +65,7 @@
     "cross-env": "^7.0.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
+    "msw": "^2.12.3",
     "typescript": "^5.8.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "3.2.4"

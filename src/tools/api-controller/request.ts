@@ -1,38 +1,43 @@
 import { getType } from '@/atomic-functions/get-type';
 import { tryCall } from '@/atomic-functions/try-call';
-import { isFunction } from '@/atomic-functions/verify';
+import { isFunction, isNullOrUndef } from '@/atomic-functions/verify';
 import type { APIConfig, RequestAPIConfig } from './types';
 
 function getBody(data: any, tdto?: APIConfig['tdto']) {
-  const _body = tdto?.(data) || data;
-  return tryCall(
-    () => JSON.stringify(_body),
-    (err) => {
-      const bodyType = getType(_body);
-      switch (bodyType) {
-        case 'object':
-        case 'array':
-        case 'function':
-        case 'symbol':
-          // 更多不允许的类型
-          throw err;
-        default:
-          return _body;
-      }
-    },
-  );
+  const _body = tdto ? tdto(data) : data;
+  const bodyType = getType(_body);
+  switch (bodyType) {
+    case 'object':
+    case 'array':
+    case 'number':
+    case 'boolean':
+    case 'function':
+      return JSON.stringify(_body);
+    default:
+      return _body;
+  }
 }
 
 async function baseRequest<R, C extends RequestAPIConfig<any, R> = RequestAPIConfig<any, R>>(
   config: C,
   getResponse: (requestInfo: Request) => Promise<Response>,
 ): Promise<R> {
-  const { baseUrl, url, parser, data, tdto, tvo, onResponse, ...rest } = config;
+  const { baseUrl, url, method: _method, parser, data, tdto, tvo, onResponse, ...rest } = config;
 
-  const targetUrl = new URL(url, baseUrl);
+  const targetUrl = new URL(url || '/', baseUrl || (globalThis.location || {}).href);
+  const method = _method?.toUpperCase() as RequestInit['method'];
 
-  const body = getBody(data, tdto);
-  const requestInfo = new Request(targetUrl, { ...rest, body });
+  const requestInfo = tryCall(() => {
+    if (isNullOrUndef(method) || method === 'GET' || method === 'HEAD') {
+      const queryKeys = Object.keys(data || {});
+      for (let i = 0; i < queryKeys.length; ++i) {
+        targetUrl.searchParams.append(queryKeys[i], (data as any)[queryKeys[i]]);
+      }
+      return new Request(targetUrl, { ...rest, method });
+    }
+    const body = getBody(data, tdto);
+    return new Request(targetUrl, { ...rest, method, body });
+  });
 
   const responseInfo = await getResponse(requestInfo);
 
@@ -48,7 +53,7 @@ async function baseRequest<R, C extends RequestAPIConfig<any, R> = RequestAPICon
     }
     const responseHandler = (responseInfo as unknown as Record<string, () => Promise<any>>)[parser];
     if (isFunction(responseHandler)) {
-      return responseHandler();
+      return Reflect.apply(responseHandler, responseInfo, []);
     }
     throw new TypeError('Invalid parser');
   });

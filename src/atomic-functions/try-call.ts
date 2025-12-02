@@ -2,7 +2,7 @@ import type { KEqual } from '@/types/base';
 import type { Empty } from '@/types/private';
 import { isFunction, isPromise } from './verify';
 
-type TryCallResult<R, E> = KEqual<E, Empty> extends true ? (R extends Promise<any> ? R : R | undefined) : R | E;
+type TryCallResult<R, E> = KEqual<E, Empty> extends true ? (R extends Promise<any> ? Promise<Awaited<R>> : R) : R | E;
 
 /**
  * 包装一个拦截错误的函数
