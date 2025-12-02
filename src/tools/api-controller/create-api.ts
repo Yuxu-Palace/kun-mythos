@@ -1,6 +1,13 @@
 import { isNullOrUndef, isString, isTrue } from '@/atomic-functions/verify';
 import { request } from './request';
-import type { APIConfig, APIMap, APIMapTransformMethods, APITransformMethod, DefaultAPIConfig } from './types';
+import type {
+  APIConfig,
+  APIMap,
+  APIMapTransformMethods,
+  APITransformMethod,
+  DefaultAPIConfig,
+  DefineAPIConfig,
+} from './types';
 
 /**
  * 通过 API config map 创建请求对象
@@ -51,13 +58,13 @@ export function createApi<
 /**
  * 定义 API, ts 支持, 获取更好的类型声明
  */
-export function defineApi<A extends APIConfig>(_api: A): A {
+export function defineApi<U extends string, A extends DefineAPIConfig<U>>(_api: A): A {
   return _api;
 }
 
 /**
  * 定义 API map, ts 支持, 获取更好的类型声明
  */
-export function defineApiMap<A extends APIMap>(_apiMap: A): A {
+export function defineApiMap<U extends string, A extends APIMap<U>>(_apiMap: A): A {
   return _apiMap;
 }

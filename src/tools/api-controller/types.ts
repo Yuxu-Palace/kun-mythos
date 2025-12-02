@@ -28,6 +28,14 @@ type ParserReturn<RM extends RequestMode, P extends Parser, ReqOutput, UserR = E
   ? ParserResult<P, UserR>
   : EmptyUnwrap<UserR, RM extends 'mock' ? ReqOutput : any>;
 
+type URLParamParser<U extends string, Param extends string = never> = U extends `${string}/:${infer P}/${infer Rest}`
+  ? URLParamParser<`/${Rest}`, Param | P>
+  : U extends `${string}/:${infer P}`
+    ? P | Param
+    : Param;
+
+type CheckNonParamUrlAPIConfig<A extends APIConfig> = KEqual<URLParamParser<A['url']>, never>;
+
 export interface BaseAPIConfig<
   Input = any,
   Output = any,
@@ -35,6 +43,7 @@ export interface BaseAPIConfig<
   ResOutput = any,
   DefaultConfig extends DefaultAPIConfig = DefaultAPIConfig,
   ReqModeMapKeys extends string = string & {},
+  Url extends string = string,
 > extends RequestInit {
   /**
    * 请求地址
@@ -42,7 +51,8 @@ export interface BaseAPIConfig<
    * @example '/api/user'
    * @example 'https://example.com/api/user'
    */
-  url: string;
+  url: Url;
+  params?: Record<URLParamParser<Url>, string>;
   /** 请求模式 */
   requestMode?: RequestMode<ReqModeMapKeys>;
   /** 请求方法 */
@@ -136,7 +146,8 @@ export type APIConfig<
   ResOutput = any,
   DefaultConfig extends DefaultAPIConfig = DefaultAPIConfig,
   ReqModeMapKeys extends string = string & {},
-> = BaseAPIConfig<Input, Output, ReqOutput, ResOutput, DefaultConfig, ReqModeMapKeys>;
+  Url extends string = string,
+> = BaseAPIConfig<Input, Output, ReqOutput, ResOutput, DefaultConfig, ReqModeMapKeys, Url>;
 // | MockAPIConfig<Input, Output, ReqOutput, ResOutput, DefaultConfig, ReqModeMapKeys>;
 
 export type CallAPIConfig<
@@ -146,10 +157,16 @@ export type CallAPIConfig<
   ResOutput = any,
   DefaultConfig extends DefaultAPIConfig = DefaultAPIConfig,
   ReqModeMapKeys extends string = string & {},
-> = Omit<APIConfig<Input, Output, ReqOutput, ResOutput, DefaultConfig, ReqModeMapKeys>, 'url'>;
+  Url extends string = string,
+> = Omit<APIConfig<Input, Output, ReqOutput, ResOutput, DefaultConfig, ReqModeMapKeys, Url>, 'url'>;
+
+export type DefineAPIConfig<U extends string> = APIConfig<any, any, any, any, any, any, U>;
 
 /** API map */
-export type APIMap = Record<string, APIConfig | Record<string, APIConfig>>;
+export type APIMap<U extends string = string & {}> = Record<
+  string,
+  DefineAPIConfig<U> | Record<string, DefineAPIConfig<U>>
+>;
 
 export type IsUnknownAny<T> = KEqual<T, any> extends true ? true : KEqual<T, unknown> extends true ? true : false;
 
@@ -161,7 +178,9 @@ export type FindNonAny<T extends any[], Other = Empty> = T extends [infer F, ...
       : F
   : any;
 
-type APIHandlerParams<I, C, Custom> = Custom extends true ? [I?, C?] : [I?];
+type APIHandlerArgs<I, C extends CallAPIConfig, Custom, NonParamUrl extends boolean> = FindNonAny<
+  [NonParamUrl extends true ? any : [I, C & Required<Pick<C, 'params'>>], Custom extends true ? [I?, C?] : [I?], [I?]]
+>;
 
 type DefineRequestModes<D extends DefaultAPIConfig> = keyof NonNullable<D['requestModeMap']> & string;
 
@@ -294,6 +313,7 @@ export type APITransformMethod<
   A extends APIConfig,
   InputD extends DefaultAPIConfig = DefaultAPIConfig,
   Custom extends boolean = false,
+  NonParamUrl extends boolean = CheckNonParamUrlAPIConfig<A>,
 > = <
   R = Empty,
   I extends APIInputType<A, InputD> = APIInputType<A, InputD>,
@@ -303,20 +323,23 @@ export type APITransformMethod<
     PropResult<A, 'onRequest'>,
     PropResult<A, 'onResponse'>,
     InputD,
-    DefineRequestModes<InputD>
+    DefineRequestModes<InputD>,
+    A['url']
   > = CallAPIConfig<
     I,
     any,
     PropResult<A, 'onRequest'>,
     PropResult<A, 'onResponse'>,
     InputD,
-    DefineRequestModes<InputD>
+    DefineRequestModes<InputD>,
+    A['url']
   >,
 >(
-  ...args: APIHandlerParams<
+  ...args: APIHandlerArgs<
     KEqual<I, APIInputType<A, InputD>> extends true ? APIInputType<C, { tdto: KFunc<[I]> }> : I,
     C,
-    Custom
+    Custom,
+    NonParamUrl
   >
 ) => Promise<
   APIHandlerResult<
@@ -333,10 +356,20 @@ export type APIMapTransformMethods<
   M extends APIMap | Record<string, APIConfig>,
   D extends DefaultAPIConfig = DefaultAPIConfig,
 > = {
-  [K in keyof M]: M[K] extends APIConfig
-    ? APITransformMethod<M[K], D, false>
+  // 普通请求方法
+  [K in keyof M as M[K] extends APIConfig
+    ? // 如果 url 中不存在 param 参数 则直接使用, 否则忽略
+      CheckNonParamUrlAPIConfig<M[K]> extends true
+      ? K
+      : never
+    : // 不是 APIConfig 的话就是嵌套的 api map, 直接返回 K 即可
+      K]: M[K] extends APIConfig
+    ? CheckNonParamUrlAPIConfig<M[K]> extends true
+      ? undefined
+      : APITransformMethod<M[K], D, false>
     : APIMapTransformMethods<M[K] & Record<string, APIConfig>, D>;
 } & {
+  // 支持自定义配置请求方法
   [K in keyof M as M[K] extends APIConfig ? `${K & string}Custom` : never]: APITransformMethod<
     KCast<M[K], APIConfig>,
     D,
