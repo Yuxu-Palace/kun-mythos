@@ -3,6 +3,7 @@ import type { KAnyFunc } from '@/types/base';
 import { request } from './request';
 import type {
   APIConfig,
+  APIInstance,
   APIMap,
   APIMapTransformMethods,
   APITransformMethod,
@@ -11,6 +12,25 @@ import type {
 } from './types';
 
 const FROM_DEFINE = Symbol('fromDefine');
+
+function instanceMemberGetter(prop: string, instanceObj: Record<string, any>) {
+  return instanceObj[prop];
+}
+
+function createInstance(
+  apiMap: APIConfig | APIMap,
+  realDefaultConfig: DefaultAPIConfig,
+  defaultConfig?: DefaultAPIConfig,
+) {
+  return {
+    $: apiMap,
+    $$: defaultConfig as any,
+    $$r: realDefaultConfig,
+    $updateBaseUrl(baseUrl) {
+      realDefaultConfig.baseUrl = baseUrl;
+    },
+  } satisfies APIInstance<any, any>;
+}
 
 /**
  * 通过 API config map 创建请求对象
@@ -25,11 +45,15 @@ export function createApiWithMap<M extends APIMap, D extends DefaultAPIConfig = 
   const fromDefine = (apiMap as any)[FROM_DEFINE];
   delete (apiMap as any)[FROM_DEFINE];
   const proxyCache: Record<string, any> = {};
+  const realDefaultConfig = defaultConfig || {};
 
-  return new Proxy(apiMap, {
+  const instanceObj = createInstance(apiMap, realDefaultConfig, defaultConfig);
+
+  const proxy = new Proxy(apiMap, {
     get(target, prop: string, receiver) {
-      if (prop === '$') {
-        return apiMap;
+      const instanceValue = instanceMemberGetter(prop, instanceObj);
+      if (instanceValue) {
+        return instanceValue;
       }
       const isCustom = isString(prop) && prop.endsWith('Custom');
       const name = isCustom ? prop.slice(0, -'Custom'.length) : prop;
@@ -42,14 +66,19 @@ export function createApiWithMap<M extends APIMap, D extends DefaultAPIConfig = 
       }
       let result: any = null;
       if (isString(api.url)) {
-        result = createApi({ ...api, [FROM_DEFINE]: fromDefine } as unknown as APIConfig, defaultConfig, isCustom);
+        result = createApi({ ...api, [FROM_DEFINE]: fromDefine } as unknown as APIConfig, realDefaultConfig, isCustom);
       } else {
-        result = createApiWithMap({ ...api, [FROM_DEFINE]: fromDefine } as Record<string, APIConfig>, defaultConfig);
+        result = createApiWithMap(
+          { ...api, [FROM_DEFINE]: fromDefine } as Record<string, APIConfig>,
+          realDefaultConfig,
+        );
       }
       proxyCache[prop] = result;
       return result;
     },
   }) as any;
+
+  return proxy;
 }
 
 /**
@@ -66,6 +95,7 @@ export function createApi<
 >(api: A, defaultConfig?: D, custom?: C): APITransformMethod<A, D, C> {
   const fromDefine = (api as any)[FROM_DEFINE];
   delete (api as any)[FROM_DEFINE];
+  const realDefaultConfig = defaultConfig || {};
 
   if (!isString(api.url)) {
     throw new TypeError('入参应为 APIConfig 对象');
@@ -78,13 +108,13 @@ export function createApi<
       throw new TypeError('url 中存在 params 参数, 不支持普通请求, 转为自定义请求');
     }
   }
-  const baseConfig = { ...defaultConfig, ...api };
 
   let handler: any = null;
   if (isTrue(custom)) {
     handler = (async (data, config) =>
       request({
-        ...baseConfig,
+        ...realDefaultConfig,
+        ...api,
         ...config,
         url: api.url,
         data,
@@ -93,19 +123,24 @@ export function createApi<
   } else {
     handler = (async (data) =>
       request({
-        ...baseConfig,
+        ...realDefaultConfig,
+        ...api,
         data,
         oriUrl: api.url,
       })) as KAnyFunc;
   }
 
-  Reflect.defineProperty(handler, '$', {
-    get: () => api,
-    enumerable: false,
-    configurable: false,
-  });
+  const instanceObj = createInstance(api, realDefaultConfig, defaultConfig);
 
-  return handler;
+  return new Proxy(handler, {
+    get(target, prop: string, receiver) {
+      const instanceValue = instanceMemberGetter(prop, instanceObj);
+      if (instanceValue) {
+        return instanceValue;
+      }
+      return Reflect.get(target, prop, receiver);
+    },
+  });
 }
 
 /**

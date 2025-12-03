@@ -351,7 +351,18 @@ export type APITransformMethod<
     ReturnType<KCast<RealProp<'onRequest', C, A, InputD>, KAnyFunc>>,
     Custom
   >
->) & { $: A };
+>) &
+  APIInstance<A, InputD>;
+
+export type APIInstance<A, D> = {
+  $: A;
+  $$: DefaultAPIConfig extends D ? undefined : D;
+  $$r: DefaultAPIConfig;
+} & APIInstanceHandler;
+
+interface APIInstanceHandler {
+  $updateBaseUrl(baseUrl: string): void;
+}
 
 export type APIMapTransformMethods<
   M extends APIMap | Record<string, APIConfig>,
@@ -374,4 +385,4 @@ export type APIMapTransformMethods<
     D,
     true
   >;
-} & { $: M };
+} & APIInstance<M, D>;

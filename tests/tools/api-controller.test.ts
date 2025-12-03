@@ -254,7 +254,7 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
     expect(mockApi.user.getList).toBe(mockApi.user.getList);
   });
 
-  test('$ property', async () => {
+  test('from $ property get api config', async () => {
     expect(mockApi.user.getInfo.$).toStrictEqual(getUserInfoApi.$);
     expect(mockApi.user.getInfo.$).toStrictEqual(getUserInfoApiConfig);
     expect(mockApi.user.getInfoCustom.$).toStrictEqual(getUserInfoApiConfig);
@@ -268,5 +268,46 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
 
     const from$userApiMap = createApiWithMap(mockApi.user.$, { baseUrl: 'https://api.example.com' });
     expect(await from$userApiMap.getInfo({ id: '1' })).toEqual({ id: '1', name: 'John Doe', age: 18 });
+  });
+
+  test('from $$ property get default config', async () => {
+    expect(mockApi.user.getInfo.$$).toStrictEqual(mockApi.user.getInfo.$$);
+    expect(mockApi.user.getInfo.$$).toEqual({ baseUrl: 'https://api.example.com', requestMode: 'mock' });
+    expect(mockApi.$$).toStrictEqual(mockApi.user.$$);
+    expect(mockApi.$$).toStrictEqual(mockApi.user.getInfo.$$);
+
+    const from$apiAnd$$defaultFormMap = createApi(mockApi.user.getInfo.$, mockApi.$$);
+    expect(await from$apiAnd$$defaultFormMap({ id: '1' })).toEqual({ id: '1', name: 'John Doe', age: 18 });
+
+    const from$apiAnd$$defaultFromApi = createApi(mockApi.user.getInfo.$, getUserInfoApi.$$);
+    expect(await from$apiAnd$$defaultFromApi({ id: '1' })).toEqual({ id: '1', name: 'John Doe', age: 18 });
+  });
+
+  test('updateBaseUrl', async () => {
+    const { ...mockDefaultConfig } = mockApi.$$;
+
+    const updateApiMap = createApiWithMap(mockApi.user.$, mockDefaultConfig);
+    expect(updateApiMap.$$).toStrictEqual(updateApiMap.$$r);
+    expect(updateApiMap.$$).toStrictEqual(mockDefaultConfig);
+    expect(updateApiMap.$$.baseUrl).toBe('https://api.example.com');
+    updateApiMap.$updateBaseUrl('https://api.example.com/api');
+    expect(updateApiMap.$$.baseUrl).toBe('https://api.example.com/api');
+
+    const updateApi = createApi(
+      defineApi({ ...mockApi.user.getInfo.$, url: '/user/:id/custom-name/:name', tdto: null }),
+      void 0,
+      true,
+    );
+    updateApi.$updateBaseUrl('https://api.example.com/api');
+    expect(updateApi.$$).toBeUndefined();
+    expect(updateApi.$$).not.toBe(updateApi.$$r);
+    expect(updateApi.$$r.baseUrl).toBe('https://api.example.com/api');
+    expect(await updateApi(null, { params: { id: '1', name: 'test' } })).toEqual({ id: '1', name: 'test', age: 18 });
+
+    const updateApiMapNotDefault = createApiWithMap(mockApi.user.$);
+    updateApiMapNotDefault.$updateBaseUrl('https://api.example.com/api');
+    expect(updateApiMapNotDefault.$$).toBeUndefined();
+    expect(updateApiMapNotDefault.$$).not.toBe(updateApiMapNotDefault.$$r);
+    expect(updateApiMapNotDefault.$$r.baseUrl).toBe('https://api.example.com/api');
   });
 });

@@ -18,13 +18,24 @@ function getBody(data: any, tdto?: APIConfig['tdto']) {
   }
 }
 
+function targetUrlParser(_url: string, _baseUrl: string | undefined) {
+  const tempBaseUrl = _baseUrl || (globalThis.location || {}).origin;
+  let url = _url;
+  let baseUrl: string | URL | undefined = tempBaseUrl;
+  if (tempBaseUrl) {
+    baseUrl = new URL(tempBaseUrl);
+    url = (baseUrl.pathname === '/' ? '' : baseUrl.pathname) + (_url[0] === '/' ? _url : `/${_url}`);
+  }
+  return new URL(url || '/', baseUrl);
+}
+
 async function baseRequest<R, C extends RequestAPIConfig<any, R> = RequestAPIConfig<any, R>>(
   config: C,
   getResponse: (requestInfo: Request) => Promise<Response>,
 ): Promise<R> {
   const { baseUrl, url, method: _method, parser, data, tdto, tvo, onResponse, ...rest } = config;
 
-  const targetUrl = new URL(url || '/', baseUrl || (globalThis.location || {}).href);
+  const targetUrl = targetUrlParser(url, baseUrl);
   const method = _method?.toUpperCase() as RequestInit['method'];
 
   const requestInfo = tryCall(() => {

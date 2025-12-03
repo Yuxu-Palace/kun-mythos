@@ -327,13 +327,13 @@
                 "selector": {
                   "kind": "objectLiteralMember"
                 },
-                "match": "[$]|(.*)"
+                "match": "[$]+|[$].*|(.*)"
               },
               {
                 "selector": {
                   "kind": "typeMember"
                 },
-                "match": "[$]|(.*)"
+                "match": "[$]+|[$].*|(.*)"
               },
               {
                 "selector": {
@@ -355,7 +355,7 @@
                 "selector": {
                   "kind": "objectLiteralMember"
                 },
-                "match": "__.*|(.*)",
+                "match": "__.*|[$].*|(.*)",
                 "formats": ["camelCase", "CONSTANT_CASE", "PascalCase"]
               },
               {
