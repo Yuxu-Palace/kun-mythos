@@ -120,9 +120,10 @@ export interface RequestAPIConfig<
   ResOutput = any,
   ReqModeMapKeys extends string = string & {},
 > extends DefaultAPIConfig<Input, Output, ReqOutput, ResOutput, ReqModeMapKeys>,
-    BaseAPIConfig<Input, Output, ReqOutput, ResOutput, DefaultAPIConfig, ReqModeMapKeys> {
+    APIConfig<Input, Output, ReqOutput, ResOutput, DefaultAPIConfig, ReqModeMapKeys> {
   /** 请求数据 */
   data?: Input;
+  oriUrl: string;
 }
 
 // export interface MockAPIConfig<
@@ -365,8 +366,8 @@ export type APIMapTransformMethods<
     : // 不是 APIConfig 的话就是嵌套的 api map, 直接返回 K 即可
       K]: M[K] extends APIConfig
     ? CheckNonParamUrlAPIConfig<M[K]> extends true
-      ? undefined
-      : APITransformMethod<M[K], D, false>
+      ? APITransformMethod<M[K], D, false>
+      : undefined
     : APIMapTransformMethods<M[K] & Record<string, APIConfig>, D>;
 } & {
   // 支持自定义配置请求方法

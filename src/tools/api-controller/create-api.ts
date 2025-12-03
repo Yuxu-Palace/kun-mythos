@@ -34,6 +34,8 @@ export function createApiWithMap<M extends APIMap, D extends DefaultAPIConfig = 
   }) as any;
 }
 
+const FROM_DEFINE = Symbol('fromDefine');
+
 /**
  * 通过 API config 创建一个请求方法
  *
@@ -49,22 +51,43 @@ export function createApi<
   if (!isString(api.url)) {
     throw new TypeError('入参应为 APIConfig 对象');
   }
-  if (isTrue(custom)) {
-    return ((data, config) => request({ ...defaultConfig, ...api, ...config, data })) as APITransformMethod<A, D, true>;
+  if (api.url.includes('/:')) {
+    if (isTrue((api as any)[FROM_DEFINE])) {
+      console.warn('url 中存在 params 参数, 使用 defineApi 或 defineApiMap 定义 API 或 API map 来获取更好的类型提示');
+    }
+    if (!isTrue(custom)) {
+      throw new TypeError('url 中存在 params 参数, 不支持普通请求, 转为自定义请求');
+    }
   }
-  return ((data) => request({ ...defaultConfig, ...api, data })) as APITransformMethod<A, D, C>;
+  const baseConfig = { ...defaultConfig, ...api };
+  if (isTrue(custom)) {
+    return ((data, config) =>
+      request({
+        ...baseConfig,
+        ...config,
+        url: api.url,
+        data,
+        oriUrl: api.url,
+      })) as APITransformMethod<A, D, true>;
+  }
+  return ((data) =>
+    request({
+      ...baseConfig,
+      data,
+      oriUrl: api.url,
+    })) as APITransformMethod<A, D, C>;
 }
 
 /**
  * 定义 API, ts 支持, 获取更好的类型声明
  */
 export function defineApi<U extends string, A extends DefineAPIConfig<U>>(_api: A): A {
-  return _api;
+  return { ..._api, [FROM_DEFINE]: true };
 }
 
 /**
  * 定义 API map, ts 支持, 获取更好的类型声明
  */
 export function defineApiMap<U extends string, A extends APIMap<U>>(_apiMap: A): A {
-  return _apiMap;
+  return { ..._apiMap, [FROM_DEFINE]: true };
 }

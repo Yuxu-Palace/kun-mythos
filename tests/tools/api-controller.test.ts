@@ -8,6 +8,14 @@ const server = setupServer(
     const url = new URL(req.request.url);
     return HttpResponse.json({ id: url.searchParams.get('id'), name: 'John Doe' });
   }),
+  http.get('https://api.example.com/user/:id', (req) => {
+    const { id } = req.params;
+    return HttpResponse.json({ id, name: 'John Doe' });
+  }),
+  http.get('https://api.example.com/api/user/:id/custom-name/:name', (req) => {
+    const { id, name } = req.params;
+    return HttpResponse.json({ id, name });
+  }),
   http.post('https://api.example.com/user', async (req) => {
     const { id } = (await req.request.json()) as { id: string };
     return HttpResponse.json({ id, name: 'John Doe' });
@@ -199,5 +207,21 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
 
   test('create api error', () => {
     expect(() => createApi({} as any)).toThrowError(TypeError);
+  });
+
+  test('param url', async () => {
+    expect(() => createApi({ url: '/user/:id' })).toThrowError(TypeError);
+    const paramApi = createApi(defineApi({ url: 'https://api.example.com/user/:id' }), {}, true);
+
+    // @ts-expect-error test
+    expect(async () => paramApi(null)).rejects.toThrowError(TypeError);
+
+    expect(await paramApi(null, { params: { id: '1' } })).toEqual({ id: '1', name: 'John Doe' });
+
+    const paramsApi = createApi(defineApi({ url: 'https://api.example.com/api/user/:id/custom-name/:name' }), {}, true);
+
+    // @ts-expect-error test
+    expect(async () => paramsApi(null, { params: { id: '1' } })).rejects.toThrowError(TypeError);
+    expect(await paramsApi(null, { params: { id: '1', name: 'test' } })).toEqual({ id: '1', name: 'test' });
   });
 });
