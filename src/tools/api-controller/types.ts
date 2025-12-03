@@ -365,10 +365,8 @@ export type APIMapTransformMethods<
       : never
     : // 不是 APIConfig 的话就是嵌套的 api map, 直接返回 K 即可
       K]: M[K] extends APIConfig
-    ? CheckNonParamUrlAPIConfig<M[K]> extends true
-      ? APITransformMethod<M[K], D, false>
-      : undefined
-    : APIMapTransformMethods<M[K] & Record<string, APIConfig>, D>;
+    ? APITransformMethod<M[K], D, false>
+    : APIMapTransformMethods<KCast<M[K], Record<string, APIConfig>>, D>;
 } & {
   // 支持自定义配置请求方法
   [K in keyof M as M[K] extends APIConfig ? `${K & string}Custom` : never]: APITransformMethod<

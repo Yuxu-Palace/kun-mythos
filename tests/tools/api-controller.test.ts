@@ -223,5 +223,29 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
     // @ts-expect-error test
     expect(async () => paramsApi(null, { params: { id: '1' } })).rejects.toThrowError(TypeError);
     expect(await paramsApi(null, { params: { id: '1', name: 'test' } })).toEqual({ id: '1', name: 'test' });
+
+    const paramApiMap = createApiWithMap(
+      defineApiMap({
+        user: { getInfo: { url: '/user/:id' } },
+        getCustomNameUser: { url: '/api/user/:id/custom-name/:name' },
+      }),
+      { baseUrl: 'https://api.example.com' },
+    );
+
+    // @ts-expect-error test
+    expect(() => paramApiMap.user.getInfo).toThrowError(TypeError);
+    expect(await paramApiMap.user.getInfoCustom(null, { params: { id: '1' } })).toEqual({ id: '1', name: 'John Doe' });
+    // @ts-expect-error test
+    expect(async () => paramApiMap.user.getInfoCustom(null, { params: {} })).rejects.toThrowError(TypeError);
+    // @ts-expect-error test
+    expect(() => paramApiMap.getCustomNameUser).toThrowError(TypeError);
+    expect(await paramApiMap.getCustomNameUserCustom(null, { params: { id: '1', name: 'test' } })).toEqual({
+      id: '1',
+      name: 'test',
+    });
+    // @ts-expect-error test
+    expect(async () => paramApiMap.getCustomNameUserCustom(null, { params: { id: 1 } })).rejects.toThrowError(
+      TypeError,
+    );
   });
 });

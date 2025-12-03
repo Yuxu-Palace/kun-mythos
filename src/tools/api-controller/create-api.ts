@@ -19,17 +19,19 @@ export function createApiWithMap<M extends APIMap, D extends DefaultAPIConfig = 
   apiMap: M,
   defaultConfig?: D,
 ): APIMapTransformMethods<M, D> {
+  const fromDefine = (apiMap as any)[FROM_DEFINE];
   return new Proxy(apiMap, {
     get(target, prop: string, receiver) {
-      const [name, isCustom] = prop.split('Custom');
+      const isCustom = isString(prop) && prop.endsWith('Custom');
+      const name = isCustom ? prop.slice(0, -'Custom'.length) : prop;
       const api = Reflect.get(target, name, receiver);
       if (isNullOrUndef(api)) {
         return void 0;
       }
       if (!isString(api.url)) {
-        return createApiWithMap(api as Record<string, APIConfig>, defaultConfig);
+        return createApiWithMap({ ...api, [FROM_DEFINE]: fromDefine } as Record<string, APIConfig>, defaultConfig);
       }
-      return createApi(api as APIConfig, defaultConfig, isString(isCustom));
+      return createApi({ ...api, [FROM_DEFINE]: fromDefine } as unknown as APIConfig, defaultConfig, isCustom);
     },
   }) as any;
 }
