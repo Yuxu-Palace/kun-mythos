@@ -44,7 +44,7 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
     expect(defineApi).toBeTypeOf('function');
   });
 
-  const getUserInfo = defineApi({
+  const getUserInfoApiConfig = defineApi({
     url: '/user',
     tdto(data: { id: string; name?: string }) {
       return data;
@@ -61,26 +61,25 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
     },
   });
 
-  const mockApi = createApiWithMap(
-    defineApiMap({
-      user: {
-        getInfo: getUserInfo,
-        getList: {
-          url: '/user/list',
-          onResponse() {
-            return [{ id: '1', name: 'John Doe' }];
-          },
+  const mockApiMapConfig = defineApiMap({
+    user: {
+      getInfo: getUserInfoApiConfig,
+      getList: {
+        url: '/user/list',
+        onResponse() {
+          return [{ id: '1', name: 'John Doe' }];
         },
       },
-      normal: {
-        url: '/normal',
-      },
-    }),
-    { baseUrl: 'https://api.example.com', requestMode: 'mock' },
-  );
+    },
+    normal: {
+      url: '/normal',
+    },
+  });
 
-  const getUserInfoApi = createApi(getUserInfo, { baseUrl: 'https://api.example.com' });
-  const getUserInfoApiCustom = createApi(getUserInfo, { baseUrl: 'https://api.example.com' }, true);
+  const mockApi = createApiWithMap(mockApiMapConfig, { baseUrl: 'https://api.example.com', requestMode: 'mock' });
+
+  const getUserInfoApi = createApi(getUserInfoApiConfig, { baseUrl: 'https://api.example.com' });
+  const getUserInfoApiCustom = createApi(getUserInfoApiConfig, { baseUrl: 'https://api.example.com' }, true);
 
   test('mock request', async () => {
     const res1 = await mockApi.user.getInfo({ id: '1' });
@@ -176,7 +175,7 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
   const customApi = createApiWithMap(
     defineApiMap({
       user: {
-        getInfo: getUserInfo,
+        getInfo: getUserInfoApiConfig,
         getList: {
           url: '/user/list',
           onResponse() {
@@ -246,5 +245,28 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
     });
     // @ts-expect-error test
     await expect(paramApiMap.getCustomNameUserCustom(null, { params: { id: 1 } })).rejects.toThrowError(TypeError);
+  });
+
+  test('proxy cache', () => {
+    expect(mockApi.user.getInfo).toBe(mockApi.user.getInfo);
+    expect(mockApi.user.getInfo).toBe(mockApi.user.getInfo);
+    expect(mockApi.user.getInfoCustom).toBe(mockApi.user.getInfoCustom);
+    expect(mockApi.user.getList).toBe(mockApi.user.getList);
+  });
+
+  test('$ property', async () => {
+    expect(mockApi.user.getInfo.$).toStrictEqual(getUserInfoApi.$);
+    expect(mockApi.user.getInfo.$).toStrictEqual(getUserInfoApiConfig);
+    expect(mockApi.user.getInfoCustom.$).toStrictEqual(getUserInfoApiConfig);
+
+    expect(mockApi.$).toStrictEqual(mockApiMapConfig);
+    expect(mockApi.user.$).toStrictEqual(mockApiMapConfig.user);
+    expect(mockApi.$.user).toStrictEqual(mockApiMapConfig.user);
+
+    const from$api = createApi(mockApi.user.getInfo.$, { baseUrl: 'https://api.example.com' });
+    expect(await from$api({ id: '1' })).toEqual({ id: '1', name: 'John Doe', age: 18 });
+
+    const from$userApiMap = createApiWithMap(mockApi.user.$, { baseUrl: 'https://api.example.com' });
+    expect(await from$userApiMap.getInfo({ id: '1' })).toEqual({ id: '1', name: 'John Doe', age: 18 });
   });
 });

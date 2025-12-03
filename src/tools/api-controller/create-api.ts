@@ -1,4 +1,5 @@
 import { isNullOrUndef, isString, isTrue } from '@/atomic-functions/verify';
+import type { KAnyFunc } from '@/types/base';
 import { request } from './request';
 import type {
   APIConfig,
@@ -22,18 +23,31 @@ export function createApiWithMap<M extends APIMap, D extends DefaultAPIConfig = 
   defaultConfig?: D,
 ): APIMapTransformMethods<M, D> {
   const fromDefine = (apiMap as any)[FROM_DEFINE];
+  delete (apiMap as any)[FROM_DEFINE];
+  const proxyCache: Record<string, any> = {};
+
   return new Proxy(apiMap, {
     get(target, prop: string, receiver) {
+      if (prop === '$') {
+        return apiMap;
+      }
       const isCustom = isString(prop) && prop.endsWith('Custom');
       const name = isCustom ? prop.slice(0, -'Custom'.length) : prop;
       const api = Reflect.get(target, name, receiver);
       if (isNullOrUndef(api)) {
         return void 0;
       }
-      if (!isString(api.url)) {
-        return createApiWithMap({ ...api, [FROM_DEFINE]: fromDefine } as Record<string, APIConfig>, defaultConfig);
+      if (proxyCache[prop]) {
+        return proxyCache[prop];
       }
-      return createApi({ ...api, [FROM_DEFINE]: fromDefine } as unknown as APIConfig, defaultConfig, isCustom);
+      let result: any = null;
+      if (isString(api.url)) {
+        result = createApi({ ...api, [FROM_DEFINE]: fromDefine } as unknown as APIConfig, defaultConfig, isCustom);
+      } else {
+        result = createApiWithMap({ ...api, [FROM_DEFINE]: fromDefine } as Record<string, APIConfig>, defaultConfig);
+      }
+      proxyCache[prop] = result;
+      return result;
     },
   }) as any;
 }
@@ -50,11 +64,14 @@ export function createApi<
   D extends DefaultAPIConfig = DefaultAPIConfig,
   C extends boolean = false,
 >(api: A, defaultConfig?: D, custom?: C): APITransformMethod<A, D, C> {
+  const fromDefine = (api as any)[FROM_DEFINE];
+  delete (api as any)[FROM_DEFINE];
+
   if (!isString(api.url)) {
     throw new TypeError('入参应为 APIConfig 对象');
   }
   if (api.url.includes('/:')) {
-    if (!isTrue((api as any)[FROM_DEFINE])) {
+    if (!isTrue(fromDefine)) {
       console.warn('url 中存在 params 参数, 使用 defineApi 或 defineApiMap 定义 API 或 API map 来获取更好的类型提示');
     }
     if (!isTrue(custom)) {
@@ -62,22 +79,33 @@ export function createApi<
     }
   }
   const baseConfig = { ...defaultConfig, ...api };
+
+  let handler: any = null;
   if (isTrue(custom)) {
-    return (async (data, config) =>
+    handler = (async (data, config) =>
       request({
         ...baseConfig,
         ...config,
         url: api.url,
         data,
         oriUrl: api.url,
-      })) as APITransformMethod<A, D, true>;
+      })) as KAnyFunc;
+  } else {
+    handler = (async (data) =>
+      request({
+        ...baseConfig,
+        data,
+        oriUrl: api.url,
+      })) as KAnyFunc;
   }
-  return (async (data) =>
-    request({
-      ...baseConfig,
-      data,
-      oriUrl: api.url,
-    })) as APITransformMethod<A, D, C>;
+
+  Reflect.defineProperty(handler, '$', {
+    get: () => api,
+    enumerable: false,
+    configurable: false,
+  });
+
+  return handler;
 }
 
 /**

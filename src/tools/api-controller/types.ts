@@ -315,7 +315,7 @@ export type APITransformMethod<
   InputD extends DefaultAPIConfig = DefaultAPIConfig,
   Custom extends boolean = false,
   NonParamUrl extends boolean = CheckNonParamUrlAPIConfig<A>,
-> = <
+> = (<
   R = Empty,
   I extends APIInputType<A, InputD> = APIInputType<A, InputD>,
   C extends CallAPIConfig<
@@ -351,7 +351,7 @@ export type APITransformMethod<
     ReturnType<KCast<RealProp<'onRequest', C, A, InputD>, KAnyFunc>>,
     Custom
   >
->;
+>) & { $: A };
 
 export type APIMapTransformMethods<
   M extends APIMap | Record<string, APIConfig>,
@@ -374,4 +374,4 @@ export type APIMapTransformMethods<
     D,
     true
   >;
-};
+} & { $: M };
