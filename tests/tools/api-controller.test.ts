@@ -24,7 +24,7 @@ const server = setupServer(
 );
 
 beforeAll(() => {
-  server.listen();
+  server.listen({ onUnhandledRequest: 'error' });
 });
 
 afterAll(() => {
@@ -140,7 +140,7 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
     )({ id: '1' });
     expect(resTdto).toEqual({ id: 1 });
 
-    expect(() =>
+    await expect(
       mockApi.user.getInfoCustom(
         // @ts-expect-error test
         () => void 0,
@@ -161,11 +161,11 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
     )();
     expect(emptyUrlRes).toBe(1);
 
-    expect(() =>
+    await expect(
       createApi({ url: '' }, { requestMode: 'mock', tvo: () => 1, parser: 'stream' })(),
     ).rejects.toThrowError();
 
-    expect(() =>
+    await expect(
       createApi(
         { url: '' },
         { baseUrl: 'https://api.example.com', requestMode: 'mock', tvo: () => 1, parser: 'ccc' },
@@ -210,18 +210,19 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
   });
 
   test('param url', async () => {
+    // 输出 warn
     expect(() => createApi({ url: '/user/:id' })).toThrowError(TypeError);
     const paramApi = createApi(defineApi({ url: 'https://api.example.com/user/:id' }), {}, true);
 
     // @ts-expect-error test
-    expect(async () => paramApi(null)).rejects.toThrowError(TypeError);
+    await expect(paramApi(null)).rejects.toThrowError(TypeError);
 
     expect(await paramApi(null, { params: { id: '1' } })).toEqual({ id: '1', name: 'John Doe' });
 
     const paramsApi = createApi(defineApi({ url: 'https://api.example.com/api/user/:id/custom-name/:name' }), {}, true);
 
     // @ts-expect-error test
-    expect(async () => paramsApi(null, { params: { id: '1' } })).rejects.toThrowError(TypeError);
+    await expect(paramsApi(null, { params: { id: '1' } })).rejects.toThrowError(TypeError);
     expect(await paramsApi(null, { params: { id: '1', name: 'test' } })).toEqual({ id: '1', name: 'test' });
 
     const paramApiMap = createApiWithMap(
@@ -236,7 +237,7 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
     expect(() => paramApiMap.user.getInfo).toThrowError(TypeError);
     expect(await paramApiMap.user.getInfoCustom(null, { params: { id: '1' } })).toEqual({ id: '1', name: 'John Doe' });
     // @ts-expect-error test
-    expect(async () => paramApiMap.user.getInfoCustom(null, { params: {} })).rejects.toThrowError(TypeError);
+    await expect(paramApiMap.user.getInfoCustom(null, { params: {} })).rejects.toThrowError(TypeError);
     // @ts-expect-error test
     expect(() => paramApiMap.getCustomNameUser).toThrowError(TypeError);
     expect(await paramApiMap.getCustomNameUserCustom(null, { params: { id: '1', name: 'test' } })).toEqual({
@@ -244,8 +245,6 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
       name: 'test',
     });
     // @ts-expect-error test
-    expect(async () => paramApiMap.getCustomNameUserCustom(null, { params: { id: 1 } })).rejects.toThrowError(
-      TypeError,
-    );
+    await expect(paramApiMap.getCustomNameUserCustom(null, { params: { id: 1 } })).rejects.toThrowError(TypeError);
   });
 });

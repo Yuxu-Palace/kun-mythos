@@ -9,6 +9,8 @@ import type {
   DefineAPIConfig,
 } from './types';
 
+const FROM_DEFINE = Symbol('fromDefine');
+
 /**
  * 通过 API config map 创建请求对象
  *
@@ -36,8 +38,6 @@ export function createApiWithMap<M extends APIMap, D extends DefaultAPIConfig = 
   }) as any;
 }
 
-const FROM_DEFINE = Symbol('fromDefine');
-
 /**
  * 通过 API config 创建一个请求方法
  *
@@ -54,7 +54,7 @@ export function createApi<
     throw new TypeError('入参应为 APIConfig 对象');
   }
   if (api.url.includes('/:')) {
-    if (isTrue((api as any)[FROM_DEFINE])) {
+    if (!isTrue((api as any)[FROM_DEFINE])) {
       console.warn('url 中存在 params 参数, 使用 defineApi 或 defineApiMap 定义 API 或 API map 来获取更好的类型提示');
     }
     if (!isTrue(custom)) {
@@ -63,7 +63,7 @@ export function createApi<
   }
   const baseConfig = { ...defaultConfig, ...api };
   if (isTrue(custom)) {
-    return ((data, config) =>
+    return (async (data, config) =>
       request({
         ...baseConfig,
         ...config,
@@ -72,7 +72,7 @@ export function createApi<
         oriUrl: api.url,
       })) as APITransformMethod<A, D, true>;
   }
-  return ((data) =>
+  return (async (data) =>
     request({
       ...baseConfig,
       data,

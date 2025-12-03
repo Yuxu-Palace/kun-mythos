@@ -31,17 +31,16 @@ export function tryCallFunc<A extends any[], R, E = Empty>(
   };
 
   const catchFn = (error: any) => {
-    if (isFunction(onError)) {
-      result = onError(error) as any;
-    }
+    // biome-ignore lint/style/noNonNullAssertion: 已前置校验
+    result = onError!(error) as any;
   };
 
   const finallyFn = () => {
-    // biome-ignore lint/nursery/noUnusedExpressions: test
-    isFunction(onFinal) && onFinal(result);
+    // biome-ignore lint/style/noNonNullAssertion: 已前置校验
+    onFinal!(result);
   };
 
-  if (onFinal && onError) {
+  if (isFunction(onFinal) && isFunction(onError)) {
     return function (this: any, ...args) {
       try {
         Reflect.apply(tryFn, this, [args]);
@@ -54,7 +53,7 @@ export function tryCallFunc<A extends any[], R, E = Empty>(
     };
   }
 
-  if (onError) {
+  if (isFunction(onError)) {
     return function (this: any, ...args) {
       try {
         Reflect.apply(tryFn, this, [args]);
@@ -65,7 +64,7 @@ export function tryCallFunc<A extends any[], R, E = Empty>(
     };
   }
 
-  if (onFinal) {
+  if (isFunction(onFinal)) {
     return function (this: any, ...args) {
       try {
         Reflect.apply(tryFn, this, [args]);

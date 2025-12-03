@@ -32,6 +32,10 @@ function checkFlag(_flag: any): _flag is Flag {
   const isFlag = isTrue((FLAG_MAP.get(_flag) || {})[PRIVATE_KEY]);
   if (!isFlag && isSymbol(_flag)) {
     const strFlag = _flag.toString().slice(7, -1);
+    // 对于不是 flag 的 symbol 先判断他是被复用的 flag, 还是其他 symbol
+    // 如果是其他 symbol 则不处理, 如果是 flag 则抛出异常
+    // 这里应该忽略 else 覆盖率的处理
+    /* istanbul ignore else -- @preserve */
     if (strFlag.startsWith(FLAG_PREFIX)) {
       throw new TypeError(`flag(${strFlag.slice(FLAG_PREFIX.length)}) 已被使用`);
     }
