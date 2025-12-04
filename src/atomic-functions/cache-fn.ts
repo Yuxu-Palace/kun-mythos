@@ -1,6 +1,7 @@
 import { PRIVATE_KEY } from '@/constant/private';
+import { checkPrivateType, getPrivateMeta, setPrivateMeta } from '@/private/private-info-ctrl';
+import { throwTypeError } from '@/private/throw-error';
 import type { KAnyFunc, KFunc } from '@/types/base';
-import { checkPrivateType, getPrivateMeta, setPrivateMeta } from './private/private-info-ctrl';
 import { isFunction, isNullOrUndef } from './verify';
 
 const CACHE_FN_KEY = Symbol('cacheFn');
@@ -62,7 +63,7 @@ export function unCacheFn<F extends KAnyFunc>(func: CacheFn<F>): F {
  */
 export function cacheFn<F extends KAnyFunc>(func: F): CacheFn<F> {
   if (!isFunction(func)) {
-    throw new TypeError('func is not a function');
+    throwTypeError('func is not a function');
   }
 
   const _func = unCacheFn(func as any);
@@ -94,7 +95,7 @@ export function cacheFn<F extends KAnyFunc>(func: F): CacheFn<F> {
  */
 export function clearFnCache(func: KAnyFunc) {
   if (!isFunction(func)) {
-    throw new TypeError('func is not a function');
+    throwTypeError('func is not a function');
   }
   if (!isCacheFn(func)) {
     return false;
@@ -114,7 +115,7 @@ export function clearFnCache(func: KAnyFunc) {
  */
 export function retryCacheFn<F extends KAnyFunc>(func: F): CacheFn<F> {
   if (!isFunction(func)) {
-    throw new TypeError('func is not a function');
+    throwTypeError('func is not a function');
   }
 
   const tempCB = cacheFn(func);
@@ -145,7 +146,7 @@ export function retryCacheFn<F extends KAnyFunc>(func: F): CacheFn<F> {
  */
 export function debounceCacheFn<F extends KAnyFunc>(func: F, cacheTime = 100): CacheFn<F> {
   if (!isFunction(func)) {
-    throw new TypeError('func is not a function');
+    throwTypeError('func is not a function');
   }
 
   const tempCB = cacheFn(func);
@@ -181,7 +182,7 @@ export function cacheFnFromGetter<F extends KFunc<[], KAnyFunc>>(
   clearTopCache = false,
 ): CacheFn<ReturnType<F>> {
   if (!isFunction(getter)) {
-    throw new TypeError('getter is not a function');
+    throwTypeError('getter is not a function');
   }
 
   let func: KAnyFunc | null;
@@ -190,7 +191,7 @@ export function cacheFnFromGetter<F extends KFunc<[], KAnyFunc>>(
     func ||= getter();
 
     if (!isFunction(func)) {
-      throw new TypeError('getter return value is not a function, please check your getter or use cacheFn instead');
+      throwTypeError('getter return value is not a function, please check your getter or use cacheFn instead');
     }
 
     return Reflect.apply(func, this, args);
@@ -234,7 +235,7 @@ type ResultFn<T> = T extends KFunc<any[], infer R> ? (R extends KAnyFunc ? Cache
  */
 export function cacheGetterResult<F extends KFunc<[], any>>(getter: F): CacheFn<ResultFn<F>> {
   if (!isFunction(getter)) {
-    throw new TypeError('getter is not a function');
+    throwTypeError('getter is not a function');
   }
 
   const tempCB = cacheFn(getter);

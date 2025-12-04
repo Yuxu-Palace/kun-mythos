@@ -1,6 +1,7 @@
 import { getType } from '@/atomic-functions/get-type';
 import { tryCall } from '@/atomic-functions/try-call';
 import { isFunction, isNullOrUndef } from '@/atomic-functions/verify';
+import { throwTypeError } from '@/private/throw-error';
 import type { APIConfig, RequestAPIConfig } from './types';
 
 function getBody(data: any, tdto?: APIConfig['tdto']) {
@@ -66,7 +67,7 @@ async function baseRequest<R, C extends RequestAPIConfig<any, R> = RequestAPICon
     if (isFunction(responseHandler)) {
       return Reflect.apply(responseHandler, responseInfo, []);
     }
-    throw new TypeError('Invalid parser');
+    throwTypeError('Invalid parser');
   });
 
   return tvo ? tvo(resResult) : (resResult as R);
@@ -92,7 +93,7 @@ function urlParamsParser(url: string, params: Record<string, string> | undefined
     return url;
   }
   if (!params) {
-    throw new TypeError('url 中存在 params 参数, params 配置不能为空, 请使用 custom 方法调用并传递 params 配置');
+    throwTypeError('url 中存在 params 参数, params 配置不能为空, 请使用 custom 方法调用并传递 params 配置');
   }
   const urlSplit = url.split('/');
   const emptyKeys: string[] = [];
@@ -109,7 +110,7 @@ function urlParamsParser(url: string, params: Record<string, string> | undefined
     urlSplit[i] = params[param];
   }
   if (emptyKeys.length) {
-    throw new TypeError(`params 配置中缺少 [${emptyKeys.join(', ')}] 参数`);
+    throwTypeError(`params 配置中缺少 [${emptyKeys.join(', ')}] 参数`);
   }
   return urlSplit.join('/');
 }

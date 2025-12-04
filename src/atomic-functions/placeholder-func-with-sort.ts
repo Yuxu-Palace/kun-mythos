@@ -1,16 +1,8 @@
-import { PRIVATE_KEY } from '../constant/private';
-import type {
-  KAppend,
-  KDropHead,
-  KFillArray,
-  KFilterArray,
-  KFunc,
-  KInclude,
-  KLength,
-  KPatchArray,
-} from '../types/base';
+import { PRIVATE_KEY } from '@/constant/private';
+import { setFuncLength, syncFuncLength } from '@/private/fn-length';
+import { throwTypeError } from '@/private/throw-error';
+import type { KAppend, KDropHead, KFillArray, KFilterArray, KFunc, KInclude, KLength, KPatchArray } from '@/types/base';
 import type { KCurryFuncReturnType } from './curry';
-import { setFuncLength, syncFuncLength } from './private/fn-length';
 import { isFunction, isSymbol, isTrue } from './verify';
 
 interface Flag<T extends number = number> {
@@ -37,7 +29,7 @@ function checkFlag(_flag: any): _flag is Flag {
     // 这里应该忽略 else 覆盖率的处理
     /* istanbul ignore else -- @preserve */
     if (strFlag.startsWith(FLAG_PREFIX)) {
-      throw new TypeError(`flag(${strFlag.slice(FLAG_PREFIX.length)}) 已被使用`);
+      throwTypeError(`flag(${strFlag.slice(FLAG_PREFIX.length)}) 已被使用`);
     }
   }
   return isFlag;
@@ -105,7 +97,7 @@ type PlaceholderFuncArgs<
  */
 export function placeholderFuncWithSort<O extends any[], R>(func: KFunc<O, R>) {
   if (!isFunction(func)) {
-    throw new TypeError('func 必须是函数');
+    throwTypeError('func 必须是函数');
   }
 
   const callback = <A extends PlaceholderArgs<Required<O>>>(...placeArgs: PlaceholderArgsVerify<A>) => {
@@ -122,7 +114,7 @@ export function placeholderFuncWithSort<O extends any[], R>(func: KFunc<O, R>) {
 
     const runFunc = (...callArgs: any[]) => {
       if (callArgs.length !== argsInfo.length) {
-        throw new TypeError(`非法调用, 参数数量不匹配, 期望: ${argsInfo.length}, 实际: ${callArgs.length}`);
+        throwTypeError(`非法调用, 参数数量不匹配, 期望: ${argsInfo.length}, 实际: ${callArgs.length}`);
       }
 
       const args = Array.from(_placeArgs) as any[];

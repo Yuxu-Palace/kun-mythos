@@ -1,4 +1,5 @@
 import { PRIVATE_KEY } from '@/constant/private';
+import { throwError } from '@/private/throw-error';
 import type { KAnyFunc, KFunc, KPrintify } from '@/types/base';
 import { isFunction, isPromise, isString } from './verify';
 
@@ -61,7 +62,7 @@ export function computeProps<T extends Record<PropertyKey, KAnyFunc | Promise<an
       Object.defineProperty(result, key, {
         get: () => {
           if (value === PRIVATE_KEY) {
-            throw new Error('[computeProps]: value is not ready');
+            throwError('[computeProps]: value is not ready');
           }
           return value;
         },

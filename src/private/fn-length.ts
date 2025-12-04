@@ -1,5 +1,6 @@
+import { isFunction, isNaN } from '@/atomic-functions/verify';
 import type { KAnyFunc } from '@/types/base';
-import { isFunction, isNaN } from '../verify';
+import { throwTypeError } from './throw-error';
 
 export function getFuncLength(func: KAnyFunc): number {
   if (!isFunction(func)) {
@@ -14,7 +15,7 @@ export function setFuncLength(func: KAnyFunc, length: number) {
     return;
   }
   if (isNaN(length) || length < 0) {
-    throw new TypeError('length must be a non-negative number');
+    throwTypeError('length must be a non-negative number');
   }
   // @ts-expect-error 自定义属性
   func.klength = length;

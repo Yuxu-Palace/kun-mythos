@@ -1,5 +1,6 @@
+import { throwTypeError } from '@/private/throw-error';
+import type { Empty } from '@/private/types';
 import type { KEqual } from '@/types/base';
-import type { Empty } from '@/types/private';
 import { isFunction, isPromise } from './verify';
 
 type TryCallResult<R, E> = KEqual<E, Empty> extends true ? (R extends Promise<any> ? Promise<Awaited<R>> : R) : R | E;
@@ -18,7 +19,7 @@ export function tryCallFunc<A extends any[], R, E = Empty>(
   onFinal?: (result: TryCallResult<R, E>) => void,
 ): (...args: A) => TryCallResult<R, E> {
   if (!isFunction(cb)) {
-    throw new TypeError('callback is not a function');
+    throwTypeError('callback is not a function');
   }
 
   let result = void 0 as TryCallResult<R, E>;
@@ -95,7 +96,7 @@ export function tryCall<R, E = Empty>(
   onFinal?: (result: TryCallResult<R, E>) => void,
 ): TryCallResult<R, E> {
   if (!isFunction(cb)) {
-    throw new TypeError('callback is not a function');
+    throwTypeError('callback is not a function');
   }
 
   return tryCallFunc(cb, onError, onFinal)();

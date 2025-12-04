@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { checkPrivateType, getPrivateMeta, setPrivateMeta } from '@/atomic-functions/private/private-info-ctrl';
+import { checkPrivateType, getPrivateMeta, setPrivateMeta } from '@/private/private-info-ctrl';
 import { MFT } from '~/tests/utils';
 
 MFT((module, { format }) => {

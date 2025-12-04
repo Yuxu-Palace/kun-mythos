@@ -1,6 +1,7 @@
+import { syncFuncLength } from '@/private/fn-length';
+import { throwTypeError } from '@/private/throw-error';
+import type { Empty } from '@/private/types';
 import type { KAnyFunc, KEqual, KFunc } from '@/types/base';
-import type { Empty } from '@/types/private';
-import { syncFuncLength } from './private/fn-length';
 import { isFunction } from './verify';
 
 type FnCheck<PR> = KEqual<PR, Empty> extends true ? (...args: any[]) => any : (arg: PR) => any;
@@ -34,7 +35,7 @@ type PipeFunc<F extends KAnyFunc[]> = F extends [KFunc<infer P, infer R>]
 export function pipe<F extends KAnyFunc[]>(...funcs: PipeArgs<F>): PipeFunc<F> {
   for (let i = 0; i < funcs.length; ++i) {
     if (!isFunction(funcs[i])) {
-      throw new TypeError('pipe 函数的参数必须全是函数');
+      throwTypeError('pipe 函数的参数必须全是函数');
     }
   }
 

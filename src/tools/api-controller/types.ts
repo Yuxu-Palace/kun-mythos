@@ -1,5 +1,5 @@
+import type { Empty } from '@/private/types';
 import type { KAnyFunc, KCast, KEqual, KFunc } from '@/types/base';
-import type { Empty } from '@/types/private';
 
 /** 请求方法 */
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | (string & {});

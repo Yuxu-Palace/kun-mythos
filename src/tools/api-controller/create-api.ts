@@ -1,4 +1,5 @@
 import { isNullOrUndef, isString, isTrue } from '@/atomic-functions/verify';
+import { throwTypeError } from '@/private/throw-error';
 import type { KAnyFunc } from '@/types/base';
 import { request } from './request';
 import type {
@@ -98,14 +99,14 @@ export function createApi<
   const realDefaultConfig = defaultConfig || {};
 
   if (!isString(api.url)) {
-    throw new TypeError('入参应为 APIConfig 对象');
+    throwTypeError('入参应为 APIConfig 对象');
   }
   if (api.url.includes('/:')) {
     if (!isTrue(fromDefine)) {
       console.warn('url 中存在 params 参数, 使用 defineApi 或 defineApiMap 定义 API 或 API map 来获取更好的类型提示');
     }
     if (!isTrue(custom)) {
-      throw new TypeError('url 中存在 params 参数, 不支持普通请求, 转为自定义请求');
+      throwTypeError('url 中存在 params 参数, 不支持普通请求, 转为自定义请求');
     }
   }
 

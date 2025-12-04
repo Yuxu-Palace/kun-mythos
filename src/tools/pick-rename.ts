@@ -1,4 +1,5 @@
-import { isArray, isNumber, isObject, isPlainObject, isString, isUndef } from '../atomic-functions/verify';
+import { isArray, isNumber, isObject, isPlainObject, isString, isUndef } from '@/atomic-functions/verify';
+import { throwTypeError } from '@/private/throw-error';
 
 export function parseSourceWithKeyPath(keyPath: string | PropertyKey[], obj: Record<PropertyKey, any>) {
   const oriKeys = parsePath(keyPath);
@@ -6,7 +7,7 @@ export function parseSourceWithKeyPath(keyPath: string | PropertyKey[], obj: Rec
 
   const target = keys.pop();
   if (isUndef(target) || (isString(target) && !target)) {
-    throw new TypeError(`keyPath is not a valid key path: ${keyPath}`);
+    throwTypeError(`keyPath is not a valid key path: ${keyPath}`);
   }
 
   let current = obj;
@@ -32,7 +33,7 @@ export function setTarget(keyPath: string | PropertyKey[], obj: Record<PropertyK
     if (key in current) {
       current = current[key];
       if (!isObject(current)) {
-        throw new TypeError(`keyPath is not a valid key path: ${keyPath}`);
+        throwTypeError(`keyPath is not a valid key path: ${keyPath}`);
       }
     } else {
       const nextKey = keys[i + 1] || target;
@@ -82,13 +83,13 @@ function parseArrayKeySourceInfo(keyMap: KeyMap & any[]) {
     } else if (isString(keySource)) {
       parts = keySource.split(':');
     } else {
-      throw new TypeError(`keyMap[${i}] is not a string`);
+      throwTypeError(`keyMap[${i}] is not a string`);
     }
     if (parts.length !== 2 || !parts[0].length || !parts[1].length) {
-      throw new TypeError(`keyMap[${i}] is not a valid key mapping: ${keySource}`);
+      throwTypeError(`keyMap[${i}] is not a valid key mapping: ${keySource}`);
     }
     if (parts[0][0] === '.') {
-      throw new TypeError(`keyMap[${i}] is not a valid key mapping: ${keySource} ${parts[0]} starts with \`.\``);
+      throwTypeError(`keyMap[${i}] is not a valid key mapping: ${keySource} ${parts[0]} starts with \`.\``);
     }
     keyPathMap[i] = parts as KeySourceInfo;
   }
@@ -102,11 +103,11 @@ function parseObjectKeySourceInfo(keyMap: KeyMap & Record<any, any>) {
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i] as string;
     if (!isString(key)) {
-      throw new TypeError(`key must be a string, got ${typeof key}`);
+      throwTypeError(`key must be a string, got ${typeof key}`);
     }
     const val = keyMap[key];
     if (!(isString(val) && val)) {
-      throw new TypeError(`keyMap[${key}] is not a non-empty string`);
+      throwTypeError(`keyMap[${key}] is not a non-empty string`);
     }
     keyPathMap[i] = [key, keyMap[key]];
   }

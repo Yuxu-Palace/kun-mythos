@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { getFuncLength, setFuncLength, syncFuncLength } from '@/atomic-functions/private/fn-length';
+import { getFuncLength, setFuncLength, syncFuncLength } from '@/private/fn-length';
 import { MFT } from '~/tests/utils';
 
 MFT((module, { format }) => {
