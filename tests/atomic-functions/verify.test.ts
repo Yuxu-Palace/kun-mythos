@@ -475,7 +475,7 @@ describe('类型检查', async () => {
     }
 
     // 联合类型：数组 | 非数组
-    const arr3: string[] | number = Math.random() > 0.5 ? ['a'] : 123;
+    const arr3 = Math.random() > 0.5 ? ['a'] : 123;
     if (isEmptyArray(arr3)) {
       assertType<[]>(arr3);
     } else {
@@ -483,15 +483,15 @@ describe('类型检查', async () => {
     }
 
     // 联合类型：空数组 | 非空数组
-    const arr4: [] | [number] = Math.random() > 0.5 ? [] : [1];
+    const arr4 = Math.random() > 0.5 ? [] : [1];
     if (isEmptyArray(arr4)) {
       assertType<[]>(arr4);
     } else {
-      assertType<[number]>(arr4);
+      assertType<number[]>(arr4);
     }
 
     // 联合类型：数组 | null | undefined
-    const arr5: number[] | null | undefined = Math.random() > 0.5 ? [1] : null;
+    const arr5 = Math.random() > 0.5 ? [1] : null;
     if (isEmptyArray(arr5)) {
       assertType<[]>(arr5);
     } else {
@@ -514,21 +514,21 @@ describe('类型检查', async () => {
       assertType<string>(str2);
     }
 
-    const str3: string | number = Math.random() > 0.5 ? '' : 42;
+    const str3 = Math.random() > 0.5 ? '' : 42;
     if (isEmptyString(str3)) {
       assertType<''>(str3);
     } else {
       assertType<string | number>(str3);
     }
 
-    const str4: '' | 'world' = Math.random() > 0.5 ? '' : 'world';
+    const str4 = Math.random() > 0.5 ? '' : 'world';
     if (isEmptyString(str4)) {
       assertType<''>(str4);
     } else {
       assertType<'world'>(str4);
     }
 
-    const str5: string | null | undefined = Math.random() > 0.5 ? '' : null;
+    const str5 = Math.random() > 0.5 ? '' : null;
     if (isEmptyString(str5)) {
       assertType<''>(str5);
     } else {
