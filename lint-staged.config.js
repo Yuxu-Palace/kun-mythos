@@ -3,5 +3,5 @@
  * @type {import('lint-staged').Configuration}
  */
 export default {
-  '*.{ts}': ['pnpm run check'],
+  '*.ts': ['pnpm run check'],
 };
