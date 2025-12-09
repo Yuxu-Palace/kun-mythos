@@ -45,9 +45,19 @@ export function isArray(_v: unknown): _v is any[] {
   return Array.isArray(_v);
 }
 
+/** 判断是否为空数组 */
+export function isEmptyArray(_v: unknown): _v is [] {
+  return isArray(_v) && _v.length === 0;
+}
+
 /** 判断是一个字符串 */
 export function isString(_v: unknown): _v is string {
   return typeof _v === 'string';
+}
+
+/** 判断是一个空字符串 */
+export function isEmptyString(_v: unknown): _v is '' {
+  return isString(_v) && _v.length === 0;
 }
 
 /** 判断是一个数字 */

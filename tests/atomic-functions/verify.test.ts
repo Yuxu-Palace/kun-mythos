@@ -6,6 +6,7 @@ MFT(
     isObject,
     isPlainObject,
     isArray,
+    isEmptyArray,
     isSymbol,
     isPropertyKey,
     isNaN,
@@ -15,6 +16,7 @@ MFT(
     isPlainNumber,
     isPlainSymbol,
     isString,
+    isEmptyString,
     isUndef,
     isTrue,
     isFalse,
@@ -28,6 +30,7 @@ MFT(
       expect(typeof isPromise).toBe('function');
       expect(typeof isObject).toBe('function');
       expect(typeof isArray).toBe('function');
+      expect(typeof isEmptyArray).toBe('function');
       expect(typeof isSymbol).toBe('function');
       expect(typeof isPlainObject).toBe('function');
       expect(typeof isPropertyKey).toBe('function');
@@ -38,6 +41,7 @@ MFT(
       expect(typeof isPlainNumber).toBe('function');
       expect(typeof isPlainSymbol).toBe('function');
       expect(typeof isString).toBe('function');
+      expect(typeof isEmptyString).toBe('function');
       expect(typeof isUndef).toBe('function');
       expect(typeof isTrue).toBe('function');
       expect(typeof isFalse).toBe('function');
@@ -238,6 +242,17 @@ MFT(
         expect(isString(undefined)).toBe(false);
       });
 
+      test('isEmptyString', () => {
+        expect(isEmptyString('')).toBe(true);
+        expect(isEmptyString('not empty')).toBe(false);
+        expect(isEmptyString(1)).toBe(false);
+        expect(isEmptyString(Symbol('test'))).toBe(false);
+        expect(isEmptyString({})).toBe(false);
+        expect(isEmptyString([])).toBe(false);
+        expect(isEmptyString(null)).toBe(false);
+        expect(isEmptyString(undefined)).toBe(false);
+      });
+
       test('isPlainSymbol', () => {
         expect(isPlainSymbol(Symbol('test'))).toBe(true);
         expect(isPlainSymbol(Symbol.for('test'))).toBe(false);
@@ -282,6 +297,18 @@ MFT(
         expect(isArray(undefined)).toBe(false);
       });
 
+      test('isEmptyArray', () => {
+        expect(isEmptyArray([])).toBe(true);
+        expect(isEmptyArray([1])).toBe(false);
+        expect(isEmptyArray(['a', 'b', 'c'])).toBe(false);
+        expect(isEmptyArray(null)).toBe(false);
+        expect(isEmptyArray(undefined)).toBe(false);
+        expect(isEmptyArray('not array')).toBe(false);
+        expect(isEmptyArray(123)).toBe(false);
+        expect(isEmptyArray({ length: 1 })).toBe(false);
+        expect(isEmptyArray({})).toBe(false);
+      });
+
       test('isSymbol', () => {
         expect(isSymbol(Symbol('test'))).toBe(true);
         expect(isSymbol(Symbol.for('test'))).toBe(true);
@@ -310,7 +337,7 @@ MFT(
 import type { KEqual } from '@/index';
 
 describe('类型检查', async () => {
-  const { isFalsy, isTruthy, isTrue } = await loadModule();
+  const { isFalsy, isTruthy, isTrue, isEmptyArray, isEmptyString } = await loadModule();
 
   test('isFalsy', () => {
     const a = '';
@@ -427,6 +454,85 @@ describe('类型检查', async () => {
       assertType<'TruE'>(d);
     } else {
       assertType<KEqual<typeof d, never>>(true);
+    }
+  });
+
+  test('isEmptyArray 类型测试', () => {
+    // 空数组
+    const arr1: unknown[] = [];
+    if (isEmptyArray(arr1)) {
+      assertType<[]>(arr1);
+    } else {
+      assertType<unknown[]>(arr1);
+    }
+
+    // 非空数组
+    const arr2: number[] = [1, 2, 3];
+    if (isEmptyArray(arr2)) {
+      assertType<[]>(arr2);
+    } else {
+      assertType<number[]>(arr2);
+    }
+
+    // 联合类型：数组 | 非数组
+    const arr3 = Math.random() > 0.5 ? ['a'] : 123;
+    if (isEmptyArray(arr3)) {
+      assertType<[]>(arr3);
+    } else {
+      assertType<string[] | number>(arr3);
+    }
+
+    // 联合类型：空数组 | 非空数组
+    const arr4 = Math.random() > 0.5 ? [] : [1];
+    if (isEmptyArray(arr4)) {
+      assertType<[]>(arr4);
+    } else {
+      assertType<number[]>(arr4);
+    }
+
+    // 联合类型：数组 | null | undefined
+    const arr5 = Math.random() > 0.5 ? [1] : null;
+    if (isEmptyArray(arr5)) {
+      assertType<[]>(arr5);
+    } else {
+      assertType<number[] | null | undefined>(arr5);
+    }
+  });
+
+  test('isEmptyString 类型测试', () => {
+    const str1: unknown = '';
+    if (isEmptyString(str1)) {
+      assertType<''>(str1);
+    } else {
+      assertType<unknown>(str1);
+    }
+
+    const str2: string = 'hello';
+    if (isEmptyString(str2)) {
+      assertType<''>(str2);
+    } else {
+      assertType<string>(str2);
+    }
+
+    const str3 = Math.random() > 0.5 ? '' : 42;
+    if (isEmptyString(str3)) {
+      assertType<''>(str3);
+    } else {
+      assertType<string | number>(str3);
+    }
+
+    const str4 = Math.random() > 0.5 ? '' : 'world';
+    if (isEmptyString(str4)) {
+      assertType<''>(str4);
+    } else {
+      assertType<'world'>(str4);
+    }
+
+    const str5 = Math.random() > 0.5 ? '' : null;
+    if (isEmptyString(str5)) {
+      assertType<''>(str5);
+    } else {
+      assertType<string | null | undefined>(str5);
     }
   });
 });
