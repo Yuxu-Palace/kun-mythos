@@ -18,7 +18,7 @@ describe('fn-length', () => {
     expect(getFuncLength(() => {})).toBe(0);
     expect(getFuncLength((a: number) => a)).toBe(1);
     const testFn = (...args: number[]) => args;
-    testFn.klength = 2;
+    setFuncLength(testFn, 2);
     expect(getFuncLength(testFn)).toBe(2);
     setFuncLength(testFn, 3);
     expect(getFuncLength(testFn)).toBe(3);
@@ -53,5 +53,18 @@ describe('fn-length', () => {
     expect(syncFuncLength(() => {}, null)).toBeUndefined();
     // @ts-expect-error test
     expect(syncFuncLength(() => {}, undefined)).toBeUndefined();
+    const testFn = () => {};
+    expect(setFuncLength(testFn, 0)).toBeUndefined();
+    expect(setFuncLength(testFn, 2)).toBeUndefined();
+    // @ts-expect-error test
+    expect(testFn.klength).toBe(2);
+    // @ts-expect-error test
+    // biome-ignore lint/suspicious/noAssignInExpressions: 测试只读属性
+    expect(() => (testFn.klength = 2)).toThrowError();
+    expect(getFuncLength(testFn)).toBe(2);
+    const testFn2 = () => {};
+    // @ts-expect-error
+    expect(setFuncLength(testFn2, null)).toBeUndefined();
+    expect(getFuncLength(testFn2)).toBe(0);
   });
 });
