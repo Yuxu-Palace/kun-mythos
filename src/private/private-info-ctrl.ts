@@ -34,3 +34,20 @@ export function getPrivateMeta(_v: any, type: PropertyKey): unknown {
   }
   return (MetaMap.get(_v) || {})[type];
 }
+
+export function createMetaController<T, D extends Record<PropertyKey, any>>(type: PropertyKey) {
+  return {
+    set(_v: T, meta: D) {
+      setPrivateMeta(_v, type, meta);
+    },
+    get(_v: T) {
+      return getPrivateMeta(_v, type) as D;
+    },
+    patch(_v: T, meta: Partial<D>) {
+      setPrivateMeta(_v, type, meta);
+    },
+    check(_v: T) {
+      return checkPrivateType(_v, type);
+    },
+  };
+}

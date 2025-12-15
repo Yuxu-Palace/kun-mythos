@@ -15,6 +15,7 @@ export * from './pipe';
 export * from './placeholder-func';
 export * from './placeholder-func-with-sort';
 export * from './singleton';
+export * from './skip-first-call';
 export * from './sleep';
 export * from './try-call';
 export * from './verify';
