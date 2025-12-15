@@ -1,5 +1,5 @@
 import { pick } from '@/atomic-functions/pick';
-import { getPrivateMeta, setPrivateMeta } from '@/atomic-functions/private/private-info-ctrl';
+import { getPrivateMeta, setPrivateMeta } from '@/private/private-info-ctrl';
 import type { KEqual } from '@/types/base';
 
 interface Node<T = any, M = any> {

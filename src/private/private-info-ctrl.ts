@@ -1,4 +1,5 @@
-import { isNullOrUndef } from '../verify';
+import { isNullOrUndef } from '@/atomic-functions/verify';
+import { throwTypeError } from './throw-error';
 
 const MetaMap = new WeakMap();
 
@@ -29,7 +30,24 @@ export function setPrivateMeta(_v: any, type: PropertyKey, meta: Record<Property
 /** 获取私有元数据 */
 export function getPrivateMeta(_v: any, type: PropertyKey): unknown {
   if (isNullOrUndef(_v)) {
-    throw new TypeError('[getPrivateMeta]: v is null or undefined');
+    throwTypeError('[getPrivateMeta]: v is null or undefined');
   }
   return (MetaMap.get(_v) || {})[type];
+}
+
+export function createMetaController<T, D extends Record<PropertyKey, any>>(type: PropertyKey) {
+  return {
+    set(_v: T, meta: D) {
+      setPrivateMeta(_v, type, meta);
+    },
+    get(_v: T) {
+      return getPrivateMeta(_v, type) as D;
+    },
+    patch(_v: T, meta: Partial<D>) {
+      setPrivateMeta(_v, type, meta);
+    },
+    check(_v: T) {
+      return checkPrivateType(_v, type);
+    },
+  };
 }
