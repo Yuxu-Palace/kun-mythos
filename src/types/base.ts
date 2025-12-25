@@ -19,7 +19,7 @@ export type KUnULCase<T extends string> = T extends `${infer F}${infer R}`
 /** 添加类型到数组末尾 */
 export type KAppend<T, A extends any[]> = [...A, T];
 
-/** 获取数组的剩余元素类型 */
+/** 获取数组除了第一个元素后的剩余类型 */
 export type KTailTypes<A extends any[]> = A extends [any] ? [] : A extends [any, ...infer T] ? T : [];
 
 /** 添加类型到数组头部 */
@@ -28,7 +28,7 @@ export type KPrepend<T, A extends any[]> = [T, ...A];
 /** 获取数组的长度 */
 export type KLength<T extends any[]> = T['length'];
 
-/** 获取数组的第一个元素类型 */
+/** 删除数组头部 N 个元素类型 */
 export type KDropHead<N extends number, T extends any[], I extends any[] = []> = KLength<I> extends N
   ? T
   : KDropHead<N, KTailTypes<T>, KPrepend<KHeadType<T>, I>>;

@@ -53,21 +53,27 @@ export function placeholderFunc<O extends any[], R>(func: KFunc<O, R>) {
     throw new TypeError('func 必须是函数');
   }
   const callback = <A extends PlaceholderArgs<Required<O>>>(...placeArgs: A) => {
-    const runFunc = ((...callArgs) => {
-      let index = 0;
-      const args = placeArgs.map((arg) => (arg === __ ? callArgs[index++] : arg));
+    const args = placeArgs.slice();
+    const placeholderIndexes: number[] = [];
+    for (let i = 0; i < args.length; i += 1) {
+      if (args[i] === __) {
+        placeholderIndexes.push(i);
+      }
+    }
 
-      if (callArgs.length !== index) {
+    const runFunc = ((...callArgs) => {
+      if (callArgs.length !== placeholderIndexes.length) {
         throw new TypeError(`非法调用, 参数数量不匹配, 期望: ${getFuncLength(runFunc)}, 实际: ${callArgs.length}`);
+      }
+
+      for (let i = 0; i < placeholderIndexes.length; i += 1) {
+        args[placeholderIndexes[i]] = callArgs[i];
       }
 
       return func(...(args as any));
     }) as KFunc<PlaceholderFuncArgs<A, Required<O>>, KCurryFuncReturnType<R>>;
 
-    setFuncLength(
-      runFunc,
-      placeArgs.reduce<number>((acc, cur) => acc + (cur === __ ? 1 : 0), 0),
-    );
+    setFuncLength(runFunc, placeholderIndexes.length);
     return runFunc;
   };
 
