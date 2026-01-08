@@ -173,9 +173,9 @@ export type IsUnknownAny<T> = KEqual<T, any> extends true ? true : KEqual<T, unk
 
 export type FindNonAny<T extends any[], Other = Empty> = T extends [infer F, ...infer Last]
   ? IsUnknownAny<F> extends true
-    ? FindNonAny<Last>
+    ? FindNonAny<Last, Other>
     : F extends Other
-      ? FindNonAny<Last>
+      ? FindNonAny<Last, Other>
       : F
   : any;
 
@@ -211,11 +211,17 @@ type CustomCallConfigUnwrap<C extends CallAPIConfig, Custom extends boolean> = C
     }
   : Record<never, Empty>;
 
-interface Pack<T> {
-  value: T;
+interface Pack<T> extends Empty {
+  __value: T;
 }
 
-type PackUnwrap<P> = P extends Pack<any> ? P['value'] : P;
+type PackUnwrap<P> = P extends Pack<any> ? P['__value'] : P;
+
+interface OriginalPack<T> extends Empty {
+  __originValue: T;
+}
+
+type OriginalPackUnwrap<P> = P extends OriginalPack<any> ? P['__originValue'] : Promise<P>;
 
 type CustomRequestModeReturn<
   RealRM extends RequestMode,
@@ -226,8 +232,16 @@ type CustomRequestModeReturn<
   : KEqual<RealRM, string> extends true
     ? any
     : CustomReq extends KAnyFunc
-      ? Pack<ReturnType<CustomReq>>
+      ? OriginalPack<ReturnType<CustomReq>>
       : any;
+
+type UserInputResult<UserR, CustomRequestResult> = IsUnknownAny<CustomRequestResult> extends true
+  ? UserR
+  : IsUnknownAny<UserR> extends true
+    ? any
+    : UserR extends CustomRequestResult
+      ? OriginalPack<UserR>
+      : UserR;
 
 type APIHandlerResult<
   AConfig extends APIConfig,
@@ -237,27 +251,33 @@ type APIHandlerResult<
   ReqOutput = any,
   Custom extends boolean = false,
   CC extends CallAPIConfig = CustomCallConfigUnwrap<CallConfig, Custom>,
-> = Awaited<
-  PackUnwrap<
-    FindNonAny<
-      [
-        // 如果有用户自定义返回值, 则直接应用
-        EmptyUnwrap<UserR>,
-        // 获取实际自定义请求的结果
-        CustomRequestModeReturn<NonNullable<RealProp<'requestMode', CC, AConfig, InputDefault>>, InputDefault>,
-        // 获取实际 tvo 的结果
-        ReturnType<KCast<RealProp<'tvo', CC, AConfig, InputDefault>, KAnyFunc>>,
-        // 获取实际 onResponse 的结果
-        OnResponseReturn<RealProp<'onResponse', CC, AConfig, InputDefault>>,
-        // 获取实际 parser 的结果
-        ParserReturn<
-          NonNullable<RealProp<'requestMode', CC, AConfig, InputDefault>>,
-          NonNullable<RealProp<'parser', CC, AConfig, InputDefault>>,
-          ReqOutput,
-          UserR
-        >,
-      ],
-      undefined | null
+  CustomRequestResult = CustomRequestModeReturn<
+    NonNullable<RealProp<'requestMode', CC, AConfig, InputDefault>>,
+    InputDefault
+  >,
+> = OriginalPackUnwrap<
+  Awaited<
+    PackUnwrap<
+      FindNonAny<
+        [
+          // 如果有用户自定义返回值, 则直接应用
+          UserInputResult<EmptyUnwrap<UserR>, OriginalPackUnwrap<CustomRequestResult>>,
+          // 获取实际自定义请求的结果
+          CustomRequestResult,
+          // 获取实际 tvo 的结果
+          ReturnType<KCast<RealProp<'tvo', CC, AConfig, InputDefault>, KAnyFunc>>,
+          // 获取实际 onResponse 的结果
+          OnResponseReturn<RealProp<'onResponse', CC, AConfig, InputDefault>>,
+          // 获取实际 parser 的结果
+          ParserReturn<
+            NonNullable<RealProp<'requestMode', CC, AConfig, InputDefault>>,
+            NonNullable<RealProp<'parser', CC, AConfig, InputDefault>>,
+            ReqOutput,
+            UserR
+          >,
+        ],
+        undefined | null
+      >
     >
   >
 >;
@@ -315,9 +335,9 @@ export type APITransformMethod<
   InputD extends DefaultAPIConfig = DefaultAPIConfig,
   Custom extends boolean = false,
   NonParamUrl extends boolean = CheckNonParamUrlAPIConfig<A>,
+  I extends APIInputType<A, InputD> = APIInputType<A, InputD>,
 > = (<
   R = Empty,
-  I extends APIInputType<A, InputD> = APIInputType<A, InputD>,
   C extends CallAPIConfig<
     I,
     any,
@@ -342,15 +362,13 @@ export type APITransformMethod<
     Custom,
     NonParamUrl
   >
-) => Promise<
-  APIHandlerResult<
-    A,
-    KCast<C, Partial<APIConfig>>,
-    R,
-    InputD,
-    ReturnType<KCast<RealProp<'onRequest', C, A, InputD>, KAnyFunc>>,
-    Custom
-  >
+) => APIHandlerResult<
+  A,
+  KCast<C, Partial<APIConfig>>,
+  R,
+  InputD,
+  ReturnType<KCast<RealProp<'onRequest', C, A, InputD>, KAnyFunc>>,
+  Custom
 >) &
   APIInstance<A, InputD>;
 

@@ -112,7 +112,7 @@ export function createApi<
 
   let handler: any = null;
   if (isTrue(custom)) {
-    handler = (async (data, config) =>
+    handler = ((data, config) =>
       request({
         ...realDefaultConfig,
         ...api,
@@ -122,7 +122,7 @@ export function createApi<
         oriUrl: api.url,
       })) as KAnyFunc;
   } else {
-    handler = (async (data) =>
+    handler = ((data) =>
       request({
         ...realDefaultConfig,
         ...api,

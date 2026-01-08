@@ -1,6 +1,7 @@
 import { HttpResponse, http } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, expect, test } from 'vitest';
+import type { KEqual } from '../../src';
 import { MFT } from '../utils';
 
 const server = setupServer(
@@ -214,14 +215,14 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
     const paramApi = createApi(defineApi({ url: 'https://api.example.com/user/:id' }), {}, true);
 
     // @ts-expect-error test
-    await expect(paramApi(null)).rejects.toThrowError(TypeError);
+    expect(() => paramApi(null)).toThrowError(TypeError);
 
     expect(await paramApi(null, { params: { id: '1' } })).toEqual({ id: '1', name: 'John Doe' });
 
     const paramsApi = createApi(defineApi({ url: 'https://api.example.com/api/user/:id/custom-name/:name' }), {}, true);
 
     // @ts-expect-error test
-    await expect(paramsApi(null, { params: { id: '1' } })).rejects.toThrowError(TypeError);
+    expect(() => paramsApi(null, { params: { id: '1' } })).toThrowError(TypeError);
     expect(await paramsApi(null, { params: { id: '1', name: 'test' } })).toEqual({ id: '1', name: 'test' });
 
     const paramApiMap = createApiWithMap(
@@ -236,7 +237,7 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
     expect(() => paramApiMap.user.getInfo).toThrowError(TypeError);
     expect(await paramApiMap.user.getInfoCustom(null, { params: { id: '1' } })).toEqual({ id: '1', name: 'John Doe' });
     // @ts-expect-error test
-    await expect(paramApiMap.user.getInfoCustom(null, { params: {} })).rejects.toThrowError(TypeError);
+    expect(() => paramApiMap.user.getInfoCustom(null, { params: {} })).toThrowError(TypeError);
     // @ts-expect-error test
     expect(() => paramApiMap.getCustomNameUser).toThrowError(TypeError);
     expect(await paramApiMap.getCustomNameUserCustom(null, { params: { id: '1', name: 'test' } })).toEqual({
@@ -244,7 +245,7 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
       name: 'test',
     });
     // @ts-expect-error test
-    await expect(paramApiMap.getCustomNameUserCustom(null, { params: { id: 1 } })).rejects.toThrowError(TypeError);
+    expect(() => paramApiMap.getCustomNameUserCustom(null, { params: { id: 1 } })).toThrowError(TypeError);
   });
 
   test('proxy cache', () => {
@@ -309,5 +310,79 @@ MFT(({ request, createApiWithMap, createApi, defineApiMap, defineApi }) => {
     expect(updateApiMapNotDefault.$$).toBeUndefined();
     expect(updateApiMapNotDefault.$$).not.toBe(updateApiMapNotDefault.$$r);
     expect(updateApiMapNotDefault.$$r.baseUrl).toBe('https://api.example.com/api');
+  });
+
+  test('processJson', async () => {
+    type RecordDeepKeyFlat<M extends Record<string, any>, Prefix extends string = ''> =
+      | (M extends Record<infer KS, any>
+          ? KS extends string
+            ? KEqual<M[KS], any> extends true
+              ? any
+              : M[KS] extends Record<any, any>
+                ?
+                    | RecordDeepKeyFlat<M[KS], `${Prefix extends '' ? Prefix : `${Prefix}.`}${KS & string}`>
+                    | `${Prefix extends '' ? Prefix : `${Prefix}.`}${KS & string}`
+                : `${Prefix extends '' ? Prefix : `${Prefix}.`}${KS & string}`
+            : never
+          : never)
+      | (string & {});
+
+    type RecordDeepProp<K extends string, M extends Record<string, any>> = K extends `${infer P}.${infer L}`
+      ? M[P] extends Record<string, any>
+        ? RecordDeepProp<L, M[P]>
+        : M[P]
+      : K extends `${infer P}`
+        ? M[P]
+        : unknown;
+
+    type ProcessJson<M> = M extends Record<infer KS, any> ? { [K in KS]: ProcessJson<M[K]> } : Promise<M>;
+
+    type ProcessResult<M extends Record<string, any> = Record<string, any>> = {
+      get(): Promise<ProcessJson<M>>;
+      get<K extends RecordDeepKeyFlat<M>>(key: K): ProcessJson<RecordDeepProp<K, M>>;
+      waitAll(): Promise<M>;
+    };
+
+    const processApi = createApiWithMap(
+      defineApiMap({
+        user: {
+          getInfo: {
+            url: '/user',
+          },
+        },
+      }),
+      {
+        baseUrl: 'https://api.example.com',
+        requestMode: 'processJson',
+        requestModeMap: {
+          processJson: (aaa) =>
+            ({
+              aaa,
+              get: async (prop?: string) => {
+                if (prop) {
+                  return Promise.resolve('processJson') as any;
+                }
+                return { name: Promise.resolve('processJson') };
+              },
+              waitAll: async () => Promise.resolve({ name: 'processJson' }),
+            }) as ProcessResult,
+        },
+      },
+    );
+
+    expect(await processApi.user.getInfo().waitAll()).toEqual({
+      name: 'processJson',
+    });
+    expect(await processApi.user.getInfo().get('name')).toEqual('processJson');
+    // 使用自定义请求方式时会直接绕过默认 hook
+    expect(
+      await processApi.user
+        .getInfoCustom(null, {
+          tvo() {
+            throw new Error('test');
+          },
+        })
+        .get('name'),
+    ).toEqual('processJson');
   });
 });
