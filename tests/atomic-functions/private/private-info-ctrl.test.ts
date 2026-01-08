@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { checkPrivateType, getPrivateMeta, setPrivateMeta } from '@/atomic-functions/private/private-info-ctrl';
+import { checkPrivateType, createMetaController, getPrivateMeta, setPrivateMeta } from '@/private/private-info-ctrl';
 import { MFT } from '~/tests/utils';
 
 MFT((module, { format }) => {
@@ -27,6 +27,16 @@ describe('private-info-ctrl', () => {
 
     expect(checkPrivateType(obj, 'test')).toBe(true);
     expect(checkPrivateType(obj, 'test1')).toBe(false);
+
+    const ctrl = createMetaController('test');
+    expect(ctrl.get(obj)).toBe(metadata);
+    ctrl.set(obj, { c: 3 });
+    expect(ctrl.get(obj)).toEqual({ b: 2, c: 3 });
+    expect(ctrl.check(obj)).toBe(true);
+    ctrl.patch(obj, { d: 0 });
+    expect(ctrl.get(obj)).toEqual({ b: 2, c: 3, d: 0 });
+    // @ts-expect-error test
+    expect(metadata.d).toBe(0);
   });
 
   test('边缘情况', () => {
