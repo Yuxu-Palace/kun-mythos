@@ -91,6 +91,7 @@ export function tryCallFunc<A extends any[], R, E = Empty>(
  * @param onError 错误处理函数
  */
 export function tryCall<R, E = Empty>(
+  this: any,
   cb: () => R,
   onError?: ((err: any) => E) | null,
   onFinal?: (result: TryCallResult<R, E>) => void,
@@ -99,5 +100,5 @@ export function tryCall<R, E = Empty>(
     throwTypeError('callback is not a function');
   }
 
-  return tryCallFunc(cb, onError, onFinal)();
+  return tryCallFunc(cb, onError, onFinal).call(this);
 }
