@@ -118,3 +118,7 @@ export function isPromise(_v: unknown): _v is Promise<any> {
   // @ts-expect-error
   return isObject(_v) && isFunction(_v.then);
 }
+
+export function isDate(_v: unknown): _v is Date {
+  return _v instanceof Date;
+}

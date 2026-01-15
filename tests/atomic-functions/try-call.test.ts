@@ -147,7 +147,7 @@ describe('类型测试', async () => {
 
   test('tryCall 类型测试', () => {
     const result = tryCall(() => 1);
-    assertType<KEqual<typeof result, number | undefined>>(true);
+    assertType<KEqual<typeof result, number>>(true);
 
     assertType<number | string>(
       tryCall(
@@ -168,7 +168,7 @@ describe('类型测试', async () => {
 
   test('tryCallFunc 类型测试', () => {
     const result = tryCallFunc(() => 1);
-    assertType<KEqual<typeof result, () => number | undefined>>(true);
+    assertType<KEqual<typeof result, () => number>>(true);
     const result2 = tryCallFunc(async () => 1);
     assertType<KEqual<typeof result2, () => Promise<number>>>(true);
     const result3 = tryCallFunc(

@@ -1,3 +1,4 @@
+import { throwTypeError } from '@/private/throw-error';
 import { isObject, isPlainSymbol, isPropertyKey } from './verify';
 
 const DATA_MAP = new WeakMap<WeakKey, any>();
@@ -14,7 +15,7 @@ const PRIVATE_DATA_MAP = new WeakMap<WeakKey, any>();
  */
 function setData<T>(key: WeakKey, value: T, privateKey?: PropertyKey): () => T | undefined {
   if (!(isPlainSymbol(key) || isObject(key))) {
-    throw new TypeError('key must be an object or plain symbol');
+    throwTypeError('key must be an object or plain symbol');
   }
 
   if (isPropertyKey(privateKey)) {

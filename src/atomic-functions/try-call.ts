@@ -1,8 +1,9 @@
+import { throwTypeError } from '@/private/throw-error';
+import type { Empty } from '@/private/types';
 import type { KEqual } from '@/types/base';
-import type { Empty } from '@/types/private';
 import { isFunction, isPromise } from './verify';
 
-type TryCallResult<R, E> = KEqual<E, Empty> extends true ? (R extends Promise<any> ? R : R | undefined) : R | E;
+type TryCallResult<R, E> = KEqual<E, Empty> extends true ? (R extends Promise<any> ? Promise<Awaited<R>> : R) : R | E;
 
 /**
  * 包装一个拦截错误的函数
@@ -18,7 +19,7 @@ export function tryCallFunc<A extends any[], R, E = Empty>(
   onFinal?: (result: TryCallResult<R, E>) => void,
 ): (...args: A) => TryCallResult<R, E> {
   if (!isFunction(cb)) {
-    throw new TypeError('callback is not a function');
+    throwTypeError('callback is not a function');
   }
 
   let result = void 0 as TryCallResult<R, E>;
@@ -31,17 +32,16 @@ export function tryCallFunc<A extends any[], R, E = Empty>(
   };
 
   const catchFn = (error: any) => {
-    if (isFunction(onError)) {
-      result = onError(error) as any;
-    }
+    // biome-ignore lint/style/noNonNullAssertion: 已前置校验
+    result = onError!(error) as any;
   };
 
   const finallyFn = () => {
-    // biome-ignore lint/nursery/noUnusedExpressions: test
-    isFunction(onFinal) && onFinal(result);
+    // biome-ignore lint/style/noNonNullAssertion: 已前置校验
+    onFinal!(result);
   };
 
-  if (onFinal && onError) {
+  if (isFunction(onFinal) && isFunction(onError)) {
     return function (this: any, ...args) {
       try {
         Reflect.apply(tryFn, this, [args]);
@@ -54,7 +54,7 @@ export function tryCallFunc<A extends any[], R, E = Empty>(
     };
   }
 
-  if (onError) {
+  if (isFunction(onError)) {
     return function (this: any, ...args) {
       try {
         Reflect.apply(tryFn, this, [args]);
@@ -65,7 +65,7 @@ export function tryCallFunc<A extends any[], R, E = Empty>(
     };
   }
 
-  if (onFinal) {
+  if (isFunction(onFinal)) {
     return function (this: any, ...args) {
       try {
         Reflect.apply(tryFn, this, [args]);
@@ -91,13 +91,14 @@ export function tryCallFunc<A extends any[], R, E = Empty>(
  * @param onError 错误处理函数
  */
 export function tryCall<R, E = Empty>(
+  this: any,
   cb: () => R,
   onError?: ((err: any) => E) | null,
   onFinal?: (result: TryCallResult<R, E>) => void,
 ): TryCallResult<R, E> {
   if (!isFunction(cb)) {
-    throw new TypeError('callback is not a function');
+    throwTypeError('callback is not a function');
   }
 
-  return tryCallFunc(cb, onError, onFinal)();
+  return tryCallFunc(cb, onError, onFinal).call(this);
 }

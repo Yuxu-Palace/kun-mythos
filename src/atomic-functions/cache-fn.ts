@@ -1,6 +1,7 @@
 import { PRIVATE_KEY } from '@/constant/private';
+import { createMetaController } from '@/private/private-info-ctrl';
+import { throwTypeError } from '@/private/throw-error';
 import type { KAnyFunc, KFunc } from '@/types/base';
-import { checkPrivateType, getPrivateMeta, setPrivateMeta } from './private/private-info-ctrl';
 import { isFunction, isNullOrUndef } from './verify';
 
 const CACHE_FN_KEY = Symbol('cacheFn');
@@ -9,24 +10,12 @@ type CacheFn<F extends KAnyFunc> = F & {
   clearCache: () => void;
 };
 
-/**
- * 获取缓存函数的元信息
- *
- * @param cf 缓存函数
- */
-function getCacheFnMeta<T extends KAnyFunc>(cf: CacheFn<T>) {
-  return getPrivateMeta(cf, CACHE_FN_KEY) as { oriFunc: T; result: ReturnType<T> | symbol };
+interface CacheFnMeta {
+  oriFunc: KAnyFunc;
+  result: ReturnType<KAnyFunc> | symbol;
 }
 
-/**
- * 设置缓存函数的元信息
- *
- * @param func 缓存函数
- * @param meta 元信息
- */
-function setCacheFnMeta<T extends KAnyFunc>(func: CacheFn<T>, meta: Partial<ReturnType<typeof getCacheFnMeta<T>>>) {
-  setPrivateMeta(func, CACHE_FN_KEY, meta);
-}
+const metaCtrl = createMetaController<KAnyFunc, CacheFnMeta>(CACHE_FN_KEY);
 
 /**
  * 判断是否是缓存函数
@@ -36,7 +25,7 @@ function setCacheFnMeta<T extends KAnyFunc>(func: CacheFn<T>, meta: Partial<Retu
  * @param func 待判断的函数
  */
 export function isCacheFn(func: KAnyFunc): func is CacheFn<KAnyFunc> {
-  return checkPrivateType(func, CACHE_FN_KEY);
+  return metaCtrl.check(func);
 }
 
 /**
@@ -48,7 +37,7 @@ export function isCacheFn(func: KAnyFunc): func is CacheFn<KAnyFunc> {
  */
 export function unCacheFn<F extends KAnyFunc>(func: CacheFn<F>): F {
   if (isCacheFn(func)) {
-    return getCacheFnMeta(func).oriFunc;
+    return metaCtrl.get(func).oriFunc as any;
   }
   return func;
 }
@@ -62,23 +51,23 @@ export function unCacheFn<F extends KAnyFunc>(func: CacheFn<F>): F {
  */
 export function cacheFn<F extends KAnyFunc>(func: F): CacheFn<F> {
   if (!isFunction(func)) {
-    throw new TypeError('func is not a function');
+    throwTypeError('func is not a function');
   }
 
   const _func = unCacheFn(func as any);
 
   const cb: any = function (this: any, ...args: any[]) {
-    let result = getCacheFnMeta(cb).result;
+    let result = metaCtrl.get(cb).result;
 
     if (result === PRIVATE_KEY) {
       result = Reflect.apply(_func, this, args);
-      setCacheFnMeta(cb, { result });
+      metaCtrl.patch(cb, { result });
     }
 
     return result;
   };
 
-  setCacheFnMeta(cb, { result: PRIVATE_KEY, oriFunc: _func });
+  metaCtrl.set(cb, { result: PRIVATE_KEY, oriFunc: _func });
 
   cb.clearCache = clearFnCache.bind(null, cb);
 
@@ -94,12 +83,12 @@ export function cacheFn<F extends KAnyFunc>(func: F): CacheFn<F> {
  */
 export function clearFnCache(func: KAnyFunc) {
   if (!isFunction(func)) {
-    throw new TypeError('func is not a function');
+    throwTypeError('func is not a function');
   }
   if (!isCacheFn(func)) {
     return false;
   }
-  setCacheFnMeta(func, { result: PRIVATE_KEY });
+  metaCtrl.patch(func, { result: PRIVATE_KEY });
   return true;
 }
 
@@ -114,7 +103,7 @@ export function clearFnCache(func: KAnyFunc) {
  */
 export function retryCacheFn<F extends KAnyFunc>(func: F): CacheFn<F> {
   if (!isFunction(func)) {
-    throw new TypeError('func is not a function');
+    throwTypeError('func is not a function');
   }
 
   const tempCB = cacheFn(func);
@@ -129,7 +118,7 @@ export function retryCacheFn<F extends KAnyFunc>(func: F): CacheFn<F> {
     return result;
   } as unknown as CacheFn<F>;
 
-  setCacheFnMeta(cb, getCacheFnMeta(tempCB));
+  metaCtrl.set(cb, metaCtrl.get(tempCB));
   cb.clearCache = tempCB.clearCache;
 
   return cb;
@@ -145,7 +134,7 @@ export function retryCacheFn<F extends KAnyFunc>(func: F): CacheFn<F> {
  */
 export function debounceCacheFn<F extends KAnyFunc>(func: F, cacheTime = 100): CacheFn<F> {
   if (!isFunction(func)) {
-    throw new TypeError('func is not a function');
+    throwTypeError('func is not a function');
   }
 
   const tempCB = cacheFn(func);
@@ -159,7 +148,7 @@ export function debounceCacheFn<F extends KAnyFunc>(func: F, cacheTime = 100): C
     return Reflect.apply(tempCB, this, args);
   } as unknown as CacheFn<F>;
 
-  setCacheFnMeta(cb, getCacheFnMeta(tempCB));
+  metaCtrl.set(cb, metaCtrl.get(tempCB));
   cb.clearCache = () => {
     clearTimeout(timer);
     return tempCB.clearCache();
@@ -181,7 +170,7 @@ export function cacheFnFromGetter<F extends KFunc<[], KAnyFunc>>(
   clearTopCache = false,
 ): CacheFn<ReturnType<F>> {
   if (!isFunction(getter)) {
-    throw new TypeError('getter is not a function');
+    throwTypeError('getter is not a function');
   }
 
   let func: KAnyFunc | null;
@@ -190,7 +179,7 @@ export function cacheFnFromGetter<F extends KFunc<[], KAnyFunc>>(
     func ||= getter();
 
     if (!isFunction(func)) {
-      throw new TypeError('getter return value is not a function, please check your getter or use cacheFn instead');
+      throwTypeError('getter return value is not a function, please check your getter or use cacheFn instead');
     }
 
     return Reflect.apply(func, this, args);
@@ -234,14 +223,14 @@ type ResultFn<T> = T extends KFunc<any[], infer R> ? (R extends KAnyFunc ? Cache
  */
 export function cacheGetterResult<F extends KFunc<[], any>>(getter: F): CacheFn<ResultFn<F>> {
   if (!isFunction(getter)) {
-    throw new TypeError('getter is not a function');
+    throwTypeError('getter is not a function');
   }
 
   const tempCB = cacheFn(getter);
 
   const cb = function (this: any, ...args: any[]) {
     const result = unCacheFn(Reflect.apply(tempCB, this, []));
-    setCacheFnMeta(cb, { oriFunc: result });
+    metaCtrl.patch(cb, { oriFunc: result });
 
     if (isFunction(result)) {
       return Reflect.apply(result, this, args);
@@ -250,7 +239,7 @@ export function cacheGetterResult<F extends KFunc<[], any>>(getter: F): CacheFn<
     return result;
   };
 
-  setCacheFnMeta(cb, { result: PRIVATE_KEY });
+  metaCtrl.patch(cb, { result: PRIVATE_KEY });
   cb.clearCache = tempCB.clearCache;
 
   return cb as unknown as CacheFn<ResultFn<F>>;

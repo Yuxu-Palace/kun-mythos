@@ -1,3 +1,4 @@
+import { throwTypeError } from '@/private/throw-error';
 import { isFunction } from './verify';
 
 /**
@@ -9,7 +10,7 @@ import { isFunction } from './verify';
  */
 export function iife<R>(cb: () => R): R {
   if (!isFunction(cb)) {
-    throw new TypeError('callback is not a function');
+    throwTypeError('callback is not a function');
   }
   return cb();
 }

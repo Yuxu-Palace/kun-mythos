@@ -47,3 +47,36 @@ export type KCast<X, Y> = X extends Y ? X : Y;
 
 /** 反转数组类型 */
 export type KReverse<T extends any[]> = T extends [...infer R, infer L] ? [...KReverse<R>, L] : T;
+
+/** 过滤数组 */
+export type KFilterArray<F, A extends any[]> = A extends [infer I, ...any]
+  ? I extends F
+    ? [I, ...KFilterArray<F, KDropHead<1, A>>]
+    : KFilterArray<F, KDropHead<1, A>>
+  : [];
+
+/** 填充数组 */
+export type KFillArray<L extends number, V, R extends any[] = []> = L extends KLength<R>
+  ? R
+  : KFillArray<L, V, KAppend<V, R>>;
+
+/** 修订数组 */
+export type KPatchArray<Arr extends any[], I extends number, V, R extends any[] = []> = Arr extends [
+  infer A,
+  ...infer Last,
+]
+  ? KLength<R> extends I
+    ? [...R, V, ...Last]
+    : KPatchArray<Last, I, V, KAppend<A, R>>
+  : R;
+// 该方法可以实现功能, 但是类型会被转为对象 {}, 而不是保留数组类型 []
+// export type KPatchArray<Arr extends any[], I extends number, V> = {
+//   [K in keyof Arr]: K extends `${I}` ? V : Arr[K];
+// };
+
+/** 判断数组是否包含指定值 */
+export type KInclude<V, A extends any[]> = A extends [infer I, ...any]
+  ? I extends V
+    ? true
+    : KInclude<V, KDropHead<1, A>>
+  : false;

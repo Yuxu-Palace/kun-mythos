@@ -1,7 +1,8 @@
 import { __ } from '@/constant/public';
+import { getFuncLength, setFuncLength, syncFuncLength } from '@/private/fn-length';
+import { throwTypeError } from '@/private/throw-error';
 import type { KAppend, KDropHead, KFunc, KHeadType } from '@/types/base';
 import type { KCurryFuncReturnType } from './curry';
-import { getFuncLength, setFuncLength, syncFuncLength } from './private/fn-length';
 import { isFunction } from './verify';
 
 type PlaceholderSymbol = typeof __;
@@ -50,7 +51,7 @@ type PlaceholderArgs<T extends any[], R extends any[] = []> = T extends [infer A
  */
 export function placeholderFunc<O extends any[], R>(func: KFunc<O, R>) {
   if (!isFunction(func)) {
-    throw new TypeError('func 必须是函数');
+    throwTypeError('func 必须是函数');
   }
   const callback = <A extends PlaceholderArgs<Required<O>>>(...placeArgs: A) => {
     const runFunc = ((...callArgs) => {
@@ -58,7 +59,7 @@ export function placeholderFunc<O extends any[], R>(func: KFunc<O, R>) {
       const args = placeArgs.map((arg) => (arg === __ ? callArgs[index++] : arg));
 
       if (callArgs.length !== index) {
-        throw new TypeError(`非法调用, 参数数量不匹配, 期望: ${getFuncLength(runFunc)}, 实际: ${callArgs.length}`);
+        throwTypeError(`非法调用, 参数数量不匹配, 期望: ${getFuncLength(runFunc)}, 实际: ${callArgs.length}`);
       }
 
       return func(...(args as any));
