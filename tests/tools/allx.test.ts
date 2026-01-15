@@ -244,12 +244,29 @@ MFT(({ sleep, allx }) => {
       ).rejects.toThrow('Unknown task "nonExistent"');
     });
 
-    test('非函数任务应该抛出错误', async () => {
-      await expect(
-        allx({
-          task1: 'not a function' as any,
+    test('非函数任务应该直接将值存进结果中', async () => {
+      expect(
+        await allx({
+          task1: 'not a function',
         }),
-      ).rejects.toThrow('Task "task1" is not a function');
+      ).toEqual({ task1: 'not a function' });
+
+      expect(
+        await allx({
+          promise: Promise.resolve('promise result'),
+        }),
+      ).toEqual({ promise: 'promise result' });
+
+      expect(
+        await allx({
+          number: () => 42,
+          number2: 10,
+          promise: Promise.resolve('promise result'),
+          async numSum() {
+            return (await this.$.number) + (await this.$.number2);
+          },
+        }),
+      ).toEqual({ number: 42, number2: 10, promise: 'promise result', numSum: 52 });
     });
 
     test('多个任务失败时应该抛出第一个错误', async () => {
@@ -268,7 +285,7 @@ MFT(({ sleep, allx }) => {
     test('部分任务失败不影响其他独立任务', async () => {
       const executedTasks: string[] = [];
 
-      expect(() =>
+      await expect(() =>
         allx({
           success: async () => {
             executedTasks.push('success');
@@ -647,6 +664,35 @@ MFT(({ sleep, allx }) => {
       );
 
       expect(result).toEqual({ task: 'value' });
+    });
+  });
+
+  test('allSettled 测试', async () => {
+    const result = await allx(
+      {
+        task1: async () => {
+          throw new Error('error1');
+        },
+        task2: async () => 'value2',
+        task3: 0,
+        // 依赖正常任务
+        async task4() {
+          return (await this.$.task2) + (await this.$.task3);
+        },
+        // 依赖报错任务
+        async task5() {
+          return (await this.$.task1) + (await this.$.task2);
+        },
+      },
+      { allSettled: true },
+    );
+
+    expect(result).toEqual({
+      task1: { status: 'rejected', reason: new Error('error1') },
+      task2: { status: 'fulfilled', value: 'value2' },
+      task3: { status: 'fulfilled', value: 0 },
+      task4: { status: 'fulfilled', value: 'value20' },
+      task5: { status: 'rejected', reason: new Error('error1') },
     });
   });
 });
